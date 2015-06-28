@@ -4,7 +4,8 @@ project(rvo_wrapper)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED)
+find_package(catkin REQUIRED
+  roscpp)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -76,19 +77,32 @@ find_package(catkin REQUIRED)
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
+ INCLUDE_DIRS include
 #  LIBRARIES rvo_wrapper
-#  CATKIN_DEPENDS other_catkin_pkg
+ CATKIN_DEPENDS roscpp
 #  DEPENDS system_lib
 )
 
 ###########
 ## Build ##
 ###########
+set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall -O2")
+# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fopenmp")
+
+find_package(OpenMP)
+if(OPENMP_FOUND)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+else(OPENMP_FOUND)
+message (STATUS "OpenMP not found")
+endif()
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-# include_directories(include)
+include_directories(
+  include
+  ${catkin_INCLUDE_DIRS}
+)
 
 ## Declare a cpp library
 # add_library(rvo_wrapper
@@ -96,16 +110,21 @@ catkin_package(
 # )
 
 ## Declare a cpp executable
-# add_executable(rvo_wrapper_node src/rvo_wrapper_node.cpp)
+add_executable(rvo_wrapper
+  src/rvo_wrapper.cpp
+  src/Agent.cpp
+  src/KdTree.cpp
+  src/Obstacle.cpp
+  src/RVOSimulator.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(rvo_wrapper_node rvo_wrapper_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(rvo_wrapper_node
-#   ${catkin_LIBRARIES}
-# )
+target_link_libraries(rvo_wrapper
+  ${catkin_LIBRARIES}
+)
 
 #############
 ## Install ##
