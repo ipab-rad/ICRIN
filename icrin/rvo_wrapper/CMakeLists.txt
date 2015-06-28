@@ -4,7 +4,8 @@ project(rvo_wrapper)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED)
+find_package(catkin REQUIRED
+  roscpp)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -78,7 +79,7 @@ find_package(catkin REQUIRED)
 catkin_package(
  INCLUDE_DIRS include
 #  LIBRARIES rvo_wrapper
-#  CATKIN_DEPENDS other_catkin_pkg
+ CATKIN_DEPENDS roscpp
 #  DEPENDS system_lib
 )
 
@@ -86,6 +87,15 @@ catkin_package(
 ## Build ##
 ###########
 set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall -O2")
+# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fopenmp")
+
+find_package(OpenMP)
+if(OPENMP_FOUND)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+else(OPENMP_FOUND)
+message (STATUS "OpenMP not found")
+endif()
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
@@ -100,8 +110,8 @@ include_directories(
 # )
 
 ## Declare a cpp executable
-add_executable(Circle
-  src/Circle.cpp
+add_executable(rvo_wrapper
+  src/rvo_wrapper.cpp
   src/Agent.cpp
   src/KdTree.cpp
   src/Obstacle.cpp
@@ -112,9 +122,9 @@ add_executable(Circle
 # add_dependencies(rvo_wrapper_node rvo_wrapper_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(rvo_wrapper_node
-#   ${catkin_LIBRARIES}
-# )
+target_link_libraries(rvo_wrapper
+  ${catkin_LIBRARIES}
+)
 
 #############
 ## Install ##
