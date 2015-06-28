@@ -76,7 +76,7 @@ find_package(catkin REQUIRED)
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
+ INCLUDE_DIRS include
 #  LIBRARIES rvo_wrapper
 #  CATKIN_DEPENDS other_catkin_pkg
 #  DEPENDS system_lib
@@ -85,10 +85,14 @@ catkin_package(
 ###########
 ## Build ##
 ###########
+set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall -O2")
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-# include_directories(include)
+include_directories(
+  include
+  ${catkin_INCLUDE_DIRS}
+)
 
 ## Declare a cpp library
 # add_library(rvo_wrapper
@@ -96,7 +100,12 @@ catkin_package(
 # )
 
 ## Declare a cpp executable
-# add_executable(rvo_wrapper_node src/rvo_wrapper_node.cpp)
+add_executable(Circle
+  src/Circle.cpp
+  src/Agent.cpp
+  src/KdTree.cpp
+  src/Obstacle.cpp
+  src/RVOSimulator.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
