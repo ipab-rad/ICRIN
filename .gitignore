@@ -28,6 +28,9 @@ msg/_*.py
 # qcreator stuff
 CMakeLists.txt.user
 
+# Sublime
+*.sublime-workspace
+
 srv/_*.py
 *.pcd
 *.pyc
