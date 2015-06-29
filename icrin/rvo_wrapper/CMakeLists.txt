@@ -110,8 +110,8 @@ include_directories(
 # )
 
 ## Declare a cpp executable
-add_executable(rvo_wrapper
-  src/rvo_wrapper.cpp
+add_executable(rvo_example
+  src/rvo_example.cpp
   src/Agent.cpp
   src/KdTree.cpp
   src/Obstacle.cpp
@@ -122,7 +122,7 @@ add_executable(rvo_wrapper
 # add_dependencies(rvo_wrapper_node rvo_wrapper_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(rvo_wrapper
+target_link_libraries(rvo_example
   ${catkin_LIBRARIES}
 )
 
