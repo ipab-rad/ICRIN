@@ -1,0 +1,12 @@
+{
+	"folders":
+	[
+		{
+			"path": "~/icrin_ws/src/ICRIN"
+		}
+	],
+  "sublimeclang_options":
+  [
+    "~/incrin_ws/src/ICRIN/icrin/**",
+  ]
+}
