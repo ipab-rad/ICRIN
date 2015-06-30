@@ -5,7 +5,9 @@ project(rvo_wrapper)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED
-  roscpp)
+  roscpp
+  common_msgs
+  rvo_wrapper_msgs)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -110,8 +112,15 @@ include_directories(
 # )
 
 ## Declare a cpp executable
-add_executable(rvo_example
-  src/rvo_example.cpp
+# add_executable(rvo_example
+#   src/rvo_example.cpp
+#   src/Agent.cpp
+#   src/KdTree.cpp
+#   src/Obstacle.cpp
+#   src/RVOSimulator.cpp)
+
+add_executable(rvo_wrapper
+  src/rvo_wrapper.cpp
   src/Agent.cpp
   src/KdTree.cpp
   src/Obstacle.cpp
@@ -122,7 +131,11 @@ add_executable(rvo_example
 # add_dependencies(rvo_wrapper_node rvo_wrapper_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(rvo_example
+# target_link_libraries(rvo_example
+#   ${catkin_LIBRARIES}
+# )
+
+target_link_libraries(rvo_wrapper
   ${catkin_LIBRARIES}
 )
 
