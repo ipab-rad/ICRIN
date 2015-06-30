@@ -5,8 +5,11 @@
 			"path": "~/icrin_ws/src/ICRIN"
 		}
 	],
-  "sublimeclang_options":
-  [
-    "~/incrin_ws/src/ICRIN/icrin/**",
-  ]
+  "settings":
+  {
+    "sublimeclang_options":
+    [
+      "-I${folder:${project_path:icrin.sublime-project}}/**"
+    ]
+  }
 }
