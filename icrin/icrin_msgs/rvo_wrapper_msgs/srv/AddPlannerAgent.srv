@@ -1,0 +1,9 @@
+common_msgs/Vector2 agent_pos
+float32 neighbor_dist
+uint8 max_neighbors
+float32 time_horizon
+float32 time_horizon_obst
+float32 radius
+float32 max_speed
+---
+uint8 agent_id

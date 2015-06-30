@@ -5,7 +5,9 @@ project(planner)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED
-  roscpp)
+  roscpp
+  rvo_wrapper_msgs
+  rvo_wrapper)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -79,7 +81,7 @@ find_package(catkin REQUIRED
 catkin_package(
  INCLUDE_DIRS include
 #  LIBRARIES planner
- CATKIN_DEPENDS roscpp
+ CATKIN_DEPENDS roscpp rvo_wrapper_msgs rvo_wrapper
 #  DEPENDS system_lib
 )
 
@@ -101,11 +103,15 @@ include_directories(
 # )
 
 ## Declare a cpp executable
-add_executable(planner src/planner.cpp)
+add_executable(planner
+  src/planner.cpp
+  src/rvo_planner.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-# add_dependencies(planner_node planner_generate_messages_cpp)
+add_dependencies(planner
+  rvo_wrapper_msgs
+  rvo_wrapper)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(planner
