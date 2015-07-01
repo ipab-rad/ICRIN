@@ -1,0 +1,4 @@
+uint32[] sim_ids
+rvo_wrapper_msgs/AgentDefaults defaults
+---
+bool res

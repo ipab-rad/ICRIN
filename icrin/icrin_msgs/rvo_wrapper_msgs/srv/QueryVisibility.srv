@@ -1,0 +1,6 @@
+uint32[] sim_ids
+common_msgs/Vector2 point1
+common_msgs/Vector2 point2
+float32 radius
+---
+bool visible

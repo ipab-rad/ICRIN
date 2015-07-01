@@ -1,0 +1,5 @@
+uint32[] sim_ids
+uint8 agent_id
+float32 agent_time_horizon
+---
+bool res

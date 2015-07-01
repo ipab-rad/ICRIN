@@ -1,0 +1,5 @@
+uint32[] sim_ids
+uint8 agent_id
+uint8 agent_neighbor
+---
+uint8 neighbor_id

@@ -1,3 +1,0 @@
-uint8 agent_id
----
-common_msgs/Vector2 agent_pos

@@ -44,17 +44,47 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+add_message_files(
+  FILES
+  AgentDefaults.msg
+)
 
 ## Generate services in the 'srv' folder
 add_service_files(
   FILES
-  GetPlannerAgentPos.srv
-  AddPlannerAgent.srv
+  AddAgent.srv
+  AddObstacle.srv
+  CreateRVOSim.srv
+  DoStep.srv
+  GetAgentAgentNeighbor.srv
+  GetAgentMaxNeighbor.srv
+  GetAgentMaxSpeed.srv
+  GetAgentNeighborDist.srv
+  GetAgentNumAgentNeighbors.srv
+  GetAgentNumObstacleNeighbors.srv
+  GetAgentObstacleNeighbor.srv
+  GetAgentPosition.srv
+  GetAgentPrefVelocity.srv
+  GetAgentRadius.srv
+  GetAgentTimeHorizon.srv
+  GetAgentTimeHorizonObst.srv
+  GetAgentVelocity.srv
+  GetGlobalTime.srv
+  GetNumAgents.srv
+  GetTimeStep.srv
+  ProcessObstacles.srv
+  QueryVisibility.srv
+  SetAgentDefaults.srv
+  SetAgentMaxNeighbors.srv
+  SetAgentMaxSpeed.srv
+  SetAgentNeighborDist.srv
+  SetAgentPosition.srv
+  SetAgentPrefVelocity.srv
+  SetAgentRadius.srv
+  SetAgentTimeHorizon.srv
+  SetAgentTimeHorizonObst.srv
+  SetAgentVelocity.srv
+  SetTimeStep.srv
 )
 
 ## Generate actions in the 'action' folder

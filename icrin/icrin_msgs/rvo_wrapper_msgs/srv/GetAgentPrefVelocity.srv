@@ -1,0 +1,4 @@
+uint32[] sim_ids
+uint8 agent_id
+---
+common_msgs/Vector2 pref_velocity
