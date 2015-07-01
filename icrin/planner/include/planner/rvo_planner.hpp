@@ -13,11 +13,11 @@
 #include <vector>
 
 #include <rvo_wrapper/rvo_wrapper.hpp>
-#include <rvo_wrapper/Vector2.h>
 
-#include <std_srvs/Empty.h>
-#include <rvo_wrapper_msgs/GetAgentPos.h>
-#include <rvo_wrapper_msgs/AddPlannerAgent.h>
+#include <rvo_wrapper_msgs/CreateRVOSim.h>
+#include <rvo_wrapper_msgs/AddAgent.h>
+#include <rvo_wrapper_msgs/GetAgentPosition.h>
+#include <rvo_wrapper_msgs/DoStep.h>
 
 class RVOPlanner {
  public:
@@ -30,18 +30,17 @@ class RVOPlanner {
 
   void doPlannerStep();
 
-  RVO::Vector2 getAgentPos(size_t agent_no);
+  size_t addPlannerAgent(common_msgs::Vector2 agent_pos);
+
+  common_msgs::Vector2 getAgentPos(size_t agent_no);
 
  private:
   // ROS
   ros::NodeHandle* nh_;
   ros::ServiceClient create_planner_client_;
   ros::ServiceClient do_planner_step_client_;
-  ros::ServiceClient add_planner_agent_client;
-  ros::ServiceClient get_agent_pos_client;
-
-  // Msgs
-  std_srvs::Empty empty_srv_;
+  ros::ServiceClient add_planner_agent_client_;
+  ros::ServiceClient get_agent_pos_client_;
 
   // Class pointers
 

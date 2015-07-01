@@ -10,58 +10,385 @@
 
 RVOWrapper::RVOWrapper(ros::NodeHandle* nh) {
   nh_ = nh;
+  this->init();
   this->rosSetup();
 }
 
 RVOWrapper::~RVOWrapper() {;}
 
+void RVOWrapper::init() {
+  planner_init_ = false;
+}
+
 void RVOWrapper::rosSetup() {
-  srv_create_planner_ = nh_->advertiseService("create_planner",
-                                              &RVOWrapper::createPlanner, this);
-  srv_do_planner_step_ = nh_->advertiseService("do_planner_step",
-                                               &RVOWrapper::doPlannerStep, this);
-  srv_add_planner_agent_ = nh_->advertiseService("add_planner_agent",
-                                                 &RVOWrapper::addPlannerAgent, this);
-  srv_get_agent_pos_ = nh_->advertiseService("get_agent_pos",
-                                             &RVOWrapper::getPlannerAgentPos, this);
+  srv_create_rvosim_ =
+    nh_->advertiseService("create_rvosim",
+                          &RVOWrapper::createRVOSim, this);
+  srv_add_agent_ =
+    nh_->advertiseService("add_agent",
+                          &RVOWrapper::addAgent, this);
+  srv_add_osbtacle_ =
+    nh_->advertiseService("add_osbtacle",
+                          &RVOWrapper::addObstacle, this);
+  srv_do_step_ =
+    nh_->advertiseService("do_step",
+                          &RVOWrapper::doStep, this);
+  srv_get_agent_agent_neighbor_ =
+    nh_->advertiseService("get_agent_agent_neighbor",
+                          &RVOWrapper::getAgentAgentNeighbor, this);
+  srv_get_agent_max_neighbors_ =
+    nh_->advertiseService("get_agent_max_neighbors",
+                          &RVOWrapper::getAgentMaxNeighbors, this);
+  srv_get_agent_max_speed_ =
+    nh_->advertiseService("get_agent_max_speed",
+                          &RVOWrapper::getAgentMaxSpeed, this);
+  srv_get_agent_neighbor_dist_ =
+    nh_->advertiseService("get_agent_neighbor_dist",
+                          &RVOWrapper::getAgentNeighborDist, this);
+  srv_get_agent_num_agent_neighbors_ =
+    nh_->advertiseService("get_agent_num_agent_neighbors",
+                          &RVOWrapper::getAgentNumAgentNeighbors, this);
+  srv_get_agent_num_obstacle_neighbors_ =
+    nh_->advertiseService("get_agent_num_obstacle_neighbors",
+                          &RVOWrapper::getAgentNumObstacleNeighbors, this);
+  srv_get_agent_obstacle_neighbor_ =
+    nh_->advertiseService("get_agent_obstacle_neighbor",
+                          &RVOWrapper::getAgentObstacleNeighbor, this);
+  srv_get_agent_position_ =
+    nh_->advertiseService("get_agent_position",
+                          &RVOWrapper::getAgentPosition, this);
+  srv_get_agent_pref_velocity_ =
+    nh_->advertiseService("get_agent_pref_velocity",
+                          &RVOWrapper::getAgentPrefVelocity, this);
+  srv_get_agent_radius_ =
+    nh_->advertiseService("get_agent_radius",
+                          &RVOWrapper::getAgentRadius, this);
+  srv_get_agent_time_horizon_ =
+    nh_->advertiseService("get_agent_time_horizon",
+                          &RVOWrapper::getAgentTimeHorizon, this);
+  srv_get_agent_time_horizon_obst_ =
+    nh_->advertiseService("get_agent_time_horizon_obst",
+                          &RVOWrapper::getAgentTimeHorizonObst, this);
+  srv_get_agent_velocity_ =
+    nh_->advertiseService("get_agent_velocity",
+                          &RVOWrapper::getAgentVelocity, this);
+  srv_get_global_time_ =
+    nh_->advertiseService("get_global_time",
+                          &RVOWrapper::getGlobalTime, this);
+  srv_get_num_agents_ =
+    nh_->advertiseService("get_num_agents",
+                          &RVOWrapper::getNumAgents, this);
+  srv_get_time_step_ =
+    nh_->advertiseService("get_time_step",
+                          &RVOWrapper::getTimeStep, this);
+  srv_process_obstacles_ =
+    nh_->advertiseService("process_obstacles",
+                          &RVOWrapper::processObstacles, this);
+  srv_query_visibility_ =
+    nh_->advertiseService("query_visibility",
+                          &RVOWrapper::queryVisibility, this);
+  srv_set_agent_defaults_ =
+    nh_->advertiseService("set_agent_defaults",
+                          &RVOWrapper::setAgentDefaults, this);
+  srv_set_agent_max_neighbors_ =
+    nh_->advertiseService("set_agent_max_neighbors",
+                          &RVOWrapper::setAgentMaxNeighbors, this);
+  srv_set_agent_max_speed_ =
+    nh_->advertiseService("set_agent_max_speed",
+                          &RVOWrapper::setAgentMaxSpeed, this);
+  srv_set_agent_neighbor_dist_ =
+    nh_->advertiseService("set_agent_neighbor_dist",
+                          &RVOWrapper::setAgentNeighborDist, this);
+  srv_set_agent_position_ =
+    nh_->advertiseService("set_agent_position",
+                          &RVOWrapper::setAgentPosition, this);
+  srv_set_agent_pref_velocity_ =
+    nh_->advertiseService("set_agent_pref_velocity",
+                          &RVOWrapper::setAgentPrefVelocity, this);
+  srv_set_agent_radius_ =
+    nh_->advertiseService("set_agent_radius",
+                          &RVOWrapper::setAgentRadius, this);
+  srv_set_agent_time_horizon_ =
+    nh_->advertiseService("set_agent_time_horizon",
+                          &RVOWrapper::setAgentTimeHorizon, this);
+  srv_set_agent_time_horizon_obst_ =
+    nh_->advertiseService("set_agent_time_horizon_obst",
+                          &RVOWrapper::setAgentTimeHorizonObst, this);
+  srv_set_agent_velocity_ =
+    nh_->advertiseService("set_agent_velocity",
+                          &RVOWrapper::setAgentVelocity, this);
+  srv_set_time_step_ =
+    nh_->advertiseService("set_time_step",
+                          &RVOWrapper::setTimeStep, this);
 }
-// RVO::RVOSimulator* RVOWrapper::createSimulation() {;}
 
-bool RVOWrapper::createPlanner(std_srvs::Empty::Request& req,
-                               std_srvs::Empty::Response& res) {
-  planner_ = new RVO::RVOSimulator();
-  planner_->setTimeStep(0.1f);
+bool RVOWrapper::createRVOSim(
+  rvo_wrapper_msgs::CreateRVOSim::Request& req,
+  rvo_wrapper_msgs::CreateRVOSim::Response& res) {
+  // If Planner
+  if (req.sim_num == 0 && !planner_init_) {
+    if (req.time_step == 0.0f) {
+      planner_ = new RVO::RVOSimulator();
+    } else {
+      planner_ = new RVO::RVOSimulator(req.time_step,
+                                       req.defaults.neighbor_dist,
+                                       req.defaults.max_neighbors,
+                                       req.defaults.time_horizon_agent,
+                                       req.defaults.time_horizon_obst,
+                                       req.defaults.radius,
+                                       req.defaults.max_speed);
+    }
+    res.sim_ids.push_back(0);
+    planner_init_ = true;
+  } else {
+    // If Sim Vector
+    uint32_t sim_vect_size = sim_vect_.size();
+    // Store first sim_vector id
+    res.sim_ids.push_back(sim_vect_size);
+    if (req.time_step == 0.0f) {
+      for (uint32_t i = sim_vect_size; i < req.sim_num; ++i) {
+        sim_vect_.push_back(new RVO::RVOSimulator());
+      }
+    } else {
+      for (uint32_t i = sim_vect_size; i < req.sim_num; ++i) {
+        sim_vect_.push_back(new RVO::RVOSimulator(req.time_step,
+                                                  req.defaults.neighbor_dist,
+                                                  req.defaults.max_neighbors,
+                                                  req.defaults.time_horizon_agent,
+                                                  req.defaults.time_horizon_obst,
+                                                  req.defaults.radius,
+                                                  req.defaults.max_speed));
+      }
+      // Store last sim_vector id
+      res.sim_ids.push_back(sim_vect_.size());
+    }
+  }
   return true;
 }
 
-bool RVOWrapper::addPlannerAgent(rvo_wrapper_msgs::AddPlannerAgent::Request&
-                                 req,
-                                 rvo_wrapper_msgs::AddPlannerAgent::Response&
-                                 res) {
-  RVO::Vector2 agent_pos(req.agent_pos.x, req.agent_pos.y);
-  res.agent_id = planner_->addAgent(agent_pos, req.neighbor_dist,
-                                    req.max_neighbors, req.time_horizon,
-                                    req.time_horizon_obst, req.radius,
-                                    req.max_speed);
-  RVO::Vector2 temp_goal(1.0f, 1.0f);
-  planner_->setAgentPrefVelocity(res.agent_id, temp_goal);
+bool RVOWrapper::addAgent(
+  rvo_wrapper_msgs::AddAgent::Request& req,
+  rvo_wrapper_msgs::AddAgent::Response& res) {
+  RVO::Vector2 agent_pos(req.position.x, req.position.y);
+  // If Planner
+  if (req.sim_ids.size() == 0 && planner_init_) {
+    planner_->addAgent(agent_pos);
+    // If Sim Vector
+  } else if (req.sim_ids.size() > 0) {
+    // If using good sim id range
+    if (req.sim_ids.back() >= req.sim_ids.front()) {
+      for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
+        sim_vect_[i]->addAgent(agent_pos);
+      }
+    } else {
+      ROS_WARN("Please provide proper id range for sim_vector");
+    }
+  } else {
+    ROS_WARN("RVO Planner not initialised!");
+  }
   return true;
 }
 
-bool RVOWrapper::doPlannerStep(std_srvs::Empty::Request& req,
-                               std_srvs::Empty::Response& res) {
-  planner_->doStep();
+bool RVOWrapper::addObstacle(
+  rvo_wrapper_msgs::AddObstacle::Request& req,
+  rvo_wrapper_msgs::AddObstacle::Response& res) {
   return true;
 }
 
-bool RVOWrapper::getPlannerAgentPos(
-  rvo_wrapper_msgs::GetPlannerAgentPos::Request& req,
-  rvo_wrapper_msgs::GetPlannerAgentPos::Response& res) {
-  RVO::Vector2 agent_pos = planner_->getAgentPosition(req.agent_id);
-  res.agent_pos.x = agent_pos.x();
-  res.agent_pos.y = agent_pos.y();
+bool RVOWrapper::doStep(
+  rvo_wrapper_msgs::DoStep::Request& req,
+  rvo_wrapper_msgs::DoStep::Response& res) {
   return true;
 }
+
+bool RVOWrapper::getAgentAgentNeighbor(
+  rvo_wrapper_msgs::GetAgentAgentNeighbor::Request& req,
+  rvo_wrapper_msgs::GetAgentAgentNeighbor::Response& res) {
+  return true;
+}
+
+bool RVOWrapper::getAgentMaxNeighbors(
+  rvo_wrapper_msgs::GetAgentMaxNeighbor::Request& req,
+  rvo_wrapper_msgs::GetAgentMaxNeighbor::Response& res) {
+  return true;
+}
+
+bool RVOWrapper::getAgentMaxSpeed(
+  rvo_wrapper_msgs::GetAgentMaxSpeed::Request& req,
+  rvo_wrapper_msgs::GetAgentMaxSpeed::Response& res) {
+  return true;
+}
+
+bool RVOWrapper::getAgentNeighborDist(
+  rvo_wrapper_msgs::GetAgentNeighborDist::Request& req,
+  rvo_wrapper_msgs::GetAgentNeighborDist::Response& res) {
+  return true;
+}
+
+bool RVOWrapper::getAgentNumAgentNeighbors(
+  rvo_wrapper_msgs::GetAgentNumAgentNeighbors::Request& req,
+  rvo_wrapper_msgs::GetAgentNumAgentNeighbors::Response& res) {
+  return true;
+}
+
+bool RVOWrapper::getAgentNumObstacleNeighbors(
+  rvo_wrapper_msgs::GetAgentNumObstacleNeighbors::Request& req,
+  rvo_wrapper_msgs::GetAgentNumObstacleNeighbors::Response& res) {
+  return true;
+}
+
+bool RVOWrapper::getAgentObstacleNeighbor(
+  rvo_wrapper_msgs::GetAgentObstacleNeighbor::Request& req,
+  rvo_wrapper_msgs::GetAgentObstacleNeighbor::Response& res) {
+  return true;
+}
+
+bool RVOWrapper::getAgentPosition(
+  rvo_wrapper_msgs::GetAgentPosition::Request& req,
+  rvo_wrapper_msgs::GetAgentPosition::Response& res) {
+  return true;
+}
+
+bool RVOWrapper::getAgentPrefVelocity(
+  rvo_wrapper_msgs::GetAgentPrefVelocity::Request& req,
+  rvo_wrapper_msgs::GetAgentPrefVelocity::Response& res) {
+  return true;
+}
+
+bool RVOWrapper::getAgentRadius(
+  rvo_wrapper_msgs::GetAgentRadius::Request& req,
+  rvo_wrapper_msgs::GetAgentRadius::Response& res) {
+  return true;
+}
+
+bool RVOWrapper::getAgentTimeHorizon(
+  rvo_wrapper_msgs::GetAgentTimeHorizon::Request& req,
+  rvo_wrapper_msgs::GetAgentTimeHorizon::Response& res) {
+  return true;
+}
+
+bool RVOWrapper::getAgentTimeHorizonObst(
+  rvo_wrapper_msgs::GetAgentTimeHorizonObst::Request& req,
+  rvo_wrapper_msgs::GetAgentTimeHorizonObst::Response& res) {
+  return true;
+}
+
+bool RVOWrapper::getAgentVelocity(
+  rvo_wrapper_msgs::GetAgentVelocity::Request& req,
+  rvo_wrapper_msgs::GetAgentVelocity::Response& res) {
+  return true;
+}
+
+bool RVOWrapper::getGlobalTime(
+  rvo_wrapper_msgs::GetGlobalTime::Request& req,
+  rvo_wrapper_msgs::GetGlobalTime::Response& res) {
+  return true;
+}
+
+bool RVOWrapper::getNumAgents(
+  rvo_wrapper_msgs::GetNumAgents::Request& req,
+  rvo_wrapper_msgs::GetNumAgents::Response& res) {
+  return true;
+}
+
+bool RVOWrapper::getTimeStep(
+  rvo_wrapper_msgs::GetTimeStep::Request& req,
+  rvo_wrapper_msgs::GetTimeStep::Response& res) {
+  return true;
+}
+
+bool RVOWrapper::processObstacles(
+  rvo_wrapper_msgs::ProcessObstacles::Request& req,
+  rvo_wrapper_msgs::ProcessObstacles::Response& res) {
+  return true;
+}
+
+bool RVOWrapper::queryVisibility(
+  rvo_wrapper_msgs::QueryVisibility::Request& req,
+  rvo_wrapper_msgs::QueryVisibility::Response& res) {
+  return true;
+}
+
+bool RVOWrapper::setAgentDefaults(
+  rvo_wrapper_msgs::SetAgentDefaults::Request& req,
+  rvo_wrapper_msgs::SetAgentDefaults::Response& res) {
+  return true;
+}
+
+bool RVOWrapper::setAgentMaxNeighbors(
+  rvo_wrapper_msgs::SetAgentMaxNeighbors::Request& req,
+  rvo_wrapper_msgs::SetAgentMaxNeighbors::Response& res) {
+  return true;
+}
+
+bool RVOWrapper::setAgentMaxSpeed(
+  rvo_wrapper_msgs::SetAgentMaxSpeed::Request& req,
+  rvo_wrapper_msgs::SetAgentMaxSpeed::Response& res) {
+  return true;
+}
+
+bool RVOWrapper::setAgentNeighborDist(
+  rvo_wrapper_msgs::SetAgentNeighborDist::Request& req,
+  rvo_wrapper_msgs::SetAgentNeighborDist::Response& res) {
+  return true;
+}
+
+bool RVOWrapper::setAgentPosition(
+  rvo_wrapper_msgs::SetAgentPosition::Request& req,
+  rvo_wrapper_msgs::SetAgentPosition::Response& res) {
+  return true;
+}
+
+bool RVOWrapper::setAgentPrefVelocity(
+  rvo_wrapper_msgs::SetAgentPrefVelocity::Request& req,
+  rvo_wrapper_msgs::SetAgentPrefVelocity::Response& res) {
+  return true;
+}
+
+bool RVOWrapper::setAgentRadius(
+  rvo_wrapper_msgs::SetAgentRadius::Request& req,
+  rvo_wrapper_msgs::SetAgentRadius::Response& res) {
+  return true;
+}
+
+bool RVOWrapper::setAgentTimeHorizon(
+  rvo_wrapper_msgs::SetAgentTimeHorizon::Request& req,
+  rvo_wrapper_msgs::SetAgentTimeHorizon::Response& res) {
+  return true;
+}
+
+bool RVOWrapper::setAgentTimeHorizonObst(
+  rvo_wrapper_msgs::SetAgentTimeHorizonObst::Request& req,
+  rvo_wrapper_msgs::SetAgentTimeHorizonObst::Response& res) {
+  return true;
+}
+
+bool RVOWrapper::setAgentVelocity(
+  rvo_wrapper_msgs::SetAgentVelocity::Request& req,
+  rvo_wrapper_msgs::SetAgentVelocity::Response& res) {
+  return true;
+}
+
+bool RVOWrapper::setTimeStep(
+  rvo_wrapper_msgs::SetTimeStep::Request& req,
+  rvo_wrapper_msgs::SetTimeStep::Response& res) {
+  return true;
+}
+
+// bool RVOWrapper::doPlannerStep(std_srvs::Empty::Request& req,
+//                                std_srvs::Empty::Response& res) {
+//   planner_->doStep();
+//   return true;
+// }
+
+// bool RVOWrapper::getPlannerAgentPos(
+//   rvo_wrapper_msgs::GetPlannerAgentPos::Request& req,
+//   rvo_wrapper_msgs::GetPlannerAgentPos::Response& res) {
+//   RVO::Vector2 agent_pos = planner_->getAgentPosition(req.agent_id);
+//   res.agent_pos.x = agent_pos.x();
+//   res.agent_pos.y = agent_pos.y();
+//   return true;
+// }
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "rvo_wrapper");
