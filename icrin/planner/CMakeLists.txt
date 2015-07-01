@@ -6,6 +6,7 @@ project(planner)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED
   roscpp
+  common_msgs
   rvo_wrapper_msgs
   rvo_wrapper)
 
@@ -81,7 +82,7 @@ find_package(catkin REQUIRED
 catkin_package(
  INCLUDE_DIRS include
 #  LIBRARIES planner
- CATKIN_DEPENDS roscpp rvo_wrapper_msgs rvo_wrapper
+ CATKIN_DEPENDS roscpp common_msgs rvo_wrapper_msgs rvo_wrapper
 #  DEPENDS system_lib
 )
 
@@ -110,8 +111,9 @@ add_executable(planner
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 add_dependencies(planner
-  rvo_wrapper_msgs
-  rvo_wrapper)
+  common_msgs_gencpp
+  rvo_wrapper_msgs_gencpp
+  rvo_wrapper_gencpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(planner

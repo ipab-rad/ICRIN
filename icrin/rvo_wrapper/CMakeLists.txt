@@ -81,7 +81,7 @@ find_package(catkin REQUIRED
 catkin_package(
  INCLUDE_DIRS include
 #  LIBRARIES rvo_wrapper
- CATKIN_DEPENDS roscpp
+ CATKIN_DEPENDS roscpp common_msgs rvo_wrapper_msgs
 #  DEPENDS system_lib
 )
 
@@ -128,7 +128,9 @@ add_executable(rvo_wrapper
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-# add_dependencies(rvo_wrapper_node rvo_wrapper_generate_messages_cpp)
+add_dependencies(rvo_wrapper
+  common_msgs_gencpp
+  rvo_wrapper_msgs_gencpp)
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(rvo_example
