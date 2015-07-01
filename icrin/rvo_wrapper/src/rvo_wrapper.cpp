@@ -23,7 +23,7 @@ void RVOWrapper::rosSetup() {
   srv_add_planner_agent_ = nh_->advertiseService("add_planner_agent",
                                                  &RVOWrapper::addPlannerAgent, this);
   srv_get_agent_pos_ = nh_->advertiseService("get_agent_pos",
-                                             &RVOWrapper::getAgentPos, this);
+                                             &RVOWrapper::getPlannerAgentPos, this);
 }
 // RVO::RVOSimulator* RVOWrapper::createSimulation() {;}
 
@@ -31,12 +31,6 @@ bool RVOWrapper::createPlanner(std_srvs::Empty::Request& req,
                                std_srvs::Empty::Response& res) {
   planner_ = new RVO::RVOSimulator();
   planner_->setTimeStep(0.1f);
-  return true;
-}
-
-bool RVOWrapper::doPlannerStep(std_srvs::Empty::Request& req,
-                               std_srvs::Empty::Response& res) {
-  planner_->doStep();
   return true;
 }
 
@@ -54,8 +48,15 @@ bool RVOWrapper::addPlannerAgent(rvo_wrapper_msgs::AddPlannerAgent::Request&
   return true;
 }
 
-bool RVOWrapper::getAgentPos(rvo_wrapper_msgs::GetAgentPos::Request& req,
-                             rvo_wrapper_msgs::GetAgentPos::Response& res) {
+bool RVOWrapper::doPlannerStep(std_srvs::Empty::Request& req,
+                               std_srvs::Empty::Response& res) {
+  planner_->doStep();
+  return true;
+}
+
+bool RVOWrapper::getPlannerAgentPos(
+  rvo_wrapper_msgs::GetPlannerAgentPos::Request& req,
+  rvo_wrapper_msgs::GetPlannerAgentPos::Response& res) {
   RVO::Vector2 agent_pos = planner_->getAgentPosition(req.agent_id);
   res.agent_pos.x = agent_pos.x();
   res.agent_pos.y = agent_pos.y();
