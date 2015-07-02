@@ -167,22 +167,44 @@ bool RVOWrapper::createRVOSim(
 bool RVOWrapper::addAgent(
   rvo_wrapper_msgs::AddAgent::Request& req,
   rvo_wrapper_msgs::AddAgent::Response& res) {
+  res.res = true;
   RVO::Vector2 agent_pos(req.position.x, req.position.y);
-  // If Planner
-  if (req.sim_ids.size() == 0 && planner_init_) {
-    planner_->addAgent(agent_pos);
-    // If Sim Vector
-  } else if (req.sim_ids.size() > 0) {
-    // If using good sim id range
-    if (req.sim_ids.back() >= req.sim_ids.front()) {
-      for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
-        sim_vect_[i]->addAgent(agent_pos);
+  if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
+    if (req.defaults.radius == 0.0f) { // If defaults not set
+      res.agent_id = planner_->addAgent(agent_pos);
+    } else {
+      res.agent_id = planner_->addAgent(agent_pos,
+                                        req.defaults.neighbor_dist,
+                                        req.defaults.max_neighbors,
+                                        req.defaults.time_horizon_agent,
+                                        req.defaults.time_horizon_obst,
+                                        req.defaults.radius,
+                                        req.defaults.max_speed);
+    }
+  } else if (req.sim_ids.size() > 0) { // If Sim Vector
+    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+      if (req.defaults.radius == 0.0f) { // If defaults not set
+        for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
+          res.agent_id = sim_vect_[i]->addAgent(agent_pos);
+        }
+      } else {
+        for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
+          res.agent_id = sim_vect_[i]->addAgent(agent_pos,
+                                                req.defaults.neighbor_dist,
+                                                req.defaults.max_neighbors,
+                                                req.defaults.time_horizon_agent,
+                                                req.defaults.time_horizon_obst,
+                                                req.defaults.radius,
+                                                req.defaults.max_speed);
+        }
       }
     } else {
-      ROS_WARN("Please provide proper id range for sim_vector");
+      ROS_WARN("Please provide a proper id range for sim_vector");
+      res.res = false;
     }
   } else {
     ROS_WARN("RVO Planner not initialised!");
+    res.res = false;
   }
   return true;
 }
