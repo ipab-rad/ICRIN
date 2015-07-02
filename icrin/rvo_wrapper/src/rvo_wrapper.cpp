@@ -418,6 +418,25 @@ bool RVOWrapper::getAgentObstacleNeighbor(
 bool RVOWrapper::getAgentPosition(
   rvo_wrapper_msgs::GetAgentPosition::Request& req,
   rvo_wrapper_msgs::GetAgentPosition::Response& res) {
+  res.res = true;
+  RVO::Vector2 position;
+  if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
+    position = planner_->getAgentPosition(req.agent_id);
+  } else if (req.sim_ids.size() > 0) { // If Sim Vector
+    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+      for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
+        position = sim_vect_[i]->getAgentPosition(req.agent_id);
+      }
+    } else {
+      ROS_WARN("Please provide a proper id range for sim_vector");
+      res.res = false;
+    }
+  } else {
+    ROS_WARN("RVO Planner not initialised!");
+    res.res = false;
+  }
+  res.position.x = position.x();
+  res.position.y = position.y();
   return true;
 }
 
