@@ -1,4 +1,5 @@
 uint32[] sim_ids
 uint8 agent_id
 ---
+bool res
 uint8 num_obstacles

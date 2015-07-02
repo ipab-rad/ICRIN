@@ -1,4 +1,5 @@
 uint32[] sim_ids
 uint8 agent_id
 ---
+bool res
 float32 obst_time_horizon

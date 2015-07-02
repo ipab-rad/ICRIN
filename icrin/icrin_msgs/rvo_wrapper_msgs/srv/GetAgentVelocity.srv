@@ -1,4 +1,5 @@
 uint32[] sim_ids
 uint8 agent_id
 ---
+bool res
 common_msgs/Vector2 velocity

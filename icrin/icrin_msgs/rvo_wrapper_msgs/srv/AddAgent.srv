@@ -2,4 +2,5 @@ uint32[] sim_ids
 common_msgs/Vector2 position
 rvo_wrapper_msgs/AgentDefaults defaults
 ---
+bool res
 uint32 agent_id
