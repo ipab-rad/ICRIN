@@ -306,6 +306,22 @@ bool RVOWrapper::getAgentMaxNeighbors(
 bool RVOWrapper::getAgentMaxSpeed(
   rvo_wrapper_msgs::GetAgentMaxSpeed::Request& req,
   rvo_wrapper_msgs::GetAgentMaxSpeed::Response& res) {
+  res.res = true;
+  if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
+    res.max_speed = planner_->getAgentMaxSpeed(req.agent_id);
+  } else if (req.sim_ids.size() > 0) { // If Sim Vector
+    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+      for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
+        res.max_speed = sim_vect_[i]->getAgentMaxSpeed(req.agent_id);
+      }
+    } else {
+      ROS_WARN("Please provide a proper id range for sim_vector");
+      res.res = false;
+    }
+  } else {
+    ROS_WARN("RVO Planner not initialised!");
+    res.res = false;
+  }
   return true;
 }
 
