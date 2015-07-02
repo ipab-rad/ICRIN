@@ -144,11 +144,11 @@ bool RVOWrapper::createRVOSim(
     uint32_t sim_vect_size = sim_vect_.size(); // If Sim Vector
     res.sim_ids.push_back(sim_vect_size); // Store first sim_vector id
     if (req.time_step == 0.0f) { // If defaults not set
-      for (uint32_t i = sim_vect_size; i < req.sim_num; ++i) {
+      for (uint32_t i = sim_vect_size; i < req.sim_num + sim_vect_size; ++i) {
         sim_vect_.push_back(new RVO::RVOSimulator());
       }
     } else {
-      for (uint32_t i = sim_vect_size; i < req.sim_num; ++i) {
+      for (uint32_t i = sim_vect_size; i < req.sim_num + sim_vect_size; ++i) {
         sim_vect_.push_back(new RVO::RVOSimulator(req.time_step,
                                                   req.defaults.neighbor_dist,
                                                   req.defaults.max_neighbors,
