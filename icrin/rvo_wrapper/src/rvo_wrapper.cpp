@@ -140,7 +140,7 @@ bool RVOWrapper::createRVOSim(
     }
     res.sim_ids.push_back(0);
     planner_init_ = true;
-  } else {
+  } else if (req.sim_num > 0) {
     uint32_t sim_vect_size = sim_vect_.size(); // If Sim Vector
     res.sim_ids.push_back(sim_vect_size); // Store first sim_vector id
     if (req.time_step == 0.0f) { // If defaults not set
@@ -160,6 +160,9 @@ bool RVOWrapper::createRVOSim(
       // Store last sim_vector id
       res.sim_ids.push_back(sim_vect_.size());
     }
+  } else if (planner_init_) {
+    ROS_WARN("Planner already initialised!");
+    res.res = false;
   }
   return true;
 }
