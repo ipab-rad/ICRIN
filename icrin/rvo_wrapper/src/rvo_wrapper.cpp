@@ -927,21 +927,6 @@ bool RVOWrapper::setTimeStep(
   return true;
 }
 
-// bool RVOWrapper::doPlannerStep(std_srvs::Empty::Request& req,
-//                                std_srvs::Empty::Response& res) {
-//   planner_->doStep();
-//   return true;
-// }
-
-// bool RVOWrapper::getPlannerAgentPos(
-//   rvo_wrapper_msgs::GetPlannerAgentPos::Request& req,
-//   rvo_wrapper_msgs::GetPlannerAgentPos::Response& res) {
-//   RVO::Vector2 agent_pos = planner_->getAgentPosition(req.agent_id);
-//   res.agent_pos.x = agent_pos.x();
-//   res.agent_pos.y = agent_pos.y();
-//   return true;
-// }
-
 int main(int argc, char** argv) {
   ros::init(argc, argv, "rvo_wrapper");
   ros::NodeHandle nh("rvo_wrapper");
