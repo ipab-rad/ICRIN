@@ -443,6 +443,25 @@ bool RVOWrapper::getAgentPosition(
 bool RVOWrapper::getAgentPrefVelocity(
   rvo_wrapper_msgs::GetAgentPrefVelocity::Request& req,
   rvo_wrapper_msgs::GetAgentPrefVelocity::Response& res) {
+  res.res = true;
+  RVO::Vector2 pref_velocity;
+  if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
+    pref_velocity = planner_->getAgentPrefVelocity(req.agent_id);
+  } else if (req.sim_ids.size() > 0) { // If Sim Vector
+    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+      for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
+        pref_velocity = sim_vect_[i]->getAgentPrefVelocity(req.agent_id);
+      }
+    } else {
+      ROS_WARN("Please provide a proper id range for sim_vector");
+      res.res = false;
+    }
+  } else {
+    ROS_WARN("RVO Planner not initialised!");
+    res.res = false;
+  }
+  res.pref_velocity.x = pref_velocity.x();
+  res.pref_velocity.y = pref_velocity.y();
   return true;
 }
 
