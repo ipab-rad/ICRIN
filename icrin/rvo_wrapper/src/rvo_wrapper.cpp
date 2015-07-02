@@ -14,13 +14,21 @@ RVOWrapper::RVOWrapper(ros::NodeHandle* nh) {
   this->rosSetup();
 }
 
-RVOWrapper::~RVOWrapper() {;}
+RVOWrapper::~RVOWrapper() {
+  for (uint32_t i = 0; i < sim_vect_.size(); ++i) {
+    delete (sim_vect_[i]);
+  }
+  sim_vect_.clear();
+}
 
 void RVOWrapper::init() {
   planner_init_ = false;
 }
 
 void RVOWrapper::rosSetup() {
+  srv_delete_sim_vector_ =
+    nh_->advertiseService("delete_sim_vector",
+                          &RVOWrapper::deleteSimVector, this);
   srv_create_rvosim_ =
     nh_->advertiseService("create_rvosim",
                           &RVOWrapper::createRVOSim, this);
@@ -120,6 +128,15 @@ void RVOWrapper::rosSetup() {
   srv_set_time_step_ =
     nh_->advertiseService("set_time_step",
                           &RVOWrapper::setTimeStep, this);
+}
+
+bool RVOWrapper::deleteSimVector(std_srvs::Empty::Request& req,
+                                 std_srvs::Empty::Response& res) {
+  for (uint32_t i = 0; i < sim_vect_.size(); ++i) {
+    delete (sim_vect_[i]);
+  }
+  sim_vect_.clear();
+  return true;
 }
 
 bool RVOWrapper::createRVOSim(

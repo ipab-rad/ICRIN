@@ -15,6 +15,8 @@
 #include <rvo_wrapper/Definitions.h>
 #include <rvo_wrapper/Vector2.h>
 
+#include <std_srvs/Empty.h>
+
 #include <rvo_wrapper_msgs/AddAgent.h>
 #include <rvo_wrapper_msgs/AddObstacle.h>
 #include <rvo_wrapper_msgs/CreateRVOSim.h>
@@ -57,6 +59,9 @@ class RVOWrapper {
   void init();
 
   void rosSetup();
+
+  bool deleteSimVector(std_srvs::Empty::Request& req,
+                       std_srvs::Empty::Response& res);
 
   bool createRVOSim(rvo_wrapper_msgs::CreateRVOSim::Request& req,
                     rvo_wrapper_msgs::CreateRVOSim::Response& res);
@@ -189,6 +194,7 @@ class RVOWrapper {
  private:
   // ROS
   ros::NodeHandle* nh_;
+  ros::ServiceServer srv_delete_sim_vector_;
   ros::ServiceServer srv_create_rvosim_;
   ros::ServiceServer srv_add_agent_;
   ros::ServiceServer srv_add_osbtacle_;
