@@ -581,6 +581,22 @@ bool RVOWrapper::getGlobalTime(
 bool RVOWrapper::getNumAgents(
   rvo_wrapper_msgs::GetNumAgents::Request& req,
   rvo_wrapper_msgs::GetNumAgents::Response& res) {
+  res.res = true;
+  if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
+    res.num_agents = planner_->getNumAgents();
+  } else if (req.sim_ids.size() > 0) { // If Sim Vector
+    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+      for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
+        res.num_agents = sim_vect_[i]->getNumAgents();
+      }
+    } else {
+      ROS_WARN("Please provide a proper id range for sim_vector");
+      res.res = false;
+    }
+  } else {
+    ROS_WARN("RVO Planner not initialised!");
+    res.res = false;
+  }
   return true;
 }
 
