@@ -534,6 +534,25 @@ bool RVOWrapper::getAgentTimeHorizonObst(
 bool RVOWrapper::getAgentVelocity(
   rvo_wrapper_msgs::GetAgentVelocity::Request& req,
   rvo_wrapper_msgs::GetAgentVelocity::Response& res) {
+  res.res = true;
+  RVO::Vector2 velocity;
+  if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
+    velocity = planner_->getAgentVelocity(req.agent_id);
+  } else if (req.sim_ids.size() > 0) { // If Sim Vector
+    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+      for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
+        velocity = sim_vect_[i]->getAgentVelocity(req.agent_id);
+      }
+    } else {
+      ROS_WARN("Please provide a proper id range for sim_vector");
+      res.res = false;
+    }
+  } else {
+    ROS_WARN("RVO Planner not initialised!");
+    res.res = false;
+  }
+  res.velocity.x = velocity.x();
+  res.velocity.y = velocity.y();
   return true;
 }
 
