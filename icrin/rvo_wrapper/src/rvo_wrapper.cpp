@@ -202,7 +202,8 @@ bool RVOWrapper::addAgent(
                                         req.defaults.max_speed);
     }
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
-    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+    if ((req.sim_ids.back() >= req.sim_ids.front()) &&
+        (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
       if (req.defaults.radius == 0.0f) { // If defaults not set
         for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
           res.agent_id = sim_vect_[i]->addAgent(agent_pos);
@@ -240,7 +241,8 @@ bool RVOWrapper::addObstacle(
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     planner_->addObstacle(vertices);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
-    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+    if ((req.sim_ids.back() >= req.sim_ids.front()) &&
+        (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
       for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
         sim_vect_[i]->addObstacle(vertices);
       }
@@ -262,7 +264,8 @@ bool RVOWrapper::doStep(
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     planner_->doStep();
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
-    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+    if ((req.sim_ids.back() >= req.sim_ids.front()) &&
+        (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
       for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
         sim_vect_[i]->doStep();
       }
@@ -285,7 +288,8 @@ bool RVOWrapper::getAgentAgentNeighbor(
     res.neighbor_id = planner_->getAgentAgentNeighbor(req.agent_id,
                                                       req.agent_neighbor);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
-    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+    if ((req.sim_ids.back() >= req.sim_ids.front()) &&
+        (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
       for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
         res.neighbor_id = sim_vect_[i]->getAgentAgentNeighbor(req.agent_id,
                                                               req.agent_neighbor);
@@ -308,7 +312,8 @@ bool RVOWrapper::getAgentMaxNeighbors(
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     res.max_neighbors = planner_->getAgentMaxNeighbors(req.agent_id);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
-    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+    if ((req.sim_ids.back() >= req.sim_ids.front()) &&
+        (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
       for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
         res.max_neighbors = sim_vect_[i]->getAgentMaxNeighbors(req.agent_id);
       }
@@ -330,7 +335,8 @@ bool RVOWrapper::getAgentMaxSpeed(
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     res.max_speed = planner_->getAgentMaxSpeed(req.agent_id);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
-    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+    if ((req.sim_ids.back() >= req.sim_ids.front()) &&
+        (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
       for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
         res.max_speed = sim_vect_[i]->getAgentMaxSpeed(req.agent_id);
       }
@@ -352,7 +358,8 @@ bool RVOWrapper::getAgentNeighborDist(
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     res.max_neighbor_dist = planner_->getAgentNeighborDist(req.agent_id);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
-    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+    if ((req.sim_ids.back() >= req.sim_ids.front()) &&
+        (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
       for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
         res.max_neighbor_dist = sim_vect_[i]->getAgentNeighborDist(req.agent_id);
       }
@@ -374,7 +381,8 @@ bool RVOWrapper::getAgentNumAgentNeighbors(
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     res.num_neighbors = planner_->getAgentNumAgentNeighbors(req.agent_id);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
-    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+    if ((req.sim_ids.back() >= req.sim_ids.front()) &&
+        (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
       for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
         res.num_neighbors = sim_vect_[i]->getAgentNumAgentNeighbors(req.agent_id);
       }
@@ -396,7 +404,8 @@ bool RVOWrapper::getAgentNumObstacleNeighbors(
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     res.num_obstacles = planner_->getAgentNumObstacleNeighbors(req.agent_id);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
-    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+    if ((req.sim_ids.back() >= req.sim_ids.front()) &&
+        (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
       for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
         res.num_obstacles = sim_vect_[i]->getAgentNumObstacleNeighbors(req.agent_id);
       }
@@ -419,7 +428,8 @@ bool RVOWrapper::getAgentObstacleNeighbor(
     res.obstacle_vertex = planner_->getAgentObstacleNeighbor(req.agent_id,
                                                              req.agent_obstacle);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
-    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+    if ((req.sim_ids.back() >= req.sim_ids.front()) &&
+        (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
       for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
         res.obstacle_vertex = sim_vect_[i]->getAgentObstacleNeighbor(req.agent_id,
                                                                      req.agent_obstacle);
@@ -443,7 +453,8 @@ bool RVOWrapper::getAgentPosition(
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     position = planner_->getAgentPosition(req.agent_id);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
-    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+    if ((req.sim_ids.back() >= req.sim_ids.front()) &&
+        (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
       for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
         position = sim_vect_[i]->getAgentPosition(req.agent_id);
       }
@@ -468,7 +479,8 @@ bool RVOWrapper::getAgentPrefVelocity(
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     pref_velocity = planner_->getAgentPrefVelocity(req.agent_id);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
-    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+    if ((req.sim_ids.back() >= req.sim_ids.front()) &&
+        (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
       for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
         pref_velocity = sim_vect_[i]->getAgentPrefVelocity(req.agent_id);
       }
@@ -492,7 +504,8 @@ bool RVOWrapper::getAgentRadius(
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     res.radius = planner_->getAgentRadius(req.agent_id);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
-    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+    if ((req.sim_ids.back() >= req.sim_ids.front()) &&
+        (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
       for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
         res.radius = sim_vect_[i]->getAgentRadius(req.agent_id);
       }
@@ -514,7 +527,8 @@ bool RVOWrapper::getAgentTimeHorizon(
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     res.agent_time_horizon = planner_->getAgentTimeHorizon(req.agent_id);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
-    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+    if ((req.sim_ids.back() >= req.sim_ids.front()) &&
+        (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
       for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
         res.agent_time_horizon = sim_vect_[i]->getAgentTimeHorizon(req.agent_id);
       }
@@ -536,7 +550,8 @@ bool RVOWrapper::getAgentTimeHorizonObst(
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     res.obst_time_horizon = planner_->getAgentTimeHorizonObst(req.agent_id);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
-    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+    if ((req.sim_ids.back() >= req.sim_ids.front()) &&
+        (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
       for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
         res.obst_time_horizon = sim_vect_[i]->getAgentTimeHorizonObst(req.agent_id);
       }
@@ -559,7 +574,8 @@ bool RVOWrapper::getAgentVelocity(
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     velocity = planner_->getAgentVelocity(req.agent_id);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
-    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+    if ((req.sim_ids.back() >= req.sim_ids.front()) &&
+        (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
       for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
         velocity = sim_vect_[i]->getAgentVelocity(req.agent_id);
       }
@@ -583,7 +599,8 @@ bool RVOWrapper::getGlobalTime(
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     res.global_time = planner_->getGlobalTime();
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
-    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+    if ((req.sim_ids.back() >= req.sim_ids.front()) &&
+        (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
       for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
         res.global_time = sim_vect_[i]->getGlobalTime();
       }
@@ -605,7 +622,8 @@ bool RVOWrapper::getNumAgents(
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     res.num_agents = planner_->getNumAgents();
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
-    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+    if ((req.sim_ids.back() >= req.sim_ids.front()) &&
+        (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
       for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
         res.num_agents = sim_vect_[i]->getNumAgents();
       }
@@ -627,7 +645,8 @@ bool RVOWrapper::getTimeStep(
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     res.time_step = planner_->getTimeStep();
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
-    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+    if ((req.sim_ids.back() >= req.sim_ids.front()) &&
+        (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
       for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
         res.time_step = sim_vect_[i]->getTimeStep();
       }
@@ -649,7 +668,8 @@ bool RVOWrapper::processObstacles(
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     planner_->processObstacles();
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
-    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+    if ((req.sim_ids.back() >= req.sim_ids.front()) &&
+        (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
       for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
         sim_vect_[i]->processObstacles();
       }
@@ -673,7 +693,8 @@ bool RVOWrapper::queryVisibility(
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     res.visible = planner_->queryVisibility(point1, point2, req.radius);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
-    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+    if ((req.sim_ids.back() >= req.sim_ids.front()) &&
+        (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
       for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
         res.visible = sim_vect_[i]->queryVisibility(point1, point2, req.radius);
       }
@@ -700,7 +721,8 @@ bool RVOWrapper::setAgentDefaults(
                                req.defaults.radius,
                                req.defaults.max_speed);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
-    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+    if ((req.sim_ids.back() >= req.sim_ids.front()) &&
+        (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
       for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
         sim_vect_[i]->setAgentDefaults(req.defaults.neighbor_dist,
                                        req.defaults.max_neighbors,
@@ -727,7 +749,8 @@ bool RVOWrapper::setAgentMaxNeighbors(
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     planner_->setAgentMaxNeighbors(req.agent_id, req.max_neighbors);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
-    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+    if ((req.sim_ids.back() >= req.sim_ids.front()) &&
+        (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
       for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
         sim_vect_[i]->setAgentMaxNeighbors(req.agent_id, req.max_neighbors);
       }
@@ -749,7 +772,8 @@ bool RVOWrapper::setAgentMaxSpeed(
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     planner_->setAgentMaxSpeed(req.agent_id, req.max_speed);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
-    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+    if ((req.sim_ids.back() >= req.sim_ids.front()) &&
+        (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
       for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
         sim_vect_[i]->setAgentMaxSpeed(req.agent_id, req.max_speed);
       }
@@ -771,7 +795,8 @@ bool RVOWrapper::setAgentNeighborDist(
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     planner_->setAgentNeighborDist(req.agent_id, req.neighbor_dist);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
-    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+    if ((req.sim_ids.back() >= req.sim_ids.front()) &&
+        (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
       for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
         sim_vect_[i]->setAgentNeighborDist(req.agent_id, req.neighbor_dist);
       }
@@ -794,7 +819,8 @@ bool RVOWrapper::setAgentPosition(
     planner_->setAgentPosition(req.agent_id, RVO::Vector2(req.position.x,
                                                           req.position.y));
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
-    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+    if ((req.sim_ids.back() >= req.sim_ids.front()) &&
+        (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
       for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
         sim_vect_[i]->setAgentPosition(req.agent_id, RVO::Vector2(req.position.x,
                                                                   req.position.y));
@@ -818,7 +844,8 @@ bool RVOWrapper::setAgentPrefVelocity(
     planner_->setAgentPrefVelocity(req.agent_id, RVO::Vector2(req.pref_velocity.x,
                                                               req.pref_velocity.y));
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
-    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+    if ((req.sim_ids.back() >= req.sim_ids.front()) &&
+        (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
       for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
         sim_vect_[i]->setAgentPrefVelocity(req.agent_id,
                                            RVO::Vector2(req.pref_velocity.x,
@@ -842,7 +869,8 @@ bool RVOWrapper::setAgentRadius(
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     planner_->setAgentRadius(req.agent_id, req.radius);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
-    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+    if ((req.sim_ids.back() >= req.sim_ids.front()) &&
+        (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
       for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
         sim_vect_[i]->setAgentRadius(req.agent_id, req.radius);
       }
@@ -864,7 +892,8 @@ bool RVOWrapper::setAgentTimeHorizon(
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     planner_->setAgentTimeHorizon(req.agent_id, req.agent_time_horizon);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
-    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+    if ((req.sim_ids.back() >= req.sim_ids.front()) &&
+        (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
       for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
         sim_vect_[i]->setAgentTimeHorizon(req.agent_id, req.agent_time_horizon);
       }
@@ -886,7 +915,8 @@ bool RVOWrapper::setAgentTimeHorizonObst(
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     planner_->setAgentTimeHorizonObst(req.agent_id, req.obst_time_horizon);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
-    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+    if ((req.sim_ids.back() >= req.sim_ids.front()) &&
+        (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
       for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
         sim_vect_[i]->setAgentTimeHorizonObst(req.agent_id, req.obst_time_horizon);
       }
@@ -909,7 +939,8 @@ bool RVOWrapper::setAgentVelocity(
     planner_->setAgentVelocity(req.agent_id, RVO::Vector2(req.velocity.x,
                                                           req.velocity.y));
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
-    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+    if ((req.sim_ids.back() >= req.sim_ids.front()) &&
+        (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
       for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
         sim_vect_[i]->setAgentVelocity(req.agent_id, RVO::Vector2(req.velocity.x,
                                                                   req.velocity.y));
@@ -932,7 +963,8 @@ bool RVOWrapper::setTimeStep(
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     planner_->setTimeStep(req.time_step);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
-    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+    if ((req.sim_ids.back() >= req.sim_ids.front()) &&
+        (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
       for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
         sim_vect_[i]->setTimeStep(req.time_step);
       }
