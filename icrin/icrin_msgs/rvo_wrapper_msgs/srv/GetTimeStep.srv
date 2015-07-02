@@ -1,3 +1,4 @@
 uint32[] sim_ids
 ---
+bool res
 float32 time_step

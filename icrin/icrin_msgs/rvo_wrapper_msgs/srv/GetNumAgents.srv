@@ -1,3 +1,4 @@
 uint32[] sim_ids
 ---
+bool res
 uint8 num_agents

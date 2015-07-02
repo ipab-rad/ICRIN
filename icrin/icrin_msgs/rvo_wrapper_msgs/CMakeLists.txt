@@ -57,7 +57,7 @@ add_service_files(
   CreateRVOSim.srv
   DoStep.srv
   GetAgentAgentNeighbor.srv
-  GetAgentMaxNeighbor.srv
+  GetAgentMaxNeighbors.srv
   GetAgentMaxSpeed.srv
   GetAgentNeighborDist.srv
   GetAgentNumAgentNeighbors.srv

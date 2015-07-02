@@ -1,5 +1,5 @@
 uint32[] sim_ids
 uint8 agent_id
-float32 agent_radius
+float32 radius
 ---
 bool res
