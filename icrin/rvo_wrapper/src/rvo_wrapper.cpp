@@ -125,9 +125,9 @@ void RVOWrapper::rosSetup() {
 bool RVOWrapper::createRVOSim(
   rvo_wrapper_msgs::CreateRVOSim::Request& req,
   rvo_wrapper_msgs::CreateRVOSim::Response& res) {
-  // If Planner
-  if (req.sim_num == 0 && !planner_init_) {
-    if (req.time_step == 0.0f) {
+  res.res = true;
+  if (req.sim_num == 0 && !planner_init_) { // If Planner
+    if (req.time_step == 0.0f) { // If defaults not set
       planner_ = new RVO::RVOSimulator();
     } else {
       planner_ = new RVO::RVOSimulator(req.time_step,
@@ -141,11 +141,9 @@ bool RVOWrapper::createRVOSim(
     res.sim_ids.push_back(0);
     planner_init_ = true;
   } else {
-    // If Sim Vector
-    uint32_t sim_vect_size = sim_vect_.size();
-    // Store first sim_vector id
-    res.sim_ids.push_back(sim_vect_size);
-    if (req.time_step == 0.0f) {
+    uint32_t sim_vect_size = sim_vect_.size(); // If Sim Vector
+    res.sim_ids.push_back(sim_vect_size); // Store first sim_vector id
+    if (req.time_step == 0.0f) { // If defaults not set
       for (uint32_t i = sim_vect_size; i < req.sim_num; ++i) {
         sim_vect_.push_back(new RVO::RVOSimulator());
       }
