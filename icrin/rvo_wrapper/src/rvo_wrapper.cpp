@@ -350,6 +350,22 @@ bool RVOWrapper::getAgentNeighborDist(
 bool RVOWrapper::getAgentNumAgentNeighbors(
   rvo_wrapper_msgs::GetAgentNumAgentNeighbors::Request& req,
   rvo_wrapper_msgs::GetAgentNumAgentNeighbors::Response& res) {
+  res.res = true;
+  if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
+    res.num_neighbors = planner_->getAgentNumAgentNeighbors(req.agent_id);
+  } else if (req.sim_ids.size() > 0) { // If Sim Vector
+    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+      for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
+        res.num_neighbors = sim_vect_[i]->getAgentNumAgentNeighbors(req.agent_id);
+      }
+    } else {
+      ROS_WARN("Please provide a proper id range for sim_vector");
+      res.res = false;
+    }
+  } else {
+    ROS_WARN("RVO Planner not initialised!");
+    res.res = false;
+  }
   return true;
 }
 
