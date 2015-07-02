@@ -20,7 +20,7 @@
 #include <rvo_wrapper_msgs/CreateRVOSim.h>
 #include <rvo_wrapper_msgs/DoStep.h>
 #include <rvo_wrapper_msgs/GetAgentAgentNeighbor.h>
-#include <rvo_wrapper_msgs/GetAgentMaxNeighbor.h>
+#include <rvo_wrapper_msgs/GetAgentMaxNeighbors.h>
 #include <rvo_wrapper_msgs/GetAgentMaxSpeed.h>
 #include <rvo_wrapper_msgs/GetAgentNeighborDist.h>
 #include <rvo_wrapper_msgs/GetAgentNumAgentNeighbors.h>
@@ -75,8 +75,8 @@ class RVOWrapper {
     rvo_wrapper_msgs::GetAgentAgentNeighbor::Response& res);
 
   bool getAgentMaxNeighbors(
-    rvo_wrapper_msgs::GetAgentMaxNeighbor::Request& req,
-    rvo_wrapper_msgs::GetAgentMaxNeighbor::Response& res);
+    rvo_wrapper_msgs::GetAgentMaxNeighbors::Request& req,
+    rvo_wrapper_msgs::GetAgentMaxNeighbors::Response& res);
 
   bool getAgentMaxSpeed(
     rvo_wrapper_msgs::GetAgentMaxSpeed::Request& req,
