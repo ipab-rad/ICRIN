@@ -647,6 +647,24 @@ bool RVOWrapper::processObstacles(
 bool RVOWrapper::queryVisibility(
   rvo_wrapper_msgs::QueryVisibility::Request& req,
   rvo_wrapper_msgs::QueryVisibility::Response& res) {
+  res.res = true;
+  RVO::Vector2 point1(req.point1.x, req.point1.y);
+  RVO::Vector2 point2(req.point2.x, req.point2.y);
+  if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
+    res.visible = planner_->queryVisibility(point1, point2, req.radius);
+  } else if (req.sim_ids.size() > 0) { // If Sim Vector
+    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+      for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
+        res.visible = sim_vect_[i]->queryVisibility(point1, point2, req.radius);
+      }
+    } else {
+      ROS_WARN("Please provide a proper id range for sim_vector");
+      res.res = false;
+    }
+  } else {
+    ROS_WARN("RVO Planner not initialised!");
+    res.res = false;
+  }
   return true;
 }
 
