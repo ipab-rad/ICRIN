@@ -490,6 +490,22 @@ bool RVOWrapper::getAgentRadius(
 bool RVOWrapper::getAgentTimeHorizon(
   rvo_wrapper_msgs::GetAgentTimeHorizon::Request& req,
   rvo_wrapper_msgs::GetAgentTimeHorizon::Response& res) {
+  res.res = true;
+  if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
+    res.agent_time_horizon = planner_->getAgentTimeHorizon(req.agent_id);
+  } else if (req.sim_ids.size() > 0) { // If Sim Vector
+    if (req.sim_ids.back() >= req.sim_ids.front()) { // If good sim id range
+      for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
+        res.agent_time_horizon = sim_vect_[i]->getAgentTimeHorizon(req.agent_id);
+      }
+    } else {
+      ROS_WARN("Please provide a proper id range for sim_vector");
+      res.res = false;
+    }
+  } else {
+    ROS_WARN("RVO Planner not initialised!");
+    res.res = false;
+  }
   return true;
 }
 
