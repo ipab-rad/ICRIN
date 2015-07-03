@@ -35,6 +35,9 @@ void RVOWrapper::rosSetup() {
   srv_add_agent_ =
     nh_->advertiseService("add_agent",
                           &RVOWrapper::addAgent, this);
+  srv_set_agent_goals_ =
+    nh_->advertiseService("set_agent_goals",
+                          &RVOWrapper::setAgentGoals, this);
   srv_add_osbtacle_ =
     nh_->advertiseService("add_osbtacle",
                           &RVOWrapper::addObstacle, this);
@@ -154,6 +157,8 @@ bool RVOWrapper::createRVOSim(
     if (req.time_step == 0.0f) { // If defaults not set
       for (uint32_t i = sim_vect_size; i < req.sim_num + sim_vect_size; ++i) {
         sim_vect_.push_back(new RVO::RVOSimulator());
+        std::vector<RVO::Vector2> empty;
+        sim_vect_goals_.push_back(empty);
       }
     } else {
       for (uint32_t i = sim_vect_size; i < req.sim_num + sim_vect_size; ++i) {
@@ -164,9 +169,11 @@ bool RVOWrapper::createRVOSim(
                                                   req.defaults.time_horizon_obst,
                                                   req.defaults.radius,
                                                   req.defaults.max_speed));
+        std::vector<RVO::Vector2> empty;
+        sim_vect_goals_.push_back(empty);
       }
       // Store last sim_vector id
-      res.sim_ids.push_back(sim_vect_.size());
+      res.sim_ids.push_back(sim_vect_.size() - 1);
     }
   } else if (planner_init_) {
     ROS_WARN("Planner already initialised!");
@@ -181,6 +188,7 @@ bool RVOWrapper::deleteSimVector(std_srvs::Empty::Request& req,
     delete (sim_vect_[i]);
   }
   sim_vect_.clear();
+  sim_vect_goals_.clear();
   return true;
 }
 
@@ -201,12 +209,14 @@ bool RVOWrapper::addAgent(
                                         req.defaults.radius,
                                         req.defaults.max_speed);
     }
+    planner_goals_.push_back(RVO::Vector2(0.0f, 0.0f));
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
     if ((req.sim_ids.back() >= req.sim_ids.front()) &&
         (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
       if (req.defaults.radius == 0.0f) { // If defaults not set
         for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
           res.agent_id = sim_vect_[i]->addAgent(agent_pos);
+          sim_vect_goals_[i].push_back(RVO::Vector2(0.0f, 0.0f));
         }
       } else {
         for (uint32_t i = req.sim_ids.front(); i < req.sim_ids.back(); ++i) {
@@ -217,6 +227,7 @@ bool RVOWrapper::addAgent(
                                                 req.defaults.time_horizon_obst,
                                                 req.defaults.radius,
                                                 req.defaults.max_speed);
+          sim_vect_goals_[i].push_back(RVO::Vector2(0.0f, 0.0f));
         }
       }
     } else {
@@ -730,6 +741,48 @@ bool RVOWrapper::setAgentDefaults(
                                        req.defaults.time_horizon_obst,
                                        req.defaults.radius,
                                        req.defaults.max_speed);
+      }
+    } else {
+      ROS_WARN("Please provide a proper id range for sim_vector");
+      res.res = false;
+    }
+  } else {
+    ROS_WARN("RVO Planner not initialised!");
+    res.res = false;
+  }
+  return true;
+}
+
+bool RVOWrapper::setAgentGoals(
+  rvo_wrapper_msgs::SetAgentGoals::Request& req,
+  rvo_wrapper_msgs::SetAgentGoals::Response& res) {
+  res.res = true;
+  if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
+    uint32_t num_agents = planner_->getNumAgents();
+    for (uint32_t i = 0; i < num_agents; ++i) {
+      planner_goals_[i] = RVO::Vector2(req.sim[0].agent[i].x,
+                                       req.sim[0].agent[i].y);
+    }
+  } else if (req.sim_ids.size() == 1) { // If specific simulation
+    if (req.sim_ids[0] < sim_vect_.size()) { // If good sim id
+      uint32_t num_agents = sim_vect_[req.sim_ids[0]]->getNumAgents();
+      for (uint32_t i = 0; i < num_agents; ++i) { // Cycle through sim agents
+        sim_vect_goals_[req.sim_ids[0]][i] = RVO::Vector2(req.sim[0].agent[i].x,
+                                                          req.sim[0].agent[i].y);
+      }
+    } else {
+      ROS_WARN("Please provide a proper sim id within range");
+      res.res = false;
+    }
+  } else if (req.sim_ids.size() > 0) { // If Sim Vector
+    if ((req.sim_ids.back() >= req.sim_ids.front()) &&
+        (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
+      for (uint32_t j = req.sim_ids.front(); j < req.sim_ids.back(); ++j) {
+        uint32_t num_agents = sim_vect_[req.sim_ids[j]]->getNumAgents();
+        for (uint32_t i = 0; i < num_agents; ++i) { // Cycle through sim agents
+          sim_vect_goals_[req.sim_ids[j]][i] = RVO::Vector2(req.sim[j].agent[i].x,
+                                                            req.sim[j].agent[i].y);
+        }
       }
     } else {
       ROS_WARN("Please provide a proper id range for sim_vector");
