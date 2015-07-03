@@ -18,25 +18,36 @@ RVOPlanner::~RVOPlanner() {;}
 
 void RVOPlanner::rosSetup() {
   add_planner_agent_client_ =
-    nh_->serviceClient<rvo_wrapper_msgs::AddAgent>("/rvo_wrapper/add_agent");
+    nh_->serviceClient<rvo_wrapper_msgs::AddAgent>(
+      "/rvo_wrapper/add_agent", true);
   add_planner_agent_client_.waitForExistence();
+  check_reached_goal_client_ =
+    nh_->serviceClient<rvo_wrapper_msgs::CheckReachedGoal>(
+      "/rvo_wrapper/check_reached_goal", true);
+  check_reached_goal_client_.waitForExistence();
   calc_pref_velocities_client_ =
-    nh_->serviceClient<rvo_wrapper_msgs::CalcPrefVelocities>("/rvo_wrapper/calc_pref_velocities");
+    nh_->serviceClient<rvo_wrapper_msgs::CalcPrefVelocities>(
+      "/rvo_wrapper/calc_pref_velocities", true);
   calc_pref_velocities_client_.waitForExistence();
   create_planner_client_ =
-    nh_->serviceClient<rvo_wrapper_msgs::CreateRVOSim>("/rvo_wrapper/create_rvosim");
+    nh_->serviceClient<rvo_wrapper_msgs::CreateRVOSim>(
+      "/rvo_wrapper/create_rvosim", true);
   create_planner_client_.waitForExistence();
   do_planner_step_client_ =
-    nh_->serviceClient<rvo_wrapper_msgs::DoStep>("/rvo_wrapper/do_step");
+    nh_->serviceClient<rvo_wrapper_msgs::DoStep>(
+      "/rvo_wrapper/do_step", true);
   do_planner_step_client_.waitForExistence();
   get_agent_pos_client_ =
-    nh_->serviceClient<rvo_wrapper_msgs::GetAgentPosition>("/rvo_wrapper/get_agent_position");
+    nh_->serviceClient<rvo_wrapper_msgs::GetAgentPosition>(
+      "/rvo_wrapper/get_agent_position", true);
   get_agent_pos_client_.waitForExistence();
   get_num_agents_ =
-    nh_->serviceClient<rvo_wrapper_msgs::GetNumAgents>("/rvo_wrapper/get_num_agents");
+    nh_->serviceClient<rvo_wrapper_msgs::GetNumAgents>(
+      "/rvo_wrapper/get_num_agents", true);
   get_num_agents_.waitForExistence();
   set_agent_goals_client_ =
-    nh_->serviceClient<rvo_wrapper_msgs::SetAgentGoals>("/rvo_wrapper/set_agent_goals");
+    nh_->serviceClient<rvo_wrapper_msgs::SetAgentGoals>(
+      "/rvo_wrapper/set_agent_goals", true);
   set_agent_goals_client_.waitForExistence();
 }
 
@@ -50,6 +61,13 @@ size_t RVOPlanner::addPlannerAgent(common_msgs::Vector2 agent_pos) {
 void RVOPlanner::calcPrefVelocities() {
   rvo_wrapper_msgs::CalcPrefVelocities msg;
   calc_pref_velocities_client_.call(msg);
+}
+
+bool RVOPlanner::checkReachedGoal() {
+  rvo_wrapper_msgs::CheckReachedGoal msg;
+  // msg.request.goal = goal;
+  check_reached_goal_client_.call(msg);
+  return msg.response.reached;
 }
 
 void RVOPlanner::createPlanner() {
@@ -80,7 +98,7 @@ common_msgs::Vector2 RVOPlanner::getAgentPos(size_t agent_no) {
   return msg.response.position;
 }
 
-void RVOPlanner::setPlannerGoal(size_t agent_no, common_msgs::Vector2 goal) {
+void RVOPlanner::setPlannerGoal(common_msgs::Vector2 goal) {
   rvo_wrapper_msgs::GetNumAgents num_agents_msg;
   get_num_agents_.call(num_agents_msg);
   rvo_wrapper_msgs::SetAgentGoals agent_goal_msg;

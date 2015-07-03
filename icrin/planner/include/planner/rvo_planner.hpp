@@ -16,6 +16,7 @@
 
 #include <rvo_wrapper_msgs/AddAgent.h>
 #include <rvo_wrapper_msgs/CalcPrefVelocities.h>
+#include <rvo_wrapper_msgs/CheckReachedGoal.h>
 #include <rvo_wrapper_msgs/CreateRVOSim.h>
 #include <rvo_wrapper_msgs/DoStep.h>
 #include <rvo_wrapper_msgs/GetAgentPosition.h>
@@ -33,7 +34,9 @@ class RVOPlanner {
 
   void calcPrefVelocities();
 
-  void setPlannerGoal(size_t agent_no, common_msgs::Vector2 goal);
+  bool checkReachedGoal();
+
+  void setPlannerGoal(common_msgs::Vector2 goal);
 
   void createPlanner();
 
@@ -47,6 +50,7 @@ class RVOPlanner {
   // ROS
   ros::NodeHandle* nh_;
   ros::ServiceClient add_planner_agent_client_;
+  ros::ServiceClient check_reached_goal_client_;
   ros::ServiceClient calc_pref_velocities_client_;
   ros::ServiceClient create_planner_client_;
   ros::ServiceClient do_planner_step_client_;
