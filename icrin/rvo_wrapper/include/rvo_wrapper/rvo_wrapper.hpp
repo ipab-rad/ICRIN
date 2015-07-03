@@ -19,6 +19,7 @@
 
 #include <rvo_wrapper_msgs/AddAgent.h>
 #include <rvo_wrapper_msgs/AddObstacle.h>
+#include <rvo_wrapper_msgs/CalcPrefVelocities.h>
 #include <rvo_wrapper_msgs/CreateRVOSim.h>
 #include <rvo_wrapper_msgs/DoStep.h>
 #include <rvo_wrapper_msgs/GetAgentAgentNeighbor.h>
@@ -61,17 +62,20 @@ class RVOWrapper {
 
   void rosSetup();
 
-  bool createRVOSim(rvo_wrapper_msgs::CreateRVOSim::Request& req,
-                    rvo_wrapper_msgs::CreateRVOSim::Response& res);
-
-  bool deleteSimVector(std_srvs::Empty::Request& req,
-                       std_srvs::Empty::Response& res);
-
   bool addAgent(rvo_wrapper_msgs::AddAgent::Request& req,
                 rvo_wrapper_msgs::AddAgent::Response& res);
 
   bool addObstacle(rvo_wrapper_msgs::AddObstacle::Request& req,
                    rvo_wrapper_msgs::AddObstacle::Response& res);
+
+  bool calcPrefVelocities(rvo_wrapper_msgs::CalcPrefVelocities::Request& req,
+                          rvo_wrapper_msgs::CalcPrefVelocities::Response& res);
+
+  bool createRVOSim(rvo_wrapper_msgs::CreateRVOSim::Request& req,
+                    rvo_wrapper_msgs::CreateRVOSim::Response& res);
+
+  bool deleteSimVector(std_srvs::Empty::Request& req,
+                       std_srvs::Empty::Response& res);
 
   bool doStep(rvo_wrapper_msgs::DoStep::Request& req,
               rvo_wrapper_msgs::DoStep::Response& res);
@@ -199,11 +203,11 @@ class RVOWrapper {
  private:
   // ROS
   ros::NodeHandle* nh_;
-  ros::ServiceServer srv_delete_sim_vector_;
-  ros::ServiceServer srv_create_rvosim_;
   ros::ServiceServer srv_add_agent_;
-  ros::ServiceServer srv_set_agent_goals_;
   ros::ServiceServer srv_add_osbtacle_;
+  ros::ServiceServer srv_calc_pref_velocities_;
+  ros::ServiceServer srv_create_rvosim_;
+  ros::ServiceServer srv_delete_sim_vector_;
   ros::ServiceServer srv_do_step_;
   ros::ServiceServer srv_get_agent_agent_neighbor_;
   ros::ServiceServer srv_get_agent_max_neighbors_;
@@ -224,6 +228,7 @@ class RVOWrapper {
   ros::ServiceServer srv_process_obstacles_;
   ros::ServiceServer srv_query_visibility_;
   ros::ServiceServer srv_set_agent_defaults_;
+  ros::ServiceServer srv_set_agent_goals_;
   ros::ServiceServer srv_set_agent_max_neighbors_;
   ros::ServiceServer srv_set_agent_max_speed_;
   ros::ServiceServer srv_set_agent_neighbor_dist_;

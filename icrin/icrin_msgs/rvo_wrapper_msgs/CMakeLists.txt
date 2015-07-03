@@ -55,6 +55,7 @@ add_service_files(
   FILES
   AddAgent.srv
   AddObstacle.srv
+  CalcPrefVelocities.srv
   CreateRVOSim.srv
   DoStep.srv
   GetAgentAgentNeighbor.srv
