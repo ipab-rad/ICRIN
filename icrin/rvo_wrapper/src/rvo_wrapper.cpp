@@ -26,12 +26,12 @@ void RVOWrapper::init() {
 }
 
 void RVOWrapper::rosSetup() {
-  srv_delete_sim_vector_ =
-    nh_->advertiseService("delete_sim_vector",
-                          &RVOWrapper::deleteSimVector, this);
   srv_create_rvosim_ =
     nh_->advertiseService("create_rvosim",
                           &RVOWrapper::createRVOSim, this);
+  srv_delete_sim_vector_ =
+    nh_->advertiseService("delete_sim_vector",
+                          &RVOWrapper::deleteSimVector, this);
   srv_add_agent_ =
     nh_->advertiseService("add_agent",
                           &RVOWrapper::addAgent, this);
@@ -130,15 +130,6 @@ void RVOWrapper::rosSetup() {
                           &RVOWrapper::setTimeStep, this);
 }
 
-bool RVOWrapper::deleteSimVector(std_srvs::Empty::Request& req,
-                                 std_srvs::Empty::Response& res) {
-  for (uint32_t i = 0; i < sim_vect_.size(); ++i) {
-    delete (sim_vect_[i]);
-  }
-  sim_vect_.clear();
-  return true;
-}
-
 bool RVOWrapper::createRVOSim(
   rvo_wrapper_msgs::CreateRVOSim::Request& req,
   rvo_wrapper_msgs::CreateRVOSim::Response& res) {
@@ -181,6 +172,15 @@ bool RVOWrapper::createRVOSim(
     ROS_WARN("Planner already initialised!");
     res.res = false;
   }
+  return true;
+}
+
+bool RVOWrapper::deleteSimVector(std_srvs::Empty::Request& req,
+                                 std_srvs::Empty::Response& res) {
+  for (uint32_t i = 0; i < sim_vect_.size(); ++i) {
+    delete (sim_vect_[i]);
+  }
+  sim_vect_.clear();
   return true;
 }
 

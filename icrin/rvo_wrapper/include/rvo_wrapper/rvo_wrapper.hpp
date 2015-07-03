@@ -60,11 +60,11 @@ class RVOWrapper {
 
   void rosSetup();
 
-  bool deleteSimVector(std_srvs::Empty::Request& req,
-                       std_srvs::Empty::Response& res);
-
   bool createRVOSim(rvo_wrapper_msgs::CreateRVOSim::Request& req,
                     rvo_wrapper_msgs::CreateRVOSim::Response& res);
+
+  bool deleteSimVector(std_srvs::Empty::Request& req,
+                       std_srvs::Empty::Response& res);
 
   bool addAgent(rvo_wrapper_msgs::AddAgent::Request& req,
                 rvo_wrapper_msgs::AddAgent::Response& res);
