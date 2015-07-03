@@ -78,8 +78,8 @@ void RVOPlanner::createPlanner() {
   msg.request.defaults.max_neighbors = 20;
   msg.request.defaults.time_horizon_agent = 5.0f;
   msg.request.defaults.time_horizon_obst = 5.0f;
-  msg.request.defaults.radius = 1.2f;
-  msg.request.defaults.max_speed = 0.6f;
+  msg.request.defaults.radius = 0.5f;
+  msg.request.defaults.max_speed = 0.3f;
   create_planner_client_.call(msg);
   if (msg.response.res) {
     ROS_INFO("Planner created");
