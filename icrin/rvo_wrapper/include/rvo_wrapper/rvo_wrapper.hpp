@@ -20,6 +20,7 @@
 #include <rvo_wrapper_msgs/AddAgent.h>
 #include <rvo_wrapper_msgs/AddObstacle.h>
 #include <rvo_wrapper_msgs/CalcPrefVelocities.h>
+#include <rvo_wrapper_msgs/CheckReachedGoal.h>
 #include <rvo_wrapper_msgs/CreateRVOSim.h>
 #include <rvo_wrapper_msgs/DoStep.h>
 #include <rvo_wrapper_msgs/GetAgentAgentNeighbor.h>
@@ -70,6 +71,9 @@ class RVOWrapper {
 
   bool calcPrefVelocities(rvo_wrapper_msgs::CalcPrefVelocities::Request& req,
                           rvo_wrapper_msgs::CalcPrefVelocities::Response& res);
+
+  bool checkReachedGoal(rvo_wrapper_msgs::CheckReachedGoal::Request& req,
+                        rvo_wrapper_msgs::CheckReachedGoal::Response& res);
 
   bool createRVOSim(rvo_wrapper_msgs::CreateRVOSim::Request& req,
                     rvo_wrapper_msgs::CreateRVOSim::Response& res);
@@ -206,6 +210,7 @@ class RVOWrapper {
   ros::ServiceServer srv_add_agent_;
   ros::ServiceServer srv_add_osbtacle_;
   ros::ServiceServer srv_calc_pref_velocities_;
+  ros::ServiceServer srv_check_reached_goal_;
   ros::ServiceServer srv_create_rvosim_;
   ros::ServiceServer srv_delete_sim_vector_;
   ros::ServiceServer srv_do_step_;

@@ -32,6 +32,9 @@ void RVOWrapper::rosSetup() {
   srv_add_osbtacle_ =
     nh_->advertiseService("add_osbtacle",
                           &RVOWrapper::addObstacle, this);
+  srv_check_reached_goal_ =
+    nh_->advertiseService("check_reached_goal",
+                          &RVOWrapper::checkReachedGoal, this);
   srv_calc_pref_velocities_ =
     nh_->advertiseService("calc_pref_velocities",
                           &RVOWrapper::calcPrefVelocities, this);
@@ -248,6 +251,28 @@ bool RVOWrapper::calcPrefVelocities(
   return true;
 }
 
+bool RVOWrapper::checkReachedGoal(
+  rvo_wrapper_msgs::CheckReachedGoal::Request& req,
+  rvo_wrapper_msgs::CheckReachedGoal::Response& res) {
+  res.res = true;
+  if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
+    ROS_WARN("Goal: %f, %f. Dist: %f",
+             planner_goals_[0].x(), planner_goals_[0].y(),
+             RVO::absSq(planner_->getAgentPosition(0) - planner_goals_[0]));
+    if (RVO::absSq(planner_->getAgentPosition(0) - planner_goals_[0]) <
+        planner_->getAgentRadius(0) / 2) {
+      res.reached = true;
+    } else { res.reached = false; }
+  } else if (req.sim_ids.size() > 0) { // If Sim Vector
+    ROS_WARN("Not yet implemented for sim goals!");
+    res.res = false;
+  } else {
+    ROS_WARN("RVO Planner not initialised!");
+    res.res = false;
+  }
+  return true;
+}
+
 bool RVOWrapper::createRVOSim(
   rvo_wrapper_msgs::CreateRVOSim::Request& req,
   rvo_wrapper_msgs::CreateRVOSim::Response& res) {
@@ -310,6 +335,7 @@ bool RVOWrapper::deleteSimVector(std_srvs::Empty::Request& req,
 bool RVOWrapper::doStep(
   rvo_wrapper_msgs::DoStep::Request& req,
   rvo_wrapper_msgs::DoStep::Response& res) {
+  ROS_INFO("DoStep start");
   res.res = true;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     planner_->doStep();
@@ -327,6 +353,7 @@ bool RVOWrapper::doStep(
     ROS_WARN("RVO Planner not initialised!");
     res.res = false;
   }
+  ROS_INFO("DoStep end");
   return true;
 }
 
