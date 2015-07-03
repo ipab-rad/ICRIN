@@ -11,6 +11,8 @@
 
 #include <ros/ros.h>
 
+#include <common_msgs/Vector2.h>
+
 class Planner {
  public:
   Planner();
