@@ -14,10 +14,14 @@
 
 #include <rvo_wrapper/rvo_wrapper.hpp>
 
-#include <rvo_wrapper_msgs/CreateRVOSim.h>
 #include <rvo_wrapper_msgs/AddAgent.h>
-#include <rvo_wrapper_msgs/GetAgentPosition.h>
+#include <rvo_wrapper_msgs/CalcPrefVelocities.h>
+#include <rvo_wrapper_msgs/CheckReachedGoal.h>
+#include <rvo_wrapper_msgs/CreateRVOSim.h>
 #include <rvo_wrapper_msgs/DoStep.h>
+#include <rvo_wrapper_msgs/GetAgentPosition.h>
+#include <rvo_wrapper_msgs/GetNumAgents.h>
+#include <rvo_wrapper_msgs/SetAgentGoals.h>
 
 class RVOPlanner {
  public:
@@ -26,21 +30,33 @@ class RVOPlanner {
 
   void rosSetup();
 
+  size_t addPlannerAgent(common_msgs::Vector2 agent_pos);
+
+  void calcPrefVelocities();
+
+  bool checkReachedGoal();
+
+  void setPlannerGoal(common_msgs::Vector2 goal);
+
   void createPlanner();
 
   void doPlannerStep();
 
-  size_t addPlannerAgent(common_msgs::Vector2 agent_pos);
-
   common_msgs::Vector2 getAgentPos(size_t agent_no);
+
+
 
  private:
   // ROS
   ros::NodeHandle* nh_;
+  ros::ServiceClient add_planner_agent_client_;
+  ros::ServiceClient check_reached_goal_client_;
+  ros::ServiceClient calc_pref_velocities_client_;
   ros::ServiceClient create_planner_client_;
   ros::ServiceClient do_planner_step_client_;
-  ros::ServiceClient add_planner_agent_client_;
   ros::ServiceClient get_agent_pos_client_;
+  ros::ServiceClient get_num_agents_;
+  ros::ServiceClient set_agent_goals_client_;
 
   // Class pointers
 

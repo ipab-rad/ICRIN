@@ -47,6 +47,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
   FILES
   AgentDefaults.msg
+  SimGoals.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -54,6 +55,8 @@ add_service_files(
   FILES
   AddAgent.srv
   AddObstacle.srv
+  CalcPrefVelocities.srv
+  CheckReachedGoal.srv
   CreateRVOSim.srv
   DoStep.srv
   GetAgentAgentNeighbor.srv
@@ -75,6 +78,7 @@ add_service_files(
   ProcessObstacles.srv
   QueryVisibility.srv
   SetAgentDefaults.srv
+  SetAgentGoals.srv
   SetAgentMaxNeighbors.srv
   SetAgentMaxSpeed.srv
   SetAgentNeighborDist.srv

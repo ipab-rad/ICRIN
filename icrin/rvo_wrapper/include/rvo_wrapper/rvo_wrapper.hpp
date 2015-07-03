@@ -15,8 +15,12 @@
 #include <rvo_wrapper/Definitions.h>
 #include <rvo_wrapper/Vector2.h>
 
+#include <std_srvs/Empty.h>
+
 #include <rvo_wrapper_msgs/AddAgent.h>
 #include <rvo_wrapper_msgs/AddObstacle.h>
+#include <rvo_wrapper_msgs/CalcPrefVelocities.h>
+#include <rvo_wrapper_msgs/CheckReachedGoal.h>
 #include <rvo_wrapper_msgs/CreateRVOSim.h>
 #include <rvo_wrapper_msgs/DoStep.h>
 #include <rvo_wrapper_msgs/GetAgentAgentNeighbor.h>
@@ -38,6 +42,7 @@
 #include <rvo_wrapper_msgs/ProcessObstacles.h>
 #include <rvo_wrapper_msgs/QueryVisibility.h>
 #include <rvo_wrapper_msgs/SetAgentDefaults.h>
+#include <rvo_wrapper_msgs/SetAgentGoals.h>
 #include <rvo_wrapper_msgs/SetAgentMaxNeighbors.h>
 #include <rvo_wrapper_msgs/SetAgentMaxSpeed.h>
 #include <rvo_wrapper_msgs/SetAgentNeighborDist.h>
@@ -58,14 +63,23 @@ class RVOWrapper {
 
   void rosSetup();
 
-  bool createRVOSim(rvo_wrapper_msgs::CreateRVOSim::Request& req,
-                    rvo_wrapper_msgs::CreateRVOSim::Response& res);
-
   bool addAgent(rvo_wrapper_msgs::AddAgent::Request& req,
                 rvo_wrapper_msgs::AddAgent::Response& res);
 
   bool addObstacle(rvo_wrapper_msgs::AddObstacle::Request& req,
                    rvo_wrapper_msgs::AddObstacle::Response& res);
+
+  bool calcPrefVelocities(rvo_wrapper_msgs::CalcPrefVelocities::Request& req,
+                          rvo_wrapper_msgs::CalcPrefVelocities::Response& res);
+
+  bool checkReachedGoal(rvo_wrapper_msgs::CheckReachedGoal::Request& req,
+                        rvo_wrapper_msgs::CheckReachedGoal::Response& res);
+
+  bool createRVOSim(rvo_wrapper_msgs::CreateRVOSim::Request& req,
+                    rvo_wrapper_msgs::CreateRVOSim::Response& res);
+
+  bool deleteSimVector(std_srvs::Empty::Request& req,
+                       std_srvs::Empty::Response& res);
 
   bool doStep(rvo_wrapper_msgs::DoStep::Request& req,
               rvo_wrapper_msgs::DoStep::Response& res);
@@ -146,6 +160,10 @@ class RVOWrapper {
     rvo_wrapper_msgs::SetAgentDefaults::Request& req,
     rvo_wrapper_msgs::SetAgentDefaults::Response& res);
 
+  bool setAgentGoals(
+    rvo_wrapper_msgs::SetAgentGoals::Request& req,
+    rvo_wrapper_msgs::SetAgentGoals::Response& res);
+
   bool setAgentMaxNeighbors(
     rvo_wrapper_msgs::SetAgentMaxNeighbors::Request& req,
     rvo_wrapper_msgs::SetAgentMaxNeighbors::Response& res);
@@ -189,9 +207,12 @@ class RVOWrapper {
  private:
   // ROS
   ros::NodeHandle* nh_;
-  ros::ServiceServer srv_create_rvosim_;
   ros::ServiceServer srv_add_agent_;
   ros::ServiceServer srv_add_osbtacle_;
+  ros::ServiceServer srv_calc_pref_velocities_;
+  ros::ServiceServer srv_check_reached_goal_;
+  ros::ServiceServer srv_create_rvosim_;
+  ros::ServiceServer srv_delete_sim_vector_;
   ros::ServiceServer srv_do_step_;
   ros::ServiceServer srv_get_agent_agent_neighbor_;
   ros::ServiceServer srv_get_agent_max_neighbors_;
@@ -212,6 +233,7 @@ class RVOWrapper {
   ros::ServiceServer srv_process_obstacles_;
   ros::ServiceServer srv_query_visibility_;
   ros::ServiceServer srv_set_agent_defaults_;
+  ros::ServiceServer srv_set_agent_goals_;
   ros::ServiceServer srv_set_agent_max_neighbors_;
   ros::ServiceServer srv_set_agent_max_speed_;
   ros::ServiceServer srv_set_agent_neighbor_dist_;
@@ -225,7 +247,9 @@ class RVOWrapper {
 
   // Class pointers
   RVO::RVOSimulator* planner_;
+  std::vector<RVO::Vector2> planner_goals_;
   std::vector<RVO::RVOSimulator*> sim_vect_;
+  std::vector< std::vector<RVO::Vector2> > sim_vect_goals_;
 
   // Variables/Flags
   bool planner_init_;
