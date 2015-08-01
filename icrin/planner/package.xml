@@ -44,6 +44,8 @@
   <run_depend>roscpp</run_depend>
   <build_depend>common_msgs</build_depend>
   <run_depend>common_msgs</run_depend>
+  <build_depend>planner_msgs</build_depend>
+  <run_depend>planner_msgs</run_depend>
   <build_depend>rvo_wrapper_msgs</build_depend>
   <run_depend>rvo_wrapper_msgs</run_depend>
   <build_depend>rvo_wrapper</build_depend>
