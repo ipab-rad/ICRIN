@@ -26,7 +26,7 @@ void PlannerWrapper::init() {
   use_rvo_planner_ = false;
   zero_vect_.x = 0.0f;
   zero_vect_.y = 0.0f;
-  goal_vect_.x = 1.0f;
+  goal_vect_.x = 0.0f;
   goal_vect_.y = 0.0f;
   cmd_vel.linear.x = 0.0f;
   cmd_vel.linear.y = 0.0f;
@@ -90,7 +90,7 @@ void PlannerWrapper::currPoseCB(const geometry_msgs::Pose2D::ConstPtr& msg) {
     common_msgs::Vector2 curr_pose;
     curr_pose.x = msg->x;
     curr_pose.y = msg->y;
-    rvo_planner_->setCurrPose(curr_pose);
+    // rvo_planner_->setCurrPose(curr_pose);
   }
 }
 

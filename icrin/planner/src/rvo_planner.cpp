@@ -154,7 +154,6 @@ void RVOPlanner::setPlannerSettings(float time_step,
 }
 
 void RVOPlanner::planStep() {
-  ROS_INFO("rvo_planner plan_step");
   // this->createPlanner();
   // ROS_INFO("rvo_planner create_planner");
   // this->setupPlanner();
