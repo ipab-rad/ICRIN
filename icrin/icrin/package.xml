@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>planner</name>
+  <name>icrin</name>
   <version>0.0.0</version>
-  <description>The planner package</description>
+  <description>The icrin package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
@@ -19,7 +19,7 @@
   <!-- Url tags are optional, but mutiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
   <!-- Example: -->
-  <!-- <url type="website">http://wiki.ros.org/planner</url> -->
+  <!-- <url type="website">http://wiki.ros.org/icrin</url> -->
 
 
   <!-- Author tags are optional, mutiple are allowed, one per tag -->
@@ -40,16 +40,25 @@
   <!-- Use test_depend for packages you need only for testing: -->
   <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>roscpp</build_depend>
-  <run_depend>roscpp</run_depend>
-  <build_depend>common_msgs</build_depend>
-  <run_depend>common_msgs</run_depend>
-  <build_depend>planner_msgs</build_depend>
-  <run_depend>planner_msgs</run_depend>
-  <build_depend>rvo_wrapper_msgs</build_depend>
-  <run_depend>rvo_wrapper_msgs</run_depend>
+  <build_depend>amcl_wrapper</build_depend>
+  <build_depend>bumper_wrapper</build_depend>
+  <build_depend>environment</build_depend>
+  <build_depend>experiment</build_depend>
+  <build_depend>model</build_depend>
+  <build_depend>planner</build_depend>
+  <build_depend>robot_comms</build_depend>
   <build_depend>rvo_wrapper</build_depend>
+  <build_depend>tracker</build_depend>
+  <run_depend>amcl_wrapper</run_depend>
+  <run_depend>bumper_wrapper</run_depend>
+  <run_depend>environment</run_depend>
+  <run_depend>experiment</run_depend>
+  <run_depend>model</run_depend>
+  <run_depend>planner</run_depend>
+  <run_depend>robot_comms</run_depend>
   <run_depend>rvo_wrapper</run_depend>
+  <run_depend>tracker</run_depend>
+
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

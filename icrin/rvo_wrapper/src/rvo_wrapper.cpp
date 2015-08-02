@@ -335,7 +335,7 @@ bool RVOWrapper::deleteSimVector(std_srvs::Empty::Request& req,
 bool RVOWrapper::doStep(
   rvo_wrapper_msgs::DoStep::Request& req,
   rvo_wrapper_msgs::DoStep::Response& res) {
-  ROS_INFO("DoStep start");
+  ROS_INFO("SimStep start");
   res.res = true;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     planner_->doStep();
@@ -353,7 +353,7 @@ bool RVOWrapper::doStep(
     ROS_WARN("RVO Planner not initialised!");
     res.res = false;
   }
-  ROS_INFO("DoStep end");
+  ROS_INFO("SimStep end");
   return true;
 }
 

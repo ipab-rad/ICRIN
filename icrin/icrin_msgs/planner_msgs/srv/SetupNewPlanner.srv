@@ -1,0 +1,5 @@
+# RVO Planner 0
+# ROS Navigation 1
+uint8 planner_type
+---
+bool res
