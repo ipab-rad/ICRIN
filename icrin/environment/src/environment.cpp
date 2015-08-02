@@ -29,7 +29,7 @@ void Environment::rosSetup() {
   target_goal_pub_ = nh_->advertise<geometry_msgs::Pose2D>("target_goal", 1,
                                                            true);
   robot_cmd_velocity_pub_ = nh_->advertise<geometry_msgs::Twist>(
-                              "cmd_vel", 1, true);
+                              robot_name_ + "/cmd_vel", 1, true);
   ros::service::waitForService(robot_name_ + "/planner/setup_rvo_planner");
   setup_rvo_planner_ =
     nh_->serviceClient<planner_msgs::SetupRVOPlanner>(
@@ -42,6 +42,7 @@ void Environment::rosSetup() {
 
 void Environment::pubRobotVelocity() {
   if (planning_ && use_rvo_planner_) {
+    // TODO: Set vels to absolute zero if small enough
     robot_cmd_velocity_ = planner_cmd_velocity_;
     robot_cmd_velocity_pub_.publish(robot_cmd_velocity_);
   }
@@ -53,6 +54,7 @@ void Environment::trackerInfoCB(const geometry_msgs::Pose2D::ConstPtr& msg) {
 
 void Environment::plannerCmdVelCB(const geometry_msgs::Twist::ConstPtr& msg) {
   planner_cmd_velocity_ = *msg;
+  this->pubRobotVelocity();
 }
 
 int main(int argc, char** argv) {
