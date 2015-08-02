@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+
+<launch>
+        <!-- Start the environment node -->
+        <node ns="megatron" name="environment" pkg="environment" type="environment" output="screen" clear_params="true">
+        <rosparam file="$(find icrin)/cfg/robot.yaml" command="load" />
+                <!-- Robot Setup -->
+        </node>
+</launch>
