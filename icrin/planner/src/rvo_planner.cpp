@@ -10,6 +10,7 @@
 
 RVOPlanner::RVOPlanner(ros::NodeHandle* nh) {
   nh_ = nh;
+  this->init();
   this->rosSetup();
   this->createPlanner();
 }
@@ -100,7 +101,7 @@ bool RVOPlanner::checkReachedGoal() {
 void RVOPlanner::createPlanner() {
   create_planner_client_.call(planner_settings_);
   if (planner_settings_.response.res) {
-    ROS_INFO("Planner created");
+    ROS_INFO("RVO Planner created");
   } else { ROS_ERROR("Planner not created!"); };
 }
 
@@ -122,9 +123,10 @@ void RVOPlanner::setPlannerGoal(common_msgs::Vector2 goal) {
   rvo_wrapper_msgs::SetAgentGoals agent_goal_msg;
   rvo_wrapper_msgs::SimGoals empty;
   agent_goal_msg.request.sim.push_back(empty);
-  for (uint32_t i = 0; i < num_agents_msg.response.num_agents; ++i) {
-    agent_goal_msg.request.sim[0].agent.push_back(goal);
-  }
+  agent_goal_msg.request.sim[0].agent.push_back(goal);
+  // for (uint32_t i = 0; i < num_agents_msg.response.num_agents; ++i) {
+  //   agent_goal_msg.request.sim[0].agent.push_back(goal);
+  // }
   set_agent_goals_client_.call(agent_goal_msg);
 }
 
@@ -152,6 +154,11 @@ void RVOPlanner::setPlannerSettings(float time_step,
 }
 
 void RVOPlanner::planStep() {
+  ROS_INFO("rvo_planner plan_step");
+  // this->createPlanner();
+  // ROS_INFO("rvo_planner create_planner");
+  // this->setupPlanner();
+  // ROS_INFO("rvo_planner setup_planner");
   this->calcPrefVelocities();
   this->doSimStep();
 }
