@@ -26,6 +26,8 @@ void PlannerWrapper::init() {
   use_rvo_planner_ = false;
   zero_vect_.x = 0.0f;
   zero_vect_.y = 0.0f;
+  goal_vect_.x = 1.0f;
+  goal_vect_.y = 0.0f;
   cmd_vel.linear.x = 0.0f;
   cmd_vel.linear.y = 0.0f;
   cmd_vel.linear.z = 0.0f;
@@ -58,8 +60,9 @@ bool PlannerWrapper::setupNewPlanner(
   rvo_planner_ = new RVOPlanner(nh_);
   rvo_planner_->addPlannerAgent(zero_vect_);
   // rvo_planner_->setCurrPose(zero_vect_);
-  rvo_planner_->setPlannerGoal(zero_vect_);
+  rvo_planner_->setPlannerGoal(goal_vect_);
   use_rvo_planner_ = true;
+  res.res = true;
   return true;
 }
 
@@ -67,6 +70,7 @@ bool PlannerWrapper::setupRVOPlanner(
   planner_msgs::SetupRVOPlanner::Request& req,
   planner_msgs::SetupRVOPlanner::Response& res) {
   rvo_planner_->setPlannerSettings(req.time_step, req.defaults);
+  res.res = true;
   return true;
 }
 

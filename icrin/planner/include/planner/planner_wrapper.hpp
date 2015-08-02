@@ -45,6 +45,7 @@ class PlannerWrapper {
   // Variables
   std::string robot_name_;
   common_msgs::Vector2 zero_vect_;
+  common_msgs::Vector2 goal_vect_;
   common_msgs::Vector2 rvo_planner_vel;
   geometry_msgs::Twist cmd_vel;
   // ROS
