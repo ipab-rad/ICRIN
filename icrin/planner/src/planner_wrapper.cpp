@@ -10,6 +10,7 @@
 
 PlannerWrapper::PlannerWrapper(ros::NodeHandle* nh) {
   nh_ = nh;
+  robot_name_ = ros::this_node::getNamespace();
   this->init();
   this->rosSetup();
 }
@@ -23,12 +24,18 @@ PlannerWrapper::~PlannerWrapper() {
 
 void PlannerWrapper::init() {
   use_rvo_planner_ = false;
+  zero_vect_.x = 0.0f;
+  zero_vect_.y = 0.0f;
+  cmd_vel.linear.x = 0.0f;
+  cmd_vel.linear.y = 0.0f;
+  cmd_vel.linear.z = 0.0f;
+  cmd_vel.angular.x = 0.0f;
+  cmd_vel.angular.y = 0.0f;
+  cmd_vel.angular.z = 0.0f;
 }
 
 void PlannerWrapper::rosSetup() {
-  curr_pose_pub_ = nh_->advertise<geometry_msgs::Pose2D>("curr_pose", 1, true);
-  target_pose_pub_ = nh_->advertise<geometry_msgs::Pose2D>("target_pose", 1,
-                                                           true);
+  cmd_vel_pub_ = nh_->advertise<geometry_msgs::Twist>("cmd_vel", 1, true);
   srv_setup_new_planner_ =
     nh_->advertiseService("setup_new_planner",
                           &PlannerWrapper::setupNewPlanner, this);
@@ -38,18 +45,20 @@ void PlannerWrapper::rosSetup() {
   // srv_add_planner_agents_ =
   //   nh_->advertiseService("add_planner_agents",
   //                         &PlannerWrapper::checkReachedGoal, this);
-  // srv_set_planner_goal_ =
-  //   nh_->advertiseService("check_reached_goal",
-  //                         &PlannerWrapper::checkReachedGoal, this);
-  // srv_set_planner_pose_ =
-  //   nh_->advertiseService("check_reached_goal",
-  //                         &PlannerWrapper::checkReachedGoal, this);
+  curr_pose_sub_ = nh_->subscribe(robot_name_ + "/environment/curr_pose", 1000,
+                                  &PlannerWrapper::currPoseCB, this);
+  target_goal_sub_ = nh_->subscribe(robot_name_ + "/environment/target_goal",
+                                    1000,
+                                    &PlannerWrapper::targetGoalCB, this);
 }
 
 bool PlannerWrapper::setupNewPlanner(
   planner_msgs::SetupNewPlanner::Request& req,
   planner_msgs::SetupNewPlanner::Response& res) {
   rvo_planner_ = new RVOPlanner(nh_);
+  rvo_planner_->addPlannerAgent(zero_vect_);
+  // rvo_planner_->setCurrPose(zero_vect_);
+  rvo_planner_->setPlannerGoal(zero_vect_);
   use_rvo_planner_ = true;
   return true;
 }
@@ -64,23 +73,34 @@ bool PlannerWrapper::setupRVOPlanner(
 void PlannerWrapper::plannerStep() {
   if (use_rvo_planner_) {
     rvo_planner_->planStep();
-    curr_pose_pub_.publish(rvo_planner_->getCurrPose());
-    target_pose_pub_.publish(rvo_planner_->getTargetPose());
+
+    rvo_planner_vel = rvo_planner_->getPlannerVel();
+    cmd_vel.linear.x = rvo_planner_vel.x;
+    cmd_vel.linear.y = rvo_planner_vel.y;
+    cmd_vel_pub_.publish(cmd_vel);
+  }
+}
+
+void PlannerWrapper::currPoseCB(const geometry_msgs::Pose2D::ConstPtr& msg) {
+  if (use_rvo_planner_) {
+    common_msgs::Vector2 curr_pose;
+    curr_pose.x = msg->x;
+    curr_pose.y = msg->y;
+    rvo_planner_->setCurrPose(curr_pose);
+  }
+}
+
+void PlannerWrapper::targetGoalCB(const geometry_msgs::Pose2D::ConstPtr& msg) {
+  if (use_rvo_planner_) {
+    common_msgs::Vector2 goal_pose;
+    goal_pose.x = msg->x;
+    goal_pose.y = msg->y;
+    rvo_planner_->setPlannerGoal(goal_pose);
   }
 }
 
 // bool Planner::addPlannerAgents(planner_msgs::SetAgentsInitPos::Request& req,
 //                                planner_msgs::SetAgentsInitPos::Response& res) {
-//   ;
-// }
-
-// bool Planner::setPlannerDefaults(planner_msgs::SetPlannerDefaults::Request& req,
-//                                  planner_msgs::SetPlannerDefaults::Response& res) {
-//   ;
-// }
-
-// bool Planner::setPlannerGoal(planner_msgs::SetPlannerGoal::Request& req,
-//                              planner_msgs::SetPlannerGoal::Response& res) {
 //   ;
 // }
 

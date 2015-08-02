@@ -11,9 +11,11 @@
 
 #include <ros/ros.h>
 
-#include <planner/rvo_planner.hpp>
+#include <geometry_msgs/Pose2D.h>
+#include <geometry_msgs/Twist.h>
 #include <common_msgs/Vector2.h>
 
+#include <planner/rvo_planner.hpp>
 #include <planner_msgs/SetupNewPlanner.h>
 #include <planner_msgs/SetupRVOPlanner.h>
 
@@ -34,20 +36,28 @@ class PlannerWrapper {
 
   void plannerStep();
 
+  void currPoseCB(const geometry_msgs::Pose2D::ConstPtr& msg);
+  void targetGoalCB(const geometry_msgs::Pose2D::ConstPtr& msg);
+
  private:
   // Flags
   bool use_rvo_planner_;
+  // Variables
+  std::string robot_name_;
+  common_msgs::Vector2 zero_vect_;
+  common_msgs::Vector2 rvo_planner_vel;
+  geometry_msgs::Twist cmd_vel;
   // ROS
   ros::NodeHandle* nh_;
 
-  ros::Publisher curr_pose_pub_;
-  ros::Publisher target_pose_pub_;
+  ros::Publisher cmd_vel_pub_;
+  ros::Subscriber curr_pose_sub_;
+  ros::Subscriber target_goal_sub_;
   ros::ServiceServer srv_setup_new_planner_;
   ros::ServiceServer srv_setup_rvo_planner_;
 
   // Class pointers
   RVOPlanner* rvo_planner_;
-
 };
 
 #endif  /* PLANNER_WRAPPER_HPP */
