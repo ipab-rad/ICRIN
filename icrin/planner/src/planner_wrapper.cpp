@@ -3,7 +3,7 @@
  * @brief     Planner wrapper, connecting the differing planners through ROS
  * @author    Alejandro Bordallo <alex.bordallo@ed.ac.uk>
  * @date      2015-06-29
- * @copyright (MIT) 2015 Edinferno
+ * @copyright (MIT) 2015 RAD-UoE Informatics
  */
 
 #include "planner/planner_wrapper.hpp"

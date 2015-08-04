@@ -1,9 +1,9 @@
 /**
  * @file      environment.hpp
- * @brief     Add file description...
+ * @brief     Main environment for Youbot-ROS-icrin interface
  * @author    Alejandro Bordallo <alex.bordallo@ed.ac.uk>
  * @date      2015-08-01
- * @copyright (MIT) 2015 Edinferno
+ * @copyright (MIT) 2015 RAD-UoE Informatics
  */
 
 #ifndef ENVIRONMENT_HPP
