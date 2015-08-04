@@ -15,6 +15,10 @@ RVOWrapper::RVOWrapper(ros::NodeHandle* nh) {
 }
 
 RVOWrapper::~RVOWrapper() {
+  if (planner_init_) {
+    delete planner_;
+    planner_ = NULL;
+  }
   for (uint32_t i = 0; i < sim_vect_.size(); ++i) {
     delete (sim_vect_[i]);
   }
