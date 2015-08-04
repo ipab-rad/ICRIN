@@ -21,6 +21,7 @@
 #include <rvo_wrapper_msgs/CheckReachedGoal.h>
 #include <rvo_wrapper_msgs/CreateRVOSim.h>
 #include <rvo_wrapper_msgs/AgentDefaults.h>
+#include <rvo_wrapper_msgs/DeleteSimVector.h>
 #include <rvo_wrapper_msgs/DoStep.h>
 #include <rvo_wrapper_msgs/GetAgentPosition.h>
 #include <rvo_wrapper_msgs/GetNumAgents.h>
@@ -71,6 +72,7 @@ class RVOPlanner {
   ros::ServiceClient check_reached_goal_client_;
   ros::ServiceClient calc_pref_velocities_client_;
   ros::ServiceClient create_planner_client_;
+  ros::ServiceClient delete_planner_client_;
   ros::ServiceClient do_planner_step_client_;
   ros::ServiceClient get_agent_pos_client_;
   ros::ServiceClient get_agent_vel_client_;

@@ -34,6 +34,7 @@ void RVOPlanner::rosSetup() {
   ros::service::waitForService("/rvo_wrapper/check_reached_goal");
   ros::service::waitForService("/rvo_wrapper/calc_pref_velocities");
   ros::service::waitForService("/rvo_wrapper/create_rvosim");
+  ros::service::waitForService("/rvo_wrapper/delete_sim_vector");
   ros::service::waitForService("/rvo_wrapper/do_step");
   ros::service::waitForService("/rvo_wrapper/get_agent_position");
   ros::service::waitForService("/rvo_wrapper/get_agent_velocity");
@@ -54,6 +55,9 @@ void RVOPlanner::rosSetup() {
   create_planner_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::CreateRVOSim>(
       "/rvo_wrapper/create_rvosim", true);
+  delete_planner_client_ =
+    nh_->serviceClient<rvo_wrapper_msgs::DeleteSimVector>(
+      "/rvo_wrapper/delete_sim_vector", true);
   do_planner_step_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::DoStep>(
       "/rvo_wrapper/do_step", true);

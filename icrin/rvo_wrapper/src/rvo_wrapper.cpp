@@ -322,13 +322,22 @@ bool RVOWrapper::createRVOSim(
   return true;
 }
 
-bool RVOWrapper::deleteSimVector(std_srvs::Empty::Request& req,
-                                 std_srvs::Empty::Response& res) {
-  for (uint32_t i = 0; i < sim_vect_.size(); ++i) {
-    delete (sim_vect_[i]);
+bool RVOWrapper::deleteSimVector(
+  rvo_wrapper_msgs::DeleteSimVector::Request& req,
+  rvo_wrapper_msgs::DeleteSimVector::Response& res) {
+  res.res = true;
+  if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
+    ROS_INFO("Deleting Planner");
+    delete planner_;
+    planner_ = NULL;
+    planner_init_ = false;
+  } else if (req.sim_ids.size() > 0) { // If Sim Vector
+    for (uint32_t i = 0; i < sim_vect_.size(); ++i) {
+      delete (sim_vect_[i]);
+    }
+    sim_vect_.clear();
+    sim_vect_goals_.clear();
   }
-  sim_vect_.clear();
-  sim_vect_goals_.clear();
   return true;
 }
 
