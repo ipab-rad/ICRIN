@@ -28,6 +28,7 @@
 #include <rvo_wrapper_msgs/SetAgentGoals.h>
 #include <rvo_wrapper_msgs/SetAgentDefaults.h>
 #include <rvo_wrapper_msgs/SetAgentPosition.h>
+#include <rvo_wrapper_msgs/SetAgentVelocity.h>
 #include <rvo_wrapper_msgs/SetTimeStep.h>
 
 class RVOPlanner {
@@ -51,7 +52,7 @@ class RVOPlanner {
 
   void doSimStep();
 
-  common_msgs::Vector2 getAgentPos(size_t agent_no);
+  // common_msgs::Vector2 getAgentPos(size_t agent_no);
 
   void setPlannerSettings(float time_step,
                           rvo_wrapper_msgs::AgentDefaults defaults);
@@ -59,12 +60,17 @@ class RVOPlanner {
   void planStep();
 
   common_msgs::Vector2 getPlannerVel();
+  void setAgentPositions(std::vector<common_msgs::Vector2> agent_positions);
+  void setAgentVelocities(std::vector<common_msgs::Vector2> agent_velocities);
   void setCurrPose(common_msgs::Vector2 curr_pose);
 
  private:
   // Constants
   uint8_t PLANNER_ROBOT_;
   // Variables
+  common_msgs::Vector2 planner_goal_;
+  std::vector<common_msgs::Vector2> agent_positions_;
+  std::vector<common_msgs::Vector2> agent_velocities_;
   rvo_wrapper_msgs::CreateRVOSim planner_settings_;
   // ROS
   ros::NodeHandle* nh_;
@@ -74,12 +80,13 @@ class RVOPlanner {
   ros::ServiceClient create_planner_client_;
   ros::ServiceClient delete_planner_client_;
   ros::ServiceClient do_planner_step_client_;
-  ros::ServiceClient get_agent_pos_client_;
+  // ros::ServiceClient get_agent_pos_client_;
   ros::ServiceClient get_agent_vel_client_;
   ros::ServiceClient get_num_agents_;
   ros::ServiceClient set_agent_goals_client_;
   ros::ServiceClient set_agent_defaults_;
   ros::ServiceClient set_agent_position_;
+  ros::ServiceClient set_agent_velocity_;
   ros::ServiceClient set_time_step_;
 
   // Class pointers
