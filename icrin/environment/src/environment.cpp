@@ -11,8 +11,10 @@
 Environment::Environment(ros::NodeHandle* nh) {
   nh_ = nh;
   robot_name_ = ros::this_node::getNamespace();
+  robot_name_.erase (0, 1); // Remove 1 forward slash from robot_name
   this->init();
   this->rosSetup();
+  this->loadParams();
 }
 
 Environment::~Environment() {
@@ -21,7 +23,6 @@ Environment::~Environment() {
 
 void Environment::init() {
   planning_ = true;
-  use_rvo_planner_ = true;
   use_odometry_ = true;
   // ROS
   robot_curr_pose_.x = 0.0f;
@@ -46,11 +47,22 @@ void Environment::rosSetup() {
   odom_sub_ = nh_->subscribe(robot_name_ + "/odom", 1000,
                              &Environment::odomCB, this);
   // Tracker
-  tracker_pose_sub_ = nh_->subscribe("/tracker/data", 1000,
+  tracker_data_sub_ = nh_->subscribe("/tracker/data", 1000,
                                      &Environment::trackerDataCB, this);
+  // Robot Comms
+  comms_data_sub_ = nh_->subscribe("/robot_comms/data", 1000,
+                                   &Environment::commsDataCB, this);
   // Planner
   planner_cmd_vel_sub_ = nh_->subscribe(robot_name_ + "/planner/cmd_vel", 1000,
                                         &Environment::plannerCmdVelCB, this);
+}
+
+void Environment::loadParams() {
+  bool robot_active;
+  ros::param::param(robot_name_ + "active", robot_active, false);
+  if (!robot_active)
+  {ROS_WARN("WARNING: Robot %s not active but environment created!", robot_name_.c_str());}
+  ros::param::param(robot_name_ + "use_rvo_planner", use_rvo_planner_, true);
 }
 
 void Environment::pubRobotPose() {
@@ -71,7 +83,18 @@ void Environment::odomCB(const nav_msgs::Odometry::ConstPtr& msg) {
   robot_odom_ = *msg;
 }
 
-void Environment::trackerDataCB(const geometry_msgs::Pose2D::ConstPtr& msg) {
+void Environment::trackerDataCB(const tracker_msgs::TrackerData::ConstPtr&
+                                msg) {
+  // Store ids/positions/velocities of agents
+  agent_trackerID_ = msg->identity;
+  agent_positions_ = msg->agent_position;
+  agent_pos_std_dev_ = msg->standard_deviation;
+  agent_velocities_ = msg->agent_velocity;
+  agent_avg_velocities_ = msg->agent_avg_velocity;
+}
+
+void Environment::commsDataCB(const robot_comms_msgs::CommsData::ConstPtr&
+                              msg) {
   ;
 }
 
