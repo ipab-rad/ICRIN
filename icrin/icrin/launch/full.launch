@@ -1,12 +1,15 @@
 <?xml version="1.0"?>
 
 <launch>
-        <rosparam file="$(find icrin)/cfg/robot.yaml" command="load" />
         <node name="rvo_wrapper" pkg="rvo_wrapper" type="rvo_wrapper" output="screen" clear_params="true">
         </node>
         <node ns="megatron" name="planner" pkg="planner" type="planner" output="screen" clear_params="true">
         </node>
         <!-- Start the environment node -->
         <node ns="megatron" name="environment" pkg="environment" type="environment" output="screen" clear_params="true">
+        <rosparam file="$(find icrin)/cfg/robot.yaml" command="load" />
+        <rosparam file="$(find icrin)/cfg/experiment.yaml" command="load" />
+        </node>
+        <node ns="megatron" name="robot_comms" pkg="robot_comms" type="robot_comms" output="screen" clear_params="true">
         </node>
 </launch>

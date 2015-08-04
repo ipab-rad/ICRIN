@@ -3,7 +3,7 @@
  * @brief     RVO Planner class
  * @author    Alejandro Bordallo <alex.bordallo@ed.ac.uk>
  * @date      2015-06-30
- * @copyright (MIT) 2015 Edinferno
+ * @copyright (MIT) 2015 RAD-UoE Informatics
  */
 
 #include <planner/rvo_planner.hpp>
@@ -34,6 +34,7 @@ void RVOPlanner::rosSetup() {
   ros::service::waitForService("/rvo_wrapper/check_reached_goal");
   ros::service::waitForService("/rvo_wrapper/calc_pref_velocities");
   ros::service::waitForService("/rvo_wrapper/create_rvosim");
+  ros::service::waitForService("/rvo_wrapper/delete_sim_vector");
   ros::service::waitForService("/rvo_wrapper/do_step");
   ros::service::waitForService("/rvo_wrapper/get_agent_position");
   ros::service::waitForService("/rvo_wrapper/get_agent_velocity");
@@ -54,12 +55,15 @@ void RVOPlanner::rosSetup() {
   create_planner_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::CreateRVOSim>(
       "/rvo_wrapper/create_rvosim", true);
+  delete_planner_client_ =
+    nh_->serviceClient<rvo_wrapper_msgs::DeleteSimVector>(
+      "/rvo_wrapper/delete_sim_vector", true);
   do_planner_step_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::DoStep>(
       "/rvo_wrapper/do_step", true);
-  get_agent_pos_client_ =
-    nh_->serviceClient<rvo_wrapper_msgs::GetAgentPosition>(
-      "/rvo_wrapper/get_agent_position", true);
+  // get_agent_pos_client_ =
+  //   nh_->serviceClient<rvo_wrapper_msgs::GetAgentPosition>(
+  //     "/rvo_wrapper/get_agent_position", true);
   get_agent_vel_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::GetAgentVelocity>(
       "/rvo_wrapper/get_agent_velocity", true);
@@ -75,6 +79,9 @@ void RVOPlanner::rosSetup() {
   set_agent_position_ =
     nh_->serviceClient<rvo_wrapper_msgs::SetAgentPosition>(
       "/rvo_wrapper/set_agent_position", true);
+  set_agent_velocity_ =
+    nh_->serviceClient<rvo_wrapper_msgs::SetAgentVelocity>(
+      "/rvo_wrapper/set_agent_velocity", true);
   set_time_step_ =
     nh_->serviceClient<rvo_wrapper_msgs::SetTimeStep>(
       "/rvo_wrapper/set_time_step", true);
@@ -110,12 +117,12 @@ void RVOPlanner::doSimStep() {
   do_planner_step_client_.call(msg);
 }
 
-common_msgs::Vector2 RVOPlanner::getAgentPos(size_t agent_no) {
-  rvo_wrapper_msgs::GetAgentPosition msg;
-  msg.request.agent_id = agent_no;
-  get_agent_pos_client_.call(msg);
-  return msg.response.position;
-}
+// common_msgs::Vector2 RVOPlanner::getAgentPos(size_t agent_no) {
+//   rvo_wrapper_msgs::GetAgentPosition msg;
+//   msg.request.agent_id = agent_no;
+//   get_agent_pos_client_.call(msg);
+//   return msg.response.position;
+// }
 
 void RVOPlanner::setPlannerGoal(common_msgs::Vector2 goal) {
   rvo_wrapper_msgs::GetNumAgents num_agents_msg;
@@ -171,6 +178,28 @@ common_msgs::Vector2 RVOPlanner::getPlannerVel() {
     msg.response.velocity.y = 0.0f;
   }
   return msg.response.velocity;
+}
+
+void RVOPlanner::setAgentPositions(std::vector<common_msgs::Vector2>
+                                   agent_positions) {
+  rvo_wrapper_msgs::SetAgentPosition msg;
+  for (uint8_t i = 0; i < agent_positions.size(); ++i) {
+    msg.request.agent_id = i;
+    msg.request.position.x = agent_positions[i].x;
+    msg.request.position.y = agent_positions[i].y;
+    set_agent_position_.call(msg);
+  }
+}
+
+void RVOPlanner::setAgentVelocities(std::vector<common_msgs::Vector2>
+                                    agent_velocities) {
+  rvo_wrapper_msgs::SetAgentVelocity msg;
+  for (uint8_t i = 0; i < agent_velocities.size(); ++i) {
+    msg.request.agent_id = i;
+    msg.request.velocity.x = agent_velocities[i].x;
+    msg.request.velocity.y = agent_velocities[i].y;
+    set_agent_position_.call(msg);
+  }
 }
 
 void RVOPlanner::setCurrPose(common_msgs::Vector2 curr_pose) {

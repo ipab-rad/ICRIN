@@ -4,7 +4,9 @@ project(robot_comms)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED)
+find_package(catkin REQUIRED
+  roscpp
+  geometry_msgs)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -76,7 +78,7 @@ find_package(catkin REQUIRED)
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
+ INCLUDE_DIRS include
 #  LIBRARIES robot_comms
 #  CATKIN_DEPENDS other_catkin_pkg
 #  DEPENDS system_lib
@@ -88,7 +90,7 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-# include_directories(include)
+include_directories(include)
 
 ## Declare a cpp library
 # add_library(robot_comms
@@ -96,16 +98,16 @@ catkin_package(
 # )
 
 ## Declare a cpp executable
-# add_executable(robot_comms_node src/robot_comms_node.cpp)
+add_executable(robot_comms src/robot_comms.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-# add_dependencies(robot_comms_node robot_comms_generate_messages_cpp)
+# add_dependencies(robot_comms robot_comms_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(robot_comms_node
-#   ${catkin_LIBRARIES}
-# )
+target_link_libraries(robot_comms
+  ${catkin_LIBRARIES}
+)
 
 #############
 ## Install ##
@@ -122,7 +124,7 @@ catkin_package(
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS robot_comms robot_comms_node
+# install(TARGETS robot_comms robot_comms
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
