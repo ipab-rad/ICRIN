@@ -5,7 +5,9 @@ project(environment)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED
-  roscpp)
+  roscpp
+  planner_msgs
+  tracker_msgs)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -104,7 +106,9 @@ add_executable(environment src/environment.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-# add_dependencies(environment environment_generate_messages_cpp)
+add_dependencies(environment
+  planner_msgs_gencpp
+  tracker_msgs_gencpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(environment

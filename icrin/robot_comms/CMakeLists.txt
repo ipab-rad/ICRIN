@@ -6,7 +6,8 @@ project(robot_comms)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED
   roscpp
-  geometry_msgs)
+  geometry_msgs
+  robot_comms_msgs)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -87,6 +88,7 @@ catkin_package(
 ###########
 ## Build ##
 ###########
+set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall -O2")
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
@@ -102,7 +104,8 @@ add_executable(robot_comms src/robot_comms.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-# add_dependencies(robot_comms robot_comms_generate_messages_cpp)
+add_dependencies(robot_comms
+ 	robot_comms_msgs_gencpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(robot_comms

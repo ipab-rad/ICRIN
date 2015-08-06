@@ -19,8 +19,8 @@ int main(int argc, char** argv) {
 
   while (ros::ok()) {
     // UPDATE PLANNERS
-    planner_wrapper.plannerStep();
     ros::spinOnce();
+    planner_wrapper.plannerStep();
     r.sleep();
   }
 
