@@ -5,6 +5,8 @@
         </node>
         <node name="tracker" pkg="tracker" type="tracker" output="screen" clear_params="true">
         </node>
+        <node ns="megatron" name="amcl_wrapper" pkg="amcl_wrapper" type="amcl_wrapper" output="screen" clear_params="true">
+        </node>
         <node ns="megatron" name="planner" pkg="planner" type="planner" output="screen" clear_params="true">
         </node>
         <!-- Start the environment node -->

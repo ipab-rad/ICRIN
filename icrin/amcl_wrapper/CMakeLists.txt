@@ -4,7 +4,10 @@ project(amcl_wrapper)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED)
+find_package(catkin REQUIRED
+  roscpp
+  geometry_msgs
+  nav_msgs)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -76,7 +79,7 @@ find_package(catkin REQUIRED)
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
+ INCLUDE_DIRS include
 #  LIBRARIES amcl_wrapper
 #  CATKIN_DEPENDS other_catkin_pkg
 #  DEPENDS system_lib
@@ -85,10 +88,11 @@ catkin_package(
 ###########
 ## Build ##
 ###########
+set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall -O2")
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-# include_directories(include)
+include_directories(include)
 
 ## Declare a cpp library
 # add_library(amcl_wrapper
@@ -96,16 +100,16 @@ catkin_package(
 # )
 
 ## Declare a cpp executable
-# add_executable(amcl_wrapper_node src/amcl_wrapper_node.cpp)
+add_executable(amcl_wrapper src/amcl_wrapper.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(amcl_wrapper_node amcl_wrapper_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(amcl_wrapper_node
-#   ${catkin_LIBRARIES}
-# )
+target_link_libraries(amcl_wrapper
+  ${catkin_LIBRARIES}
+)
 
 #############
 ## Install ##

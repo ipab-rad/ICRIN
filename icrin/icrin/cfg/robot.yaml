@@ -1,3 +1,4 @@
 # Enable robot, and if they use bumpers
 active: true
 bumper: false
+amcl: true
