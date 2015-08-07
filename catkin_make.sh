@@ -6,7 +6,7 @@ if [ "$#" -eq 1 ]; then
     packages=("$1")
   fi
 else
-  packages=($(ls ./icrin/) $(ls ./icrin/icrin_msgs/))
+  packages=($(ls ./icrin/) $(ls ./icrin/icrin_msgs/) $(ls ./))
 fi
 
 white_list=$(printf "%s;" "${packages[@]}")

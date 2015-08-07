@@ -111,6 +111,7 @@ int main(int argc, char** argv) {
   ros::Rate r(10);
 
   while (ros::ok()) {
+    ros::spinOnce();
     if (environment.planning_) {
       environment.pubRobotPose();
       environment.pubRobotGoal();
@@ -118,7 +119,6 @@ int main(int argc, char** argv) {
         environment.pubRobotVelocity();
       }
     }
-    ros::spinOnce();
     r.sleep();
   }
 
