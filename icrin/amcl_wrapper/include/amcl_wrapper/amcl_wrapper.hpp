@@ -30,7 +30,7 @@ class AMCLWrapper {
   void OdomCB(const nav_msgs::Odometry::ConstPtr& msg);
   void SetPoseCB(const geometry_msgs::Pose2D::ConstPtr& msg);
   void pubRobotPose();
-  // void pubRobotVel();
+  void pubRobotVel();
   void calcAMCL();
   void calcOdomDiff();
   double calcYaw(nav_msgs::Odometry odom);
@@ -48,12 +48,14 @@ class AMCLWrapper {
   ros::NodeHandle* nh_;
   geometry_msgs::PoseWithCovarianceStamped amcl_pose_;
   geometry_msgs::Pose2D robot_pose_;
+  geometry_msgs::Twist robot_vel_;
   nav_msgs::Odometry prev_odom_;
   nav_msgs::Odometry curr_odom_;
   geometry_msgs::Pose2D odom_diff_;
 
   ros::Publisher robot_pose_pub_;
-  // ros::Publisher robot_vel_pub_;
+  ros::Publisher robot_vel_pub_;
+  ros::Publisher initial_pose_pub_;
   ros::Subscriber amcl_pose_sub_;
   ros::Subscriber odom_sub_;
   ros::Subscriber set_pose_;

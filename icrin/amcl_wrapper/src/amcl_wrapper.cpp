@@ -29,7 +29,9 @@ void AMCLWrapper::init() {
 
 void AMCLWrapper::rosSetup() {
   robot_pose_pub_ = nh_->advertise<geometry_msgs::Pose2D>("curr_pose", 1, true);
-  // robot_vel_pub_ = nh_->advertise<geometry_msgs::Pose2D>("curr_vel", 1, true);
+  robot_vel_pub_ = nh_->advertise<geometry_msgs::Twist>("curr_vel", 1, true);
+  initial_pose_pub_ = nh_->advertise<geometry_msgs::PoseWithCovarianceStamped>
+                      (robot_name_ + "/initialpose", 1, true);
   amcl_pose_sub_ = nh_->subscribe(robot_name_ + "/amcl_pose",
                                   1, &AMCLWrapper::AMCLPoseCB, this);
   odom_sub_ = nh_->subscribe(robot_name_ + "/odom",
@@ -63,12 +65,19 @@ void AMCLWrapper::OdomCB(const nav_msgs::Odometry::ConstPtr& msg) {
     odom_init_ = true;
   } else {
     curr_odom_ = *msg;
+    robot_vel_ = msg->twist.twist;
     odom_received_ = true;
   }
 }
 
 void AMCLWrapper::SetPoseCB(const geometry_msgs::Pose2D::ConstPtr& msg) {
   robot_pose_ = *msg;
+  geometry_msgs::PoseWithCovarianceStamped init_pose;
+  init_pose.pose.pose.position.x = robot_pose_.x;
+  init_pose.pose.pose.position.y = robot_pose_.y;
+  tf::Quaternion q = tf::createQuaternionFromRPY(0.0, 0.0, robot_pose_.theta);
+  tf::quaternionTFToMsg(q, init_pose.pose.pose.orientation);
+  initial_pose_pub_.publish(init_pose);
 }
 
 void AMCLWrapper::pubRobotPose() {
@@ -81,13 +90,13 @@ void AMCLWrapper::pubRobotPose() {
   }
 }
 
-// void AMCLWrapper::pubRobotVel() {
-//   if (!odom_received_) {
-//     ROS_WARN("WARNING: No odometry received from robot");
-//   } else {
-
-//   }
-// }
+void AMCLWrapper::pubRobotVel() {
+  if (!odom_received_) {
+    ROS_WARN("WARNING: No odometry received from robot");
+  } else {
+    robot_vel_pub_.publish(robot_vel_);
+  }
+}
 
 void AMCLWrapper::calcAMCL() {
   tf::Quaternion q;
@@ -132,6 +141,7 @@ int main(int argc, char** argv) {
 
   while (ros::ok()) {
     ros::spinOnce();
+    amcl_wrapper.pubRobotVel();
     amcl_wrapper.pubRobotPose();
     r.sleep();
   }
