@@ -10,7 +10,11 @@
 #define ROBOT_COMMS_HPP
 
 #include <ros/ros.h>
+#include <ros/message_event.h>
+#include <sstream>
+// #include <boost/bind.hpp>
 
+#include <std_msgs/String.h>
 #include <geometry_msgs/Pose2D.h>
 #include <geometry_msgs/Twist.h>
 
@@ -25,8 +29,11 @@ class RobotComms {
   void rosSetup();
   void loadParams();
 
-  void RobotPoseCB(const geometry_msgs::Pose2D::ConstPtr& msg);
-  void RobotVelCB(const geometry_msgs::Twist::ConstPtr& msg);
+  void pubCommsData();
+  void robotPoseCB(const geometry_msgs::Pose2D::ConstPtr& msg,
+                   const std::string& robot);
+  void robotVelCB(const geometry_msgs::Twist::ConstPtr& msg,
+                  const std::string& robot);
 
  private:
   // Variables
@@ -39,6 +46,8 @@ class RobotComms {
   ros::Publisher comms_data_pub_;
   std::vector<ros::Subscriber> robot_pose_sub_;
   std::vector<ros::Subscriber> robot_vel_sub_;
+  std::vector<geometry_msgs::Pose2D> robot_poses_;
+  std::vector<geometry_msgs::Twist> robot_vels_;
 
   robot_comms_msgs::CommsData comms_data_;
 };
