@@ -34,6 +34,7 @@ class Tracker {
  private:
   // Flags
   bool ptracker_rec_;
+  int8_t invert_x_;
 
   // Variables
   PTrackingBridge::TargetEstimations ptracker_msg_;

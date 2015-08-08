@@ -26,6 +26,7 @@ Tracker::~Tracker() {
 
 void Tracker::init() {
   ptracker_rec_ = false;
+  invert_x_ = -1; // Set to -1 to invert x axis relative to robot frame
 }
 
 void Tracker::rosSetup() {
@@ -53,21 +54,21 @@ void Tracker::pubTrackerData() {
     uint32_t nagents = ptracker_msg_.identities.size();
     for (uint32_t i = 0; i < nagents; ++i) {
       geometry_msgs::Pose2D pos;
-      pos.x = ptracker_msg_.positions[i].x;
+      pos.x = ptracker_msg_.positions[i].x * invert_x_;
       pos.y = ptracker_msg_.positions[i].y;
       pos.theta = atan2(ptracker_msg_.velocities[i].y,
-                        ptracker_msg_.velocities[i].x) * (180 / PI);
+                        ptracker_msg_.velocities[i].x * invert_x_) * (180 / PI);
       tracker_data.agent_position.push_back(pos);
       geometry_msgs::Pose2D pos_dev;
       pos_dev.x = ptracker_msg_.standardDeviations[i].x;
       pos_dev.y = ptracker_msg_.standardDeviations[i].y;
       tracker_data.standard_deviation.push_back(pos_dev);
       geometry_msgs::Twist vel;
-      vel.linear.x = ptracker_msg_.velocities[i].x;
+      vel.linear.x = ptracker_msg_.velocities[i].x * invert_x_;
       vel.linear.y = ptracker_msg_.velocities[i].y;
       tracker_data.agent_velocity.push_back(vel);
       geometry_msgs::Twist vel_avg;
-      vel_avg.linear.x = ptracker_msg_.averagedVelocities[i].x;
+      vel_avg.linear.x = ptracker_msg_.averagedVelocities[i].x * invert_x_;
       vel_avg.linear.y = ptracker_msg_.averagedVelocities[i].y;
       tracker_data.agent_avg_velocity.push_back(vel_avg);
     }
