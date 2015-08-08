@@ -31,13 +31,17 @@ void RobotComms::init() {
 
 void RobotComms::rosSetup() {
   // After checking which robots are active, sub to their pose and cmd_vel
+  comms_data_pub_ = nh_->advertise<robot_comms_msgs::CommsData>("data", 1,
+                                                                true);
   for (uint8_t i = 0; i < active_robots_.size(); ++i) {
-    robot_pose_sub_.push_back(nh_->subscribe(active_robots_[i] +
-                                             "/environment/curr_pose",
-                                             1, &RobotComms::RobotPoseCB, this));
-    robot_vel_sub_.push_back(nh_->subscribe(active_robots_[i] +
-                                            "/cmd_vel",
-                                            1, &RobotComms::RobotVelCB, this));
+    robot_pose_sub_.push_back(nh_->subscribe<geometry_msgs::Pose2D>
+                              (active_robots_[i] + "/environment/curr_pose", 1,
+                               boost::bind(&RobotComms::robotPoseCB,
+                                           this, _1, active_robots_[i])));
+    robot_vel_sub_.push_back(nh_->subscribe<geometry_msgs::Twist>
+                             (active_robots_[i] + "/cmd_vel", 1,
+                              boost::bind(&RobotComms::robotVelCB,
+                                          this, _1, active_robots_[i])));
   }
 }
 
@@ -48,26 +52,44 @@ void RobotComms::loadParams() {
   {ROS_WARN("WARNING: Robot %s not active but robot_comms created!", robot_name_.c_str());}
   for (uint8_t i = 0; i < robot_names_.size(); ++i) {
     bool active;
-    ROS_INFO("Checking if %s is active", robot_names_[i].c_str());
     ros::param::param(robot_names_[i] + "/environment/active", active, false);
-    if (active && (robot_names_[i].compare(robot_name_) != 0)) {
+    if (active
+        && (robot_names_[i].compare(robot_name_) != 0)
+       ) {
+      ROS_INFO("%s active!", robot_names_[i].c_str());
       active_robots_.push_back(robot_names_[i]);
-    } else if (!active) {
-      ROS_INFO("%s not active", robot_names_[i].c_str());
-    } else {
-      ROS_INFO("%s is me!", robot_names_[i].c_str());
     }
   }
   ROS_INFO("%s is listening to %lu other robots",
            robot_name_.c_str(), active_robots_.size());
+  robot_poses_.resize(active_robots_.size());
+  robot_vels_.resize(active_robots_.size());
 }
 
-void RobotComms::RobotPoseCB(const geometry_msgs::Pose2D::ConstPtr& msg) {
-  ROS_INFO("RobotPoseCB");
+void RobotComms::pubCommsData() {
+  comms_data_.robot_poses = robot_poses_;
+  comms_data_.robot_vels = robot_vels_;
+  comms_data_pub_.publish(comms_data_);
 }
 
-void RobotComms::RobotVelCB(const geometry_msgs::Twist::ConstPtr& msg) {
-  ROS_INFO("RobotVelCB");
+void RobotComms::robotPoseCB(const geometry_msgs::Pose2D::ConstPtr& msg,
+                             const std::string& robot) {
+  for (uint32_t i = 0; i < active_robots_.size(); ++i) {
+    if (robot.compare(active_robots_[i]) == 0) {
+      robot_poses_[i] = *msg;
+      break;
+    }
+  }
+}
+
+void RobotComms::robotVelCB(const geometry_msgs::Twist::ConstPtr& msg,
+                            const std::string& robot) {
+  for (uint32_t i = 0; i < active_robots_.size(); ++i) {
+    if (robot.compare(active_robots_[i]) == 0) {
+      robot_vels_[i] = *msg;
+      break;
+    }
+  }
 }
 
 int main(int argc, char** argv) {
@@ -79,6 +101,7 @@ int main(int argc, char** argv) {
 
   while (ros::ok()) {
     ros::spinOnce();
+    robot_comms.pubCommsData();
     r.sleep();
   }
 

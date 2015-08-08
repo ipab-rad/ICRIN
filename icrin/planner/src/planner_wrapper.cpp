@@ -11,6 +11,7 @@
 PlannerWrapper::PlannerWrapper(ros::NodeHandle* nh) {
   nh_ = nh;
   robot_name_ = ros::this_node::getNamespace();
+  robot_name_.erase (0, 1); // Remove 1 forward slash from robot_name
   this->init();
   this->rosSetup();
 }

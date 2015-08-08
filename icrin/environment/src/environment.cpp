@@ -50,7 +50,7 @@ void Environment::rosSetup() {
   tracker_data_sub_ = nh_->subscribe("/tracker/data", 1000,
                                      &Environment::trackerDataCB, this);
   // Robot Comms
-  comms_data_sub_ = nh_->subscribe("/robot_comms/data", 1000,
+  comms_data_sub_ = nh_->subscribe(robot_name_ + "/robot_comms/data", 1000,
                                    &Environment::commsDataCB, this);
   // Planner
   planner_cmd_vel_sub_ = nh_->subscribe(robot_name_ + "/planner/cmd_vel", 1000,

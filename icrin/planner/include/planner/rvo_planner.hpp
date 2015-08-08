@@ -68,6 +68,7 @@ class RVOPlanner {
   // Constants
   uint8_t PLANNER_ROBOT_;
   // Variables
+  std::string robot_name_;
   common_msgs::Vector2 planner_goal_;
   std::vector<common_msgs::Vector2> agent_positions_;
   std::vector<common_msgs::Vector2> agent_velocities_;
