@@ -9,10 +9,10 @@
         </node>
         <node name="amcl_wrapper" pkg="amcl_wrapper" type="amcl_wrapper" output="screen" clear_params="true">
         </node>
-        <rosparam file="$(find icrin)/cfg/robot.yaml" command="load" />
         <node name="planner" pkg="planner" type="planner" output="screen" clear_params="true">
         </node>
         <node name="environment" pkg="environment" type="environment" output="screen" clear_params="true">
+        <rosparam file="$(find icrin)/cfg/$(arg robot).yaml" command="load" />
         <rosparam file="$(find icrin)/cfg/experiment.yaml" command="load" />
         </node>
         <node name="robot_comms" pkg="robot_comms" type="robot_comms" output="screen" clear_params="true">
