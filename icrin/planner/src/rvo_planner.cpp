@@ -10,6 +10,8 @@
 
 RVOPlanner::RVOPlanner(ros::NodeHandle* nh) {
   nh_ = nh;
+  robot_name_ = ros::this_node::getNamespace();
+  robot_name_.erase (0, 1); // Remove 1 forward slash from robot_name
   this->init();
   this->rosSetup();
   this->createPlanner();
@@ -30,61 +32,61 @@ void RVOPlanner::init() {
 }
 
 void RVOPlanner::rosSetup() {
-  ros::service::waitForService("/rvo_wrapper/add_agent");
-  ros::service::waitForService("/rvo_wrapper/check_reached_goal");
-  ros::service::waitForService("/rvo_wrapper/calc_pref_velocities");
-  ros::service::waitForService("/rvo_wrapper/create_rvosim");
-  ros::service::waitForService("/rvo_wrapper/delete_sim_vector");
-  ros::service::waitForService("/rvo_wrapper/do_step");
-  ros::service::waitForService("/rvo_wrapper/get_agent_position");
-  ros::service::waitForService("/rvo_wrapper/get_agent_velocity");
-  ros::service::waitForService("/rvo_wrapper/get_num_agents");
-  ros::service::waitForService("/rvo_wrapper/set_agent_goals");
-  ros::service::waitForService("/rvo_wrapper/set_agent_defaults");
-  ros::service::waitForService("/rvo_wrapper/set_agent_position");
-  ros::service::waitForService("/rvo_wrapper/set_time_step");
+  ros::service::waitForService(robot_name_ + "/rvo_wrapper/add_agent");
+  ros::service::waitForService(robot_name_ + "/rvo_wrapper/check_reached_goal");
+  ros::service::waitForService(robot_name_ + "/rvo_wrapper/calc_pref_velocities");
+  ros::service::waitForService(robot_name_ + "/rvo_wrapper/create_rvosim");
+  ros::service::waitForService(robot_name_ + "/rvo_wrapper/delete_sim_vector");
+  ros::service::waitForService(robot_name_ + "/rvo_wrapper/do_step");
+  ros::service::waitForService(robot_name_ + "/rvo_wrapper/get_agent_position");
+  ros::service::waitForService(robot_name_ + "/rvo_wrapper/get_agent_velocity");
+  ros::service::waitForService(robot_name_ + "/rvo_wrapper/get_num_agents");
+  ros::service::waitForService(robot_name_ + "/rvo_wrapper/set_agent_goals");
+  ros::service::waitForService(robot_name_ + "/rvo_wrapper/set_agent_defaults");
+  ros::service::waitForService(robot_name_ + "/rvo_wrapper/set_agent_position");
+  ros::service::waitForService(robot_name_ + "/rvo_wrapper/set_time_step");
   add_planner_agent_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::AddAgent>(
-      "/rvo_wrapper/add_agent", true);
+      robot_name_ + "/rvo_wrapper/add_agent", true);
   check_reached_goal_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::CheckReachedGoal>(
-      "/rvo_wrapper/check_reached_goal", true);
+      robot_name_ + "/rvo_wrapper/check_reached_goal", true);
   calc_pref_velocities_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::CalcPrefVelocities>(
-      "/rvo_wrapper/calc_pref_velocities", true);
+      robot_name_ + "/rvo_wrapper/calc_pref_velocities", true);
   create_planner_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::CreateRVOSim>(
-      "/rvo_wrapper/create_rvosim", true);
+      robot_name_ + "/rvo_wrapper/create_rvosim", true);
   delete_planner_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::DeleteSimVector>(
-      "/rvo_wrapper/delete_sim_vector", true);
+      robot_name_ + "/rvo_wrapper/delete_sim_vector", true);
   do_planner_step_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::DoStep>(
-      "/rvo_wrapper/do_step", true);
+      robot_name_ + "/rvo_wrapper/do_step", true);
   // get_agent_pos_client_ =
   //   nh_->serviceClient<rvo_wrapper_msgs::GetAgentPosition>(
-  //     "/rvo_wrapper/get_agent_position", true);
+  //     robot_name_ + "/rvo_wrapper/get_agent_position", true);
   get_agent_vel_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::GetAgentVelocity>(
-      "/rvo_wrapper/get_agent_velocity", true);
+      robot_name_ + "/rvo_wrapper/get_agent_velocity", true);
   get_num_agents_ =
     nh_->serviceClient<rvo_wrapper_msgs::GetNumAgents>(
-      "/rvo_wrapper/get_num_agents", true);
+      robot_name_ + "/rvo_wrapper/get_num_agents", true);
   set_agent_goals_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::SetAgentGoals>(
-      "/rvo_wrapper/set_agent_goals", true);
+      robot_name_ + "/rvo_wrapper/set_agent_goals", true);
   set_agent_defaults_ =
     nh_->serviceClient<rvo_wrapper_msgs::SetAgentDefaults>(
-      "/rvo_wrapper/set_agent_defaults", true);
+      robot_name_ + "/rvo_wrapper/set_agent_defaults", true);
   set_agent_position_ =
     nh_->serviceClient<rvo_wrapper_msgs::SetAgentPosition>(
-      "/rvo_wrapper/set_agent_position", true);
+      robot_name_ + "/rvo_wrapper/set_agent_position", true);
   set_agent_velocity_ =
     nh_->serviceClient<rvo_wrapper_msgs::SetAgentVelocity>(
-      "/rvo_wrapper/set_agent_velocity", true);
+      robot_name_ + "/rvo_wrapper/set_agent_velocity", true);
   set_time_step_ =
     nh_->serviceClient<rvo_wrapper_msgs::SetTimeStep>(
-      "/rvo_wrapper/set_time_step", true);
+      robot_name_ + "/rvo_wrapper/set_time_step", true);
 }
 
 size_t RVOPlanner::addPlannerAgent(common_msgs::Vector2 agent_pos) {
