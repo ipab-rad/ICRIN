@@ -38,7 +38,6 @@ class Tracker {
 
   // Variables
   PTrackingBridge::TargetEstimations ptracker_msg_;
-  // tracker_msgs::TrackerData tracker_data_;
 
   // ROS
   ros::NodeHandle* nh_;

@@ -18,7 +18,6 @@ int main(int argc, char** argv) {
   ros::Rate r(10);
 
   while (ros::ok()) {
-    // UPDATE PLANNERS
     ros::spinOnce();
     planner_wrapper.plannerStep();
     r.sleep();

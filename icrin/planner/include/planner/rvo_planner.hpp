@@ -52,8 +52,6 @@ class RVOPlanner {
 
   void doSimStep();
 
-  // common_msgs::Vector2 getAgentPos(size_t agent_no);
-
   void setPlannerSettings(float time_step,
                           rvo_wrapper_msgs::AgentDefaults defaults);
 
@@ -89,9 +87,6 @@ class RVOPlanner {
   ros::ServiceClient set_agent_position_;
   ros::ServiceClient set_agent_velocity_;
   ros::ServiceClient set_time_step_;
-
-  // Class pointers
-
 };
 
 #endif /* RVO_PLANNER_HPP */

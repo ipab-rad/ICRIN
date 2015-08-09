@@ -36,13 +36,10 @@ void Tracker::rosSetup() {
 }
 
 void Tracker::loadParams() {
-  // bool robot_active;
-  // ros::param::param(robot_name_ + "/environment/active", robot_active, false);
 }
 
 void Tracker::receivePTrackerData(const PTrackingBridge::
                                   TargetEstimations::ConstPtr& msg) {
-  // Store last message sent by the tracker
   ptracker_msg_ = *msg;
   ptracker_rec_ = true;
 }
@@ -72,7 +69,6 @@ void Tracker::pubTrackerData() {
       vel_avg.linear.y = ptracker_msg_.averagedVelocities[i].y;
       tracker_data.agent_avg_velocity.push_back(vel_avg);
     }
-
     tracker_pub_.publish(tracker_data);
     ptracker_rec_ = false;
   } else {
