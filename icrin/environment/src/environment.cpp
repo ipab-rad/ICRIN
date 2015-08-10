@@ -48,7 +48,11 @@ void Environment::rosSetup() {
   ros::service::waitForService(robot_name_ + "/planner/setup_rvo_planner");
   setup_rvo_planner_ = nh_->serviceClient<planner_msgs::SetupRVOPlanner>(
                          robot_name_ + "/planner/setup_rvo_planner", true);
+  planning_sub_ = nh_->subscribe(robot_name_ + "/environment/planning", 1000,
+                                 &Environment::planningCB, this);
   // Youbot
+  bumper_kilt_sub_ = nh_->subscribe(robot_name_ + "/bumper_kilt", 1000,
+                                    &Environment::bumperKiltCB, this);
   // Tracker
   tracker_data_sub_ = nh_->subscribe("/tracker/data", 1000,
                                      &Environment::trackerDataCB, this);
@@ -61,8 +65,6 @@ void Environment::rosSetup() {
   // Planner
   planner_cmd_vel_sub_ = nh_->subscribe(robot_name_ + "/planner/cmd_vel", 1000,
                                         &Environment::plannerCmdVelCB, this);
-  planning_sub_ = nh_->subscribe(robot_name_ + "/environment/planning", 1000,
-                                 &Environment::planningCB, this);
 }
 
 void Environment::loadParams() {
@@ -90,13 +92,21 @@ void Environment::pubRobotGoal() {
 }
 
 void Environment::pubRobotVelocity() {
-  if (planning_) {
+  if (planning_ && !collision_) {
     robot_cmd_velocity_ = planner_cmd_velocity_;
   } else {
     robot_cmd_velocity_.linear = zero_vect_;
     robot_cmd_velocity_.angular = zero_vect_;
   }
   robot_cmd_velocity_pub_.publish(robot_cmd_velocity_);
+}
+
+void Environment::bumperKiltCB(const std_msgs::Int32MultiArray::ConstPtr& msg) {
+  bumper_kilt_ = *msg;  // 8 Directions, clockwise starting at front
+  collision_ = false;
+  for (uint8_t i = 0; i < bumper_kilt_.data.size(); ++i) {
+    if (bumper_kilt_.data[i] > 0) {collision_ = true;}
+  }
 }
 
 void Environment::trackerDataCB(const tracker_msgs::TrackerData::ConstPtr&

@@ -12,6 +12,7 @@
 #include <ros/ros.h>
 
 #include <std_msgs/Bool.h>
+#include <std_msgs/Int32MultiArray.h>
 #include <nav_msgs/Odometry.h>
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Pose2D.h>
@@ -38,6 +39,7 @@ class Environment {
   void pubRobotVelocity();
   void pubEnvironmentData();
 
+  void bumperKiltCB(const std_msgs::Int32MultiArray::ConstPtr& msg);
   void trackerDataCB(const tracker_msgs::TrackerData::ConstPtr& msg);
   void amclPoseCB(const geometry_msgs::Pose2D::ConstPtr& msg);
   void commsDataCB(const robot_comms_msgs::CommsData::ConstPtr& msg);
@@ -52,12 +54,13 @@ class Environment {
   bool amcl_;
   bool bumper_;
   bool rvo_planner_;
+  bool collision_;
 
   // Variables
   std::string robot_name_;
   geometry_msgs::Vector3 zero_vect_;
+  std_msgs::Int32MultiArray bumper_kilt_;
   tracker_msgs::TrackerData tracker_data_;
-  nav_msgs::Odometry robot_odom_;
   robot_comms_msgs::CommsData comms_data_;
   geometry_msgs::Pose2D robot_amcl_pose_;
   geometry_msgs::Pose2D robot_curr_pose_;
@@ -72,6 +75,7 @@ class Environment {
   ros::Publisher robot_cmd_velocity_pub_;
   ros::Publisher environment_data_pub_;
   ros::ServiceClient setup_rvo_planner_;
+  ros::Subscriber bumper_kilt_sub_;
   ros::Subscriber tracker_data_sub_;
   ros::Subscriber amcl_pose_sub_;
   ros::Subscriber comms_data_sub_;
