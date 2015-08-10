@@ -23,7 +23,6 @@ Environment::~Environment() {
 
 void Environment::init() {
   planning_ = true;
-  use_odometry_ = true;
   // ROS
   robot_curr_pose_.x = 0.0f;
   robot_curr_pose_.y = 0.0f;
@@ -39,16 +38,19 @@ void Environment::rosSetup() {
                                                            true);
   robot_cmd_velocity_pub_ = nh_->advertise<geometry_msgs::Twist>(
                               robot_name_ + "/cmd_vel", 1, true);
+  environment_data_pub_ = nh_->advertise<environment_msgs::EnvironmentData>(
+                            "data", 1, true);
   ros::service::waitForService(robot_name_ + "/planner/setup_rvo_planner");
   setup_rvo_planner_ =
     nh_->serviceClient<planner_msgs::SetupRVOPlanner>(
       robot_name_ + "/planner/setup_rvo_planner", true);
   // Youbot
-  odom_sub_ = nh_->subscribe(robot_name_ + "/odom", 1000,
-                             &Environment::odomCB, this);
   // Tracker
   tracker_data_sub_ = nh_->subscribe("/tracker/data", 1000,
                                      &Environment::trackerDataCB, this);
+  // AMCL Wrapper
+  amcl_pose_sub_ = nh_->subscribe(robot_name_ + "/amcl_wrapper/curr_pose",
+                                  1000, &Environment::amclPoseCB, this);
   // Robot Comms
   comms_data_sub_ = nh_->subscribe(robot_name_ + "/robot_comms/data", 1000,
                                    &Environment::commsDataCB, this);
@@ -86,27 +88,44 @@ void Environment::pubRobotVelocity() {
   robot_cmd_velocity_pub_.publish(robot_cmd_velocity_);
 }
 
-void Environment::odomCB(const nav_msgs::Odometry::ConstPtr& msg) {
-  robot_odom_ = *msg;
-}
-
 void Environment::trackerDataCB(const tracker_msgs::TrackerData::ConstPtr&
                                 msg) {
-  // Store ids/positions/velocities of agents
-  agent_trackerID_ = msg->identity;
-  agent_positions_ = msg->agent_position;
-  agent_pos_std_dev_ = msg->standard_deviation;
-  agent_velocities_ = msg->agent_velocity;
-  agent_avg_velocities_ = msg->agent_avg_velocity;
+  tracker_data_ = *msg;
+}
+
+void Environment::amclPoseCB(const geometry_msgs::Pose2D::ConstPtr& msg) {
+  robot_amcl_pose_ = *msg;
 }
 
 void Environment::commsDataCB(const robot_comms_msgs::CommsData::ConstPtr&
                               msg) {
-  ;
+  comms_data_ = *msg;
 }
 
 void Environment::plannerCmdVelCB(const geometry_msgs::Twist::ConstPtr& msg) {
   planner_cmd_velocity_ = *msg;
+  this->pubRobotVelocity();
+}
+
+void Environment::pubEnvironmentData() {
+  environment_msgs::EnvironmentData env_data;
+  uint64_t nrobots = comms_data_.robot_poses.size();
+  uint64_t ntrackers = tracker_data_.identity.size();
+  // Add other robots info
+  if (!track_robots_) {
+    env_data.tracker_ids.resize(nrobots, 0);  // If robots are not tracked
+    env_data.agent_poses = comms_data_.robot_poses;
+    env_data.agent_vels = comms_data_.robot_vels;
+  }
+  // Add people tracking info
+  for (uint64_t i = 0; i < ntrackers; ++i) {
+    env_data.tracker_ids.push_back(tracker_data_.identity[i]);
+    env_data.agent_poses.push_back(tracker_data_.agent_position[i]);
+    env_data.agent_vels.push_back(tracker_data_.agent_avg_velocity[i]);
+  }
+  environment_data_pub_.publish(env_data);
+  this->pubRobotPose();
+  this->pubRobotGoal();
   this->pubRobotVelocity();
 }
 
@@ -119,13 +138,7 @@ int main(int argc, char** argv) {
 
   while (ros::ok()) {
     ros::spinOnce();
-    if (environment.planning_) {
-      environment.pubRobotPose();
-      environment.pubRobotGoal();
-      if (environment.use_rvo_planner_) {
-        environment.pubRobotVelocity();
-      }
-    }
+    environment.pubEnvironmentData();
     r.sleep();
   }
 
