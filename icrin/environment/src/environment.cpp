@@ -58,11 +58,18 @@ void Environment::rosSetup() {
 }
 
 void Environment::loadParams() {
-  bool robot_active;
-  ros::param::param(robot_name_ + "active", robot_active, false);
-  if (!robot_active)
-  {ROS_WARN("WARNING: Robot %s not active but environment created!", robot_name_.c_str());}
-  ros::param::param(robot_name_ + "use_rvo_planner", use_rvo_planner_, true);
+  // Experiment
+  ros::param::param(robot_name_ + "/environment/track_robots",
+                    track_robots_, false);
+  // Robot specific
+  ros::param::param(robot_name_ + "/environment/active", active_, false);
+  if (!active_) {
+    ROS_WARN("WARNING: Robot %s not active but environment created!",
+             robot_name_.c_str());
+  }
+  ros::param::param(robot_name_ + "/environment/amcl", amcl_, true);
+  ros::param::param(robot_name_ + "/environment/bumper", bumper_, false);
+  ros::param::param(robot_name_ + "/environment/rvo_planner", rvo_planner_, true);
 }
 
 void Environment::pubRobotPose() {

@@ -44,9 +44,13 @@ class Environment {
 
   // Flags
   bool planning_;
-  bool use_rvo_planner_;
-  bool use_odometry_;
  private:
+  bool track_robots_;
+  bool active_;
+  bool amcl_;
+  bool bumper_;
+  bool rvo_planner_;
+
   // Variables
   std::string robot_name_;
   std::vector<uint32_t> agent_trackerID_;
