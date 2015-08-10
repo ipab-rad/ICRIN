@@ -34,6 +34,7 @@ class Tracker {
  private:
   // Flags
   bool ptracker_rec_;
+  bool ptracker_sent_;
   int8_t invert_x_;
 
   // Variables
