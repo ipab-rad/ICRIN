@@ -22,14 +22,19 @@ Environment::~Environment() {
 }
 
 void Environment::init() {
-  planning_ = true;
+  planning_ = false;
   // ROS
+  zero_vect_.x = 0.0f;
+  zero_vect_.y = 0.0f;
+  zero_vect_.z = 0.0f;
   robot_curr_pose_.x = 0.0f;
   robot_curr_pose_.y = 0.0f;
   robot_curr_pose_.theta = 0.0f;
-  robot_target_goal_.x = 1.0f;
+  robot_target_goal_.x = 0.0f;
   robot_target_goal_.y = 0.0f;
   robot_target_goal_.theta = 0.0f;
+  robot_cmd_velocity_.linear = zero_vect_;
+  robot_cmd_velocity_.angular = zero_vect_;
 }
 
 void Environment::rosSetup() {
@@ -41,9 +46,8 @@ void Environment::rosSetup() {
   environment_data_pub_ = nh_->advertise<environment_msgs::EnvironmentData>(
                             "data", 1, true);
   ros::service::waitForService(robot_name_ + "/planner/setup_rvo_planner");
-  setup_rvo_planner_ =
-    nh_->serviceClient<planner_msgs::SetupRVOPlanner>(
-      robot_name_ + "/planner/setup_rvo_planner", true);
+  setup_rvo_planner_ = nh_->serviceClient<planner_msgs::SetupRVOPlanner>(
+                         robot_name_ + "/planner/setup_rvo_planner", true);
   // Youbot
   // Tracker
   tracker_data_sub_ = nh_->subscribe("/tracker/data", 1000,
@@ -57,6 +61,8 @@ void Environment::rosSetup() {
   // Planner
   planner_cmd_vel_sub_ = nh_->subscribe(robot_name_ + "/planner/cmd_vel", 1000,
                                         &Environment::plannerCmdVelCB, this);
+  planning_sub_ = nh_->subscribe(robot_name_ + "/environment/planning", 1000,
+                                 &Environment::planningCB, this);
 }
 
 void Environment::loadParams() {
@@ -75,6 +81,7 @@ void Environment::loadParams() {
 }
 
 void Environment::pubRobotPose() {
+  robot_curr_pose_ = robot_amcl_pose_;
   curr_pose_pub_.publish(robot_curr_pose_);
 }
 
@@ -83,8 +90,12 @@ void Environment::pubRobotGoal() {
 }
 
 void Environment::pubRobotVelocity() {
-  // TODO: Set vels to absolute zero if small enough
-  robot_cmd_velocity_ = planner_cmd_velocity_;
+  if (planning_) {
+    robot_cmd_velocity_ = planner_cmd_velocity_;
+  } else {
+    robot_cmd_velocity_.linear = zero_vect_;
+    robot_cmd_velocity_.angular = zero_vect_;
+  }
   robot_cmd_velocity_pub_.publish(robot_cmd_velocity_);
 }
 
@@ -105,6 +116,16 @@ void Environment::commsDataCB(const robot_comms_msgs::CommsData::ConstPtr&
 void Environment::plannerCmdVelCB(const geometry_msgs::Twist::ConstPtr& msg) {
   planner_cmd_velocity_ = *msg;
   this->pubRobotVelocity();
+}
+
+void Environment::planningCB(const std_msgs::Bool::ConstPtr& msg) {
+  bool plan_now = msg->data;
+  if (!planning_ && plan_now) {
+    ROS_WARN("Robot %s now planning!", robot_name_.c_str());
+  } else if (planning_ && !plan_now) {
+    ROS_WARN("Robot %s stop planning!", robot_name_.c_str());
+  }
+  planning_ = plan_now;
 }
 
 void Environment::pubEnvironmentData() {

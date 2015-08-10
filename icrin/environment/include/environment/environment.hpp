@@ -11,6 +11,7 @@
 
 #include <ros/ros.h>
 
+#include <std_msgs/Bool.h>
 #include <nav_msgs/Odometry.h>
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Pose2D.h>
@@ -18,11 +19,9 @@
 // #include "environment/youbot_wrapper.hpp"
 // #include "environment/amcl_wrapper.hpp"
 // #include "environment/bumper_wrapper.hpp"
-
 #include <environment_msgs/EnvironmentData.h>
 #include <tracker_msgs/TrackerData.h>
 #include <robot_comms_msgs/CommsData.h>
-
 #include <planner_msgs/SetupRVOPlanner.h>
 
 class Environment {
@@ -43,6 +42,7 @@ class Environment {
   void amclPoseCB(const geometry_msgs::Pose2D::ConstPtr& msg);
   void commsDataCB(const robot_comms_msgs::CommsData::ConstPtr& msg);
   void plannerCmdVelCB(const geometry_msgs::Twist::ConstPtr& msg);
+  void planningCB(const std_msgs::Bool::ConstPtr& msg);
 
  private:
   // Flags
@@ -55,6 +55,7 @@ class Environment {
 
   // Variables
   std::string robot_name_;
+  geometry_msgs::Vector3 zero_vect_;
   tracker_msgs::TrackerData tracker_data_;
   nav_msgs::Odometry robot_odom_;
   robot_comms_msgs::CommsData comms_data_;
@@ -63,6 +64,7 @@ class Environment {
   geometry_msgs::Pose2D robot_target_goal_;
   geometry_msgs::Twist robot_cmd_velocity_;
   geometry_msgs::Twist planner_cmd_velocity_;
+
   // ROS
   ros::NodeHandle* nh_;
   ros::Publisher curr_pose_pub_;
@@ -74,7 +76,7 @@ class Environment {
   ros::Subscriber amcl_pose_sub_;
   ros::Subscriber comms_data_sub_;
   ros::Subscriber planner_cmd_vel_sub_;
-
+  ros::Subscriber planning_sub_;
 };
 
 #endif /* ENVIRONMENT_HPP */

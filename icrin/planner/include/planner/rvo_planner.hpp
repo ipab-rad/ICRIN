@@ -13,6 +13,7 @@
 #include <vector>
 
 #include <geometry_msgs/Pose2D.h>
+#include <geometry_msgs/Twist.h>
 
 #include <rvo_wrapper/rvo_wrapper.hpp>
 
@@ -42,32 +43,41 @@ class RVOPlanner {
 
   size_t addPlannerAgent(common_msgs::Vector2 agent_pos);
 
-  void calcPrefVelocities();
-
   bool checkReachedGoal();
 
-  void setPlannerGoal(common_msgs::Vector2 goal);
-
-  void createPlanner();
-
-  void doSimStep();
-
-  void setPlannerSettings(float time_step,
-                          rvo_wrapper_msgs::AgentDefaults defaults);
 
   void planStep();
 
+  void createPlanner();
+
+  void setupPlanner();
+
+  void calcPrefVelocity();
+
+  void doSimStep();
+
+  void deletePlanner();
+  void setupEnvironment(std::vector<uint32_t> tracker_ids,
+                        std::vector<common_msgs::Vector2> agent_poses,
+                        std::vector<common_msgs::Vector2> agent_vels);
+
   common_msgs::Vector2 getPlannerVel();
-  void setAgentPositions(std::vector<common_msgs::Vector2> agent_positions);
+  // void setAgentPositions(std::vector<common_msgs::Vector2> agent_positions);
   void setAgentVelocities(std::vector<common_msgs::Vector2> agent_velocities);
+
+  void setPlannerSettings(float time_step,
+                          rvo_wrapper_msgs::AgentDefaults defaults);
   void setCurrPose(common_msgs::Vector2 curr_pose);
+  void setPlannerGoal(common_msgs::Vector2 goal);
 
  private:
   // Constants
   uint8_t PLANNER_ROBOT_;
   // Variables
   std::string robot_name_;
+  common_msgs::Vector2 curr_pose_;
   common_msgs::Vector2 planner_goal_;
+  std::vector<uint32_t> tracker_ids_;
   std::vector<common_msgs::Vector2> agent_positions_;
   std::vector<common_msgs::Vector2> agent_velocities_;
   rvo_wrapper_msgs::CreateRVOSim planner_settings_;
