@@ -22,15 +22,19 @@ Environment::~Environment() {
 }
 
 void Environment::init() {
-  planning_ = true;
-  use_odometry_ = true;
+  planning_ = false;
   // ROS
+  zero_vect_.x = 0.0f;
+  zero_vect_.y = 0.0f;
+  zero_vect_.z = 0.0f;
   robot_curr_pose_.x = 0.0f;
   robot_curr_pose_.y = 0.0f;
   robot_curr_pose_.theta = 0.0f;
-  robot_target_goal_.x = 1.0f;
+  robot_target_goal_.x = 0.0f;
   robot_target_goal_.y = 0.0f;
   robot_target_goal_.theta = 0.0f;
+  robot_cmd_velocity_.linear = zero_vect_;
+  robot_cmd_velocity_.angular = zero_vect_;
 }
 
 void Environment::rosSetup() {
@@ -39,33 +43,45 @@ void Environment::rosSetup() {
                                                            true);
   robot_cmd_velocity_pub_ = nh_->advertise<geometry_msgs::Twist>(
                               robot_name_ + "/cmd_vel", 1, true);
+  environment_data_pub_ = nh_->advertise<environment_msgs::EnvironmentData>(
+                            "data", 1, true);
   ros::service::waitForService(robot_name_ + "/planner/setup_rvo_planner");
-  setup_rvo_planner_ =
-    nh_->serviceClient<planner_msgs::SetupRVOPlanner>(
-      robot_name_ + "/planner/setup_rvo_planner", true);
+  setup_rvo_planner_ = nh_->serviceClient<planner_msgs::SetupRVOPlanner>(
+                         robot_name_ + "/planner/setup_rvo_planner", true);
   // Youbot
-  odom_sub_ = nh_->subscribe(robot_name_ + "/odom", 1000,
-                             &Environment::odomCB, this);
   // Tracker
   tracker_data_sub_ = nh_->subscribe("/tracker/data", 1000,
                                      &Environment::trackerDataCB, this);
+  // AMCL Wrapper
+  amcl_pose_sub_ = nh_->subscribe(robot_name_ + "/amcl_wrapper/curr_pose",
+                                  1000, &Environment::amclPoseCB, this);
   // Robot Comms
   comms_data_sub_ = nh_->subscribe(robot_name_ + "/robot_comms/data", 1000,
                                    &Environment::commsDataCB, this);
   // Planner
   planner_cmd_vel_sub_ = nh_->subscribe(robot_name_ + "/planner/cmd_vel", 1000,
                                         &Environment::plannerCmdVelCB, this);
+  planning_sub_ = nh_->subscribe(robot_name_ + "/environment/planning", 1000,
+                                 &Environment::planningCB, this);
 }
 
 void Environment::loadParams() {
-  bool robot_active;
-  ros::param::param(robot_name_ + "active", robot_active, false);
-  if (!robot_active)
-  {ROS_WARN("WARNING: Robot %s not active but environment created!", robot_name_.c_str());}
-  ros::param::param(robot_name_ + "use_rvo_planner", use_rvo_planner_, true);
+  // Experiment
+  ros::param::param(robot_name_ + "/environment/track_robots",
+                    track_robots_, false);
+  // Robot specific
+  ros::param::param(robot_name_ + "/environment/active", active_, false);
+  if (!active_) {
+    ROS_WARN("WARNING: Robot %s not active but environment created!",
+             robot_name_.c_str());
+  }
+  ros::param::param(robot_name_ + "/environment/amcl", amcl_, true);
+  ros::param::param(robot_name_ + "/environment/bumper", bumper_, false);
+  ros::param::param(robot_name_ + "/environment/rvo_planner", rvo_planner_, true);
 }
 
 void Environment::pubRobotPose() {
+  robot_curr_pose_ = robot_amcl_pose_;
   curr_pose_pub_.publish(robot_curr_pose_);
 }
 
@@ -74,32 +90,63 @@ void Environment::pubRobotGoal() {
 }
 
 void Environment::pubRobotVelocity() {
-  // TODO: Set vels to absolute zero if small enough
-  robot_cmd_velocity_ = planner_cmd_velocity_;
+  if (planning_) {
+    robot_cmd_velocity_ = planner_cmd_velocity_;
+  } else {
+    robot_cmd_velocity_.linear = zero_vect_;
+    robot_cmd_velocity_.angular = zero_vect_;
+  }
   robot_cmd_velocity_pub_.publish(robot_cmd_velocity_);
-}
-
-void Environment::odomCB(const nav_msgs::Odometry::ConstPtr& msg) {
-  robot_odom_ = *msg;
 }
 
 void Environment::trackerDataCB(const tracker_msgs::TrackerData::ConstPtr&
                                 msg) {
-  // Store ids/positions/velocities of agents
-  agent_trackerID_ = msg->identity;
-  agent_positions_ = msg->agent_position;
-  agent_pos_std_dev_ = msg->standard_deviation;
-  agent_velocities_ = msg->agent_velocity;
-  agent_avg_velocities_ = msg->agent_avg_velocity;
+  tracker_data_ = *msg;
+}
+
+void Environment::amclPoseCB(const geometry_msgs::Pose2D::ConstPtr& msg) {
+  robot_amcl_pose_ = *msg;
 }
 
 void Environment::commsDataCB(const robot_comms_msgs::CommsData::ConstPtr&
                               msg) {
-  ;
+  comms_data_ = *msg;
 }
 
 void Environment::plannerCmdVelCB(const geometry_msgs::Twist::ConstPtr& msg) {
   planner_cmd_velocity_ = *msg;
+  this->pubRobotVelocity();
+}
+
+void Environment::planningCB(const std_msgs::Bool::ConstPtr& msg) {
+  bool plan_now = msg->data;
+  if (!planning_ && plan_now) {
+    ROS_WARN("Robot %s now planning!", robot_name_.c_str());
+  } else if (planning_ && !plan_now) {
+    ROS_WARN("Robot %s stop planning!", robot_name_.c_str());
+  }
+  planning_ = plan_now;
+}
+
+void Environment::pubEnvironmentData() {
+  environment_msgs::EnvironmentData env_data;
+  uint64_t nrobots = comms_data_.robot_poses.size();
+  uint64_t ntrackers = tracker_data_.identity.size();
+  // Add other robots info
+  if (!track_robots_) {
+    env_data.tracker_ids.resize(nrobots, 0);  // If robots are not tracked
+    env_data.agent_poses = comms_data_.robot_poses;
+    env_data.agent_vels = comms_data_.robot_vels;
+  }
+  // Add people tracking info
+  for (uint64_t i = 0; i < ntrackers; ++i) {
+    env_data.tracker_ids.push_back(tracker_data_.identity[i]);
+    env_data.agent_poses.push_back(tracker_data_.agent_position[i]);
+    env_data.agent_vels.push_back(tracker_data_.agent_avg_velocity[i]);
+  }
+  environment_data_pub_.publish(env_data);
+  this->pubRobotPose();
+  this->pubRobotGoal();
   this->pubRobotVelocity();
 }
 
@@ -112,13 +159,7 @@ int main(int argc, char** argv) {
 
   while (ros::ok()) {
     ros::spinOnce();
-    if (environment.planning_) {
-      environment.pubRobotPose();
-      environment.pubRobotGoal();
-      if (environment.use_rvo_planner_) {
-        environment.pubRobotVelocity();
-      }
-    }
+    environment.pubEnvironmentData();
     r.sleep();
   }
 

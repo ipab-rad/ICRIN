@@ -2,4 +2,4 @@
 active: false
 bumper: false
 amcl: true
-use_rvo_planner: true
+rvo_planner: true

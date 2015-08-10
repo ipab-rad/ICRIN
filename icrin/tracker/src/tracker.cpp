@@ -26,6 +26,7 @@ Tracker::~Tracker() {
 
 void Tracker::init() {
   ptracker_rec_ = false;
+  ptracker_sent_ = true;
   invert_x_ = -1; // Set to -1 to invert x axis relative to robot frame
 }
 
@@ -36,13 +37,10 @@ void Tracker::rosSetup() {
 }
 
 void Tracker::loadParams() {
-  // bool robot_active;
-  // ros::param::param(robot_name_ + "/environment/active", robot_active, false);
 }
 
 void Tracker::receivePTrackerData(const PTrackingBridge::
                                   TargetEstimations::ConstPtr& msg) {
-  // Store last message sent by the tracker
   ptracker_msg_ = *msg;
   ptracker_rec_ = true;
 }
@@ -72,11 +70,13 @@ void Tracker::pubTrackerData() {
       vel_avg.linear.y = ptracker_msg_.averagedVelocities[i].y;
       tracker_data.agent_avg_velocity.push_back(vel_avg);
     }
-
     tracker_pub_.publish(tracker_data);
+    if (!ptracker_sent_) {ROS_INFO("Tracker data received!");}
     ptracker_rec_ = false;
+    ptracker_sent_ = true;
   } else {
-    ROS_WARN("No tracker data received!");
+    if (ptracker_sent_) {ROS_WARN("Tracker data not received!");}
+    ptracker_sent_ = false;
   }
 }
 

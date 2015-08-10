@@ -30,7 +30,6 @@ void RobotComms::init() {
 }
 
 void RobotComms::rosSetup() {
-  // After checking which robots are active, sub to their pose and cmd_vel
   comms_data_pub_ = nh_->advertise<robot_comms_msgs::CommsData>("data", 1,
                                                                 true);
   for (uint8_t i = 0; i < active_robots_.size(); ++i) {

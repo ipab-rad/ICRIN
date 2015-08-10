@@ -1,14 +1,13 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(environment)
+project(environment_msgs)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED
-  roscpp
-  environment_msgs
-  planner_msgs
-  tracker_msgs)
+find_package(catkin REQUIRED COMPONENTS
+  message_generation
+  geometry_msgs
+)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -44,11 +43,10 @@ find_package(catkin REQUIRED
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+add_message_files(
+  FILES
+  EnvironmentData.msg
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -65,10 +63,10 @@ find_package(catkin REQUIRED
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs  # Or other packages containing msgs
-# )
+generate_messages(
+  DEPENDENCIES
+  geometry_msgs
+)
 
 ###################################
 ## catkin specific configuration ##
@@ -80,42 +78,39 @@ find_package(catkin REQUIRED
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
- INCLUDE_DIRS include
-#  LIBRARIES environment
-#  CATKIN_DEPENDS other_catkin_pkg
+#  INCLUDE_DIRS include
+#  LIBRARIES environment_msgs
+#  CATKIN_DEPENDS geometry_msgs
 #  DEPENDS system_lib
 )
 
 ###########
 ## Build ##
 ###########
-set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall -O2")
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
+# include_directories(include)
 include_directories(
-  include
   ${catkin_INCLUDE_DIRS}
 )
+
 ## Declare a cpp library
-# add_library(environment
-#   src/${PROJECT_NAME}/environment.cpp
+# add_library(environment_msgs
+#   src/${PROJECT_NAME}/environment_msgs.cpp
 # )
 
 ## Declare a cpp executable
-add_executable(environment src/environment.cpp)
+# add_executable(environment_msgs_node src/environment_msgs_node.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-add_dependencies(environment
-  environment_msgs_gencpp
-  planner_msgs_gencpp
-  tracker_msgs_gencpp)
+# add_dependencies(environment_msgs_node environment_msgs_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(environment
-  ${catkin_LIBRARIES}
-)
+# target_link_libraries(environment_msgs_node
+#   ${catkin_LIBRARIES}
+# )
 
 #############
 ## Install ##
@@ -132,7 +127,7 @@ target_link_libraries(environment
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS environment environment
+# install(TARGETS environment_msgs environment_msgs_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -157,7 +152,7 @@ target_link_libraries(environment
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_environment.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_environment_msgs.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

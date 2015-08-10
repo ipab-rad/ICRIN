@@ -14,7 +14,6 @@ RVOPlanner::RVOPlanner(ros::NodeHandle* nh) {
   robot_name_.erase (0, 1); // Remove 1 forward slash from robot_name
   this->init();
   this->rosSetup();
-  this->createPlanner();
 }
 
 RVOPlanner::~RVOPlanner() {;}
@@ -96,11 +95,6 @@ size_t RVOPlanner::addPlannerAgent(common_msgs::Vector2 agent_pos) {
   return msg.response.agent_id;
 }
 
-void RVOPlanner::calcPrefVelocities() {
-  rvo_wrapper_msgs::CalcPrefVelocities msg;
-  calc_pref_velocities_client_.call(msg);
-}
-
 bool RVOPlanner::checkReachedGoal() {
   rvo_wrapper_msgs::CheckReachedGoal msg;
   check_reached_goal_client_.call(msg);
@@ -111,12 +105,7 @@ void RVOPlanner::createPlanner() {
   create_planner_client_.call(planner_settings_);
   if (planner_settings_.response.res) {
     ROS_INFO("RVO Planner created");
-  } else { ROS_ERROR("Planner not created!"); };
-}
-
-void RVOPlanner::doSimStep() {
-  rvo_wrapper_msgs::DoStep msg;
-  do_planner_step_client_.call(msg);
+  } else { ROS_ERROR("Planner not created!"); }
 }
 
 // common_msgs::Vector2 RVOPlanner::getAgentPos(size_t agent_no) {
@@ -125,19 +114,6 @@ void RVOPlanner::doSimStep() {
 //   get_agent_pos_client_.call(msg);
 //   return msg.response.position;
 // }
-
-void RVOPlanner::setPlannerGoal(common_msgs::Vector2 goal) {
-  rvo_wrapper_msgs::GetNumAgents num_agents_msg;
-  get_num_agents_.call(num_agents_msg);
-  rvo_wrapper_msgs::SetAgentGoals agent_goal_msg;
-  rvo_wrapper_msgs::SimGoals empty;
-  agent_goal_msg.request.sim.push_back(empty);
-  agent_goal_msg.request.sim[0].agent.push_back(goal);
-  // for (uint32_t i = 0; i < num_agents_msg.response.num_agents; ++i) {
-  //   agent_goal_msg.request.sim[0].agent.push_back(goal);
-  // }
-  set_agent_goals_client_.call(agent_goal_msg);
-}
 
 void RVOPlanner::setPlannerSettings(float time_step,
                                     rvo_wrapper_msgs::AgentDefaults defaults) {
@@ -151,24 +127,51 @@ void RVOPlanner::setPlannerSettings(float time_step,
     defaults.time_horizon_obst;
   planner_settings_.request.defaults.radius = defaults.radius;
   planner_settings_.request.defaults.max_speed = defaults.max_speed;
-  // Set new planner settings
-  rvo_wrapper_msgs::SetTimeStep planner_time_step;
-  // planner_time_step.request.sim_ids = planner_settings_.request.sim_num;
-  planner_time_step.request.time_step = planner_settings_.request.time_step;
-  set_time_step_.call(planner_time_step);
-  rvo_wrapper_msgs::SetAgentDefaults agent_defaults;
-  // agent_defaults.request.sim_ids = planner_settings_.request.sim_num;
-  agent_defaults.request.defaults = planner_settings_.request.defaults;
-  set_agent_defaults_.call(agent_defaults);
+}
+
+void RVOPlanner::setupEnvironment(std::vector<uint32_t> tracker_ids,
+                                  std::vector<common_msgs::Vector2> agent_poses,
+                                  std::vector<common_msgs::Vector2> agent_vels) {
+  tracker_ids_ = tracker_ids;
+  agent_positions_ = agent_poses;
+  agent_velocities_ = agent_vels;
 }
 
 void RVOPlanner::planStep() {
-  // this->createPlanner();
-  // ROS_INFO("rvo_planner create_planner");
-  // this->setupPlanner();
-  // ROS_INFO("rvo_planner setup_planner");
-  this->calcPrefVelocities();
+  this->createPlanner();
+  this->setupPlanner();
+  this->calcPrefVelocity();
   this->doSimStep();
+  this->deletePlanner();
+}
+
+void RVOPlanner::setupPlanner() {
+  this->addPlannerAgent(curr_pose_);
+  for (uint64_t i = 0; i < agent_positions_.size(); ++i) {
+    this->addPlannerAgent(agent_positions_[i]);
+  }
+  this->setAgentVelocities(agent_velocities_);
+  // Set planner goal
+  rvo_wrapper_msgs::SetAgentGoals agent_goal_msg;
+  rvo_wrapper_msgs::SimGoals empty;
+  agent_goal_msg.request.sim.push_back(empty);
+  agent_goal_msg.request.sim[0].agent.push_back(planner_goal_);
+  set_agent_goals_client_.call(agent_goal_msg);
+}
+
+void RVOPlanner::calcPrefVelocity() {
+  rvo_wrapper_msgs::CalcPrefVelocities msg;
+  calc_pref_velocities_client_.call(msg);
+}
+
+void RVOPlanner::doSimStep() {
+  rvo_wrapper_msgs::DoStep msg;
+  do_planner_step_client_.call(msg);
+}
+
+void RVOPlanner::deletePlanner() {
+  rvo_wrapper_msgs::DeleteSimVector msg;
+  delete_planner_client_.call(msg);
 }
 
 common_msgs::Vector2 RVOPlanner::getPlannerVel() {
@@ -182,32 +185,37 @@ common_msgs::Vector2 RVOPlanner::getPlannerVel() {
   return msg.response.velocity;
 }
 
-void RVOPlanner::setAgentPositions(std::vector<common_msgs::Vector2>
+/*void RVOPlanner::setAgentPositions(std::vector<common_msgs::Vector2>
                                    agent_positions) {
   rvo_wrapper_msgs::SetAgentPosition msg;
-  for (uint8_t i = 0; i < agent_positions.size(); ++i) {
+  for (uint8_t i = 1; i < agent_positions.size(); ++i) {
     msg.request.agent_id = i;
     msg.request.position.x = agent_positions[i].x;
     msg.request.position.y = agent_positions[i].y;
     set_agent_position_.call(msg);
   }
-}
+}*/
 
 void RVOPlanner::setAgentVelocities(std::vector<common_msgs::Vector2>
                                     agent_velocities) {
   rvo_wrapper_msgs::SetAgentVelocity msg;
-  for (uint8_t i = 0; i < agent_velocities.size(); ++i) {
+  for (uint8_t i = 1; i < agent_velocities.size(); ++i) {
     msg.request.agent_id = i;
     msg.request.velocity.x = agent_velocities[i].x;
     msg.request.velocity.y = agent_velocities[i].y;
-    set_agent_position_.call(msg);
+    set_agent_velocity_.call(msg);
   }
 }
 
 void RVOPlanner::setCurrPose(common_msgs::Vector2 curr_pose) {
-  rvo_wrapper_msgs::SetAgentPosition msg;
-  msg.request.agent_id = PLANNER_ROBOT_;
-  msg.request.position.x = curr_pose.x;
-  msg.request.position.y = curr_pose.y;
-  set_agent_position_.call(msg);
+  curr_pose_ = curr_pose;
+  // rvo_wrapper_msgs::SetAgentPosition msg;
+  // msg.request.agent_id = PLANNER_ROBOT_;
+  // msg.request.position.x = curr_pose.x;
+  // msg.request.position.y = curr_pose.y;
+  // set_agent_position_.call(msg);
+}
+
+void RVOPlanner::setPlannerGoal(common_msgs::Vector2 goal) {
+  planner_goal_ = goal;
 }

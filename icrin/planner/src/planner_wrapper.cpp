@@ -25,16 +25,16 @@ PlannerWrapper::~PlannerWrapper() {
 
 void PlannerWrapper::init() {
   use_rvo_planner_ = false;
-  zero_vect_.x = 0.0f;
-  zero_vect_.y = 0.0f;
-  goal_vect_.x = 0.0f;
-  goal_vect_.y = 0.0f;
-  cmd_vel.linear.x = 0.0f;
-  cmd_vel.linear.y = 0.0f;
-  cmd_vel.linear.z = 0.0f;
-  cmd_vel.angular.x = 0.0f;
-  cmd_vel.angular.y = 0.0f;
-  cmd_vel.angular.z = 0.0f;
+  planning_ = false;
+  curr_pose_.x = 0.0f;
+  curr_pose_.y = 0.0f;
+  goal_pose_ = curr_pose_;
+  cmd_vel_.linear.x = 0.0f;
+  cmd_vel_.linear.y = 0.0f;
+  cmd_vel_.linear.z = 0.0f;
+  cmd_vel_.angular.x = 0.0f;
+  cmd_vel_.angular.y = 0.0f;
+  cmd_vel_.angular.z = 0.0f;
 }
 
 void PlannerWrapper::rosSetup() {
@@ -53,17 +53,20 @@ void PlannerWrapper::rosSetup() {
   target_goal_sub_ = nh_->subscribe(robot_name_ + "/environment/target_goal",
                                     1000,
                                     &PlannerWrapper::targetGoalCB, this);
+  planning_sub_ = nh_->subscribe(robot_name_ + "/environment/planning", 1000,
+                                 &PlannerWrapper::planningCB, this);
 }
 
 bool PlannerWrapper::setupNewPlanner(
   planner_msgs::SetupNewPlanner::Request& req,
   planner_msgs::SetupNewPlanner::Response& res) {
-  rvo_planner_ = new RVOPlanner(nh_);
-  rvo_planner_->addPlannerAgent(zero_vect_);
-  // rvo_planner_->setCurrPose(zero_vect_);
-  rvo_planner_->setPlannerGoal(goal_vect_);
-  use_rvo_planner_ = true;
   res.res = true;
+  if (req.planner_type == req.RVO_PLANNER) {
+    rvo_planner_ = new RVOPlanner(nh_);
+    use_rvo_planner_ = true;
+  } else if (req.planner_type == req.ROS_NAVIGATION) {
+    ROS_ERROR("ROS_NAVIGATION not implemented yet, sorry!");
+  } else {res.res = false;}
   return true;
 }
 
@@ -76,69 +79,53 @@ bool PlannerWrapper::setupRVOPlanner(
 }
 
 void PlannerWrapper::plannerStep() {
-  if (use_rvo_planner_) {
-    rvo_planner_->planStep();
-
-    rvo_planner_vel = rvo_planner_->getPlannerVel();
-    cmd_vel.linear.x = rvo_planner_vel.x;
-    cmd_vel.linear.y = rvo_planner_vel.y;
-    cmd_vel_pub_.publish(cmd_vel);
+  if (planning_) {
+    if (use_rvo_planner_) {
+      rvo_planner_->planStep();
+      rvo_planner_vel_ = rvo_planner_->getPlannerVel();
+      cmd_vel_.linear.x = rvo_planner_vel_.x;
+      cmd_vel_.linear.y = rvo_planner_vel_.y;
+    }
+    cmd_vel_pub_.publish(cmd_vel_);
   }
 }
 
 void PlannerWrapper::currPoseCB(const geometry_msgs::Pose2D::ConstPtr& msg) {
+  curr_pose_.x = msg->x;
+  curr_pose_.y = msg->y;
   if (use_rvo_planner_) {
-    common_msgs::Vector2 curr_pose;
-    curr_pose.x = msg->x;
-    curr_pose.y = msg->y;
-    // rvo_planner_->setCurrPose(curr_pose);
+    rvo_planner_->setCurrPose(curr_pose_);
   }
 }
 
 void PlannerWrapper::targetGoalCB(const geometry_msgs::Pose2D::ConstPtr& msg) {
+  goal_pose_.x = msg->x;
+  goal_pose_.y = msg->y;
   if (use_rvo_planner_) {
-    common_msgs::Vector2 goal_pose;
-    goal_pose.x = msg->x;
-    goal_pose.y = msg->y;
-    rvo_planner_->setPlannerGoal(goal_pose);
+    rvo_planner_->setPlannerGoal(goal_pose_);
   }
 }
 
-// bool Planner::addPlannerAgents(planner_msgs::SetAgentsInitPos::Request& req,
-//                                planner_msgs::SetAgentsInitPos::Response& res) {
-//   ;
-// }
+void PlannerWrapper::planningCB(const std_msgs::Bool::ConstPtr& msg) {
+  planning_ = msg->data;
+}
 
-// int main(int argc, char** argv) {
-//   ros::init(argc, argv, "planner");
-//   ros::NodeHandle nh("planner");
-//   PlannerWrapper planner(&nh);
-
-//   if (planner.use_rvo_planner_) {
-//     rvo_planner_->addPlannerAgent(planner.init_pos_);
-//     rvo_planner_->setPlannerGoal(planner.goal1_);
-
-//     ros::Rate r(10);
-
-//     // Flags
-//     bool going1;
-//     // Variables
-//     common_msgs::Vector2 target_pos;
-//     while (ros::ok()) {
-//       rvo_planner_->planStep();
-//       if (rvo_planner_->checkReachedGoal()) {
-//         if (going1) {
-//           target_pos = planner.goal2_; going1 = false;
-//         } else {target_pos = planner.goal1_; going1 = true;}
-//         rvo_planner_->setPlannerGoal(target_pos);
-//       }
-//       ros::spinOnce();
-//       r.sleep();
-//     }
-//   }
-
-//   ros::shutdown();
-
-//   return 0;
-// }
-
+void PlannerWrapper::environmentDataCB(
+  const environment_msgs::EnvironmentData::ConstPtr& msg) {
+  environment_ = *msg;
+  if (use_rvo_planner_) {
+    uint64_t nAgents = environment_.agent_poses.size();
+    std::vector<common_msgs::Vector2> agent_poses;
+    std::vector<common_msgs::Vector2> agent_vels;
+    agent_poses.resize(nAgents);
+    agent_vels.resize(nAgents);
+    for (uint64_t i = 0; i < nAgents; ++i) {
+      agent_poses[i].x = environment_.agent_poses[i].x;
+      agent_poses[i].y = environment_.agent_poses[i].y;
+      agent_vels[i].x = environment_.agent_vels[i].linear.x;
+      agent_vels[i].y = environment_.agent_vels[i].linear.y;
+    }
+    rvo_planner_->setupEnvironment(environment_.tracker_ids,
+                                   agent_poses, agent_vels);
+  }
+}

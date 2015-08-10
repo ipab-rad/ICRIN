@@ -34,11 +34,11 @@ class Tracker {
  private:
   // Flags
   bool ptracker_rec_;
+  bool ptracker_sent_;
   int8_t invert_x_;
 
   // Variables
   PTrackingBridge::TargetEstimations ptracker_msg_;
-  // tracker_msgs::TrackerData tracker_data_;
 
   // ROS
   ros::NodeHandle* nh_;
