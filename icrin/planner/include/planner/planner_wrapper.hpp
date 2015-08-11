@@ -48,6 +48,7 @@ class PlannerWrapper {
   // Flags
   bool use_rvo_planner_;
   bool planning_;
+  bool planner_init;
   // Variables
   std::string robot_name_;
   common_msgs::Vector2 curr_pose_;

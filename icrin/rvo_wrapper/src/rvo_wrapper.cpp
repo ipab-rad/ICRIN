@@ -226,8 +226,12 @@ bool RVOWrapper::calcPrefVelocities(
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     for (uint32_t i = 0; i < planner_->getNumAgents(); ++i) {
       RVO::Vector2 goalVector = planner_goals_[i] - planner_->getAgentPosition(i);
-      if (RVO::absSq(goalVector) > 1.0f) {
-        goalVector = RVO::normalize(goalVector);
+      if (i == 0) {
+        if (RVO::absSq(goalVector) > 1.0f) {
+          goalVector = RVO::normalize(goalVector);
+        }
+      } else {
+        goalVector = planner_->getAgentVelocity(i);
       }
       planner_->setAgentPrefVelocity(i, goalVector);
     }

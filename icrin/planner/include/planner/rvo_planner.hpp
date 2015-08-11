@@ -45,8 +45,7 @@ class RVOPlanner {
 
   bool checkReachedGoal();
 
-
-  void planStep();
+  common_msgs::Vector2 planStep();
 
   void createPlanner();
 
@@ -77,6 +76,7 @@ class RVOPlanner {
   std::string robot_name_;
   common_msgs::Vector2 curr_pose_;
   common_msgs::Vector2 planner_goal_;
+  common_msgs::Vector2 planner_vel_;
   std::vector<uint32_t> tracker_ids_;
   std::vector<common_msgs::Vector2> agent_positions_;
   std::vector<common_msgs::Vector2> agent_velocities_;

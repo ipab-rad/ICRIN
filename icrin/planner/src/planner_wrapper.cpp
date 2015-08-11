@@ -26,6 +26,7 @@ PlannerWrapper::~PlannerWrapper() {
 void PlannerWrapper::init() {
   use_rvo_planner_ = false;
   planning_ = false;
+  planner_init = false;
   curr_pose_.x = 0.0f;
   curr_pose_.y = 0.0f;
   goal_pose_ = curr_pose_;
@@ -61,10 +62,12 @@ bool PlannerWrapper::setupNewPlanner(
   planner_msgs::SetupNewPlanner::Request& req,
   planner_msgs::SetupNewPlanner::Response& res) {
   res.res = true;
-  if (req.planner_type == req.RVO_PLANNER) {
+  if (req.planner_type == req.RVO_PLANNER && !planner_init) {
     rvo_planner_ = new RVOPlanner(nh_);
     use_rvo_planner_ = true;
-  } else if (req.planner_type == req.ROS_NAVIGATION) {
+    planner_init = true;
+    ROS_INFO("RVO Planner setup");
+  } else if (req.planner_type == req.ROS_NAVIGATION && !planner_init) {
     ROS_ERROR("ROS_NAVIGATION not implemented yet, sorry!");
   } else {res.res = false;}
   return true;
@@ -81,8 +84,8 @@ bool PlannerWrapper::setupRVOPlanner(
 void PlannerWrapper::plannerStep() {
   if (planning_) {
     if (use_rvo_planner_) {
-      rvo_planner_->planStep();
-      rvo_planner_vel_ = rvo_planner_->getPlannerVel();
+      ROS_INFO("Planning!");
+      rvo_planner_vel_ = rvo_planner_->planStep();
       cmd_vel_.linear.x = rvo_planner_vel_.x;
       cmd_vel_.linear.y = rvo_planner_vel_.y;
     }
