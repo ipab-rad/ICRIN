@@ -68,8 +68,10 @@ class RVOPlanner {
                           rvo_wrapper_msgs::AgentDefaults defaults);
   void setCurrPose(common_msgs::Vector2 curr_pose);
   void setPlannerGoal(common_msgs::Vector2 goal);
+  bool getArrived() {return arrived_;}
 
  private:
+  bool arrived_;
   // Constants
   uint8_t PLANNER_ROBOT_;
   // Variables

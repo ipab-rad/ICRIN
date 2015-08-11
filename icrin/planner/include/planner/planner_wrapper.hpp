@@ -31,6 +31,9 @@ class PlannerWrapper {
 
   void rosSetup();
 
+  void pubPlanning(bool planning);
+  void pubArrived(bool arrived);
+
   bool setupNewPlanner(planner_msgs::SetupNewPlanner::Request& req,
                        planner_msgs::SetupNewPlanner::Response& res);
 
@@ -48,6 +51,7 @@ class PlannerWrapper {
   // Flags
   bool use_rvo_planner_;
   bool planning_;
+  bool arrived_;
   bool planner_init;
   // Variables
   std::string robot_name_;
@@ -60,6 +64,8 @@ class PlannerWrapper {
   ros::NodeHandle* nh_;
 
   ros::Publisher cmd_vel_pub_;
+  ros::Publisher planning_pub_;
+  ros::Publisher arrived_pub_;
   ros::Subscriber curr_pose_sub_;
   ros::Subscriber target_goal_sub_;
   ros::Subscriber planning_sub_;

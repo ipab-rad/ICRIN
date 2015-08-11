@@ -19,6 +19,7 @@ RVOPlanner::RVOPlanner(ros::NodeHandle* nh) {
 RVOPlanner::~RVOPlanner() {;}
 
 void RVOPlanner::init() {
+  arrived_ = false;
   PLANNER_ROBOT_ = 0;
   planner_settings_.request.sim_num = 0;
   planner_settings_.request.time_step = 0.1f;
@@ -142,6 +143,7 @@ common_msgs::Vector2 RVOPlanner::planStep() {
   this->setupPlanner();
   this->calcPrefVelocity();
   this->doSimStep();
+  arrived_ = this->checkReachedGoal();
   planner_vel_ = this->getPlannerVel();
   this->deletePlanner();
   return planner_vel_;

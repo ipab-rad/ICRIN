@@ -26,6 +26,7 @@ PlannerWrapper::~PlannerWrapper() {
 void PlannerWrapper::init() {
   use_rvo_planner_ = false;
   planning_ = false;
+  arrived_ = false;
   planner_init = false;
   curr_pose_.x = 0.0f;
   curr_pose_.y = 0.0f;
@@ -40,6 +41,10 @@ void PlannerWrapper::init() {
 
 void PlannerWrapper::rosSetup() {
   cmd_vel_pub_ = nh_->advertise<geometry_msgs::Twist>("cmd_vel", 1, true);
+  planning_pub_ = nh_->advertise<std_msgs::Bool>(robot_name_ +
+                                                 "/environment/planning",
+                                                 1, true);
+  arrived_pub_ = nh_->advertise<std_msgs::Bool>("arrived", 1, true);
   srv_setup_new_planner_ =
     nh_->advertiseService("setup_new_planner",
                           &PlannerWrapper::setupNewPlanner, this);
@@ -56,6 +61,20 @@ void PlannerWrapper::rosSetup() {
                                     &PlannerWrapper::targetGoalCB, this);
   planning_sub_ = nh_->subscribe(robot_name_ + "/environment/planning", 1000,
                                  &PlannerWrapper::planningCB, this);
+}
+
+void PlannerWrapper::pubPlanning(bool planning) {
+  planning_ = planning;
+  std_msgs::Bool msg;
+  msg.data = planning;
+  planning_pub_.publish(msg);
+}
+
+void PlannerWrapper::pubArrived(bool arrived) {
+  arrived_ = arrived;
+  std_msgs::Bool msg;
+  msg.data = arrived;
+  arrived_pub_.publish(msg);
 }
 
 bool PlannerWrapper::setupNewPlanner(
@@ -90,6 +109,12 @@ void PlannerWrapper::plannerStep() {
       cmd_vel_.linear.y = rvo_planner_vel_.y;
     }
     cmd_vel_pub_.publish(cmd_vel_);
+    arrived_ = rvo_planner_->getArrived();
+  }
+  if (planning_ && arrived_) {
+    this->pubArrived(true);
+    this->pubPlanning(false);
+    ROS_INFO("Robot %s reached goal", robot_name_.c_str());
   }
 }
 

@@ -23,7 +23,7 @@
 #include <environment_msgs/EnvironmentData.h>
 #include <tracker_msgs/TrackerData.h>
 #include <robot_comms_msgs/CommsData.h>
-#include <planner_msgs/SetupRVOPlanner.h>
+#include <planner_msgs/SetupNewPlanner.h>
 
 class Environment {
  public:
@@ -74,7 +74,8 @@ class Environment {
   ros::Publisher target_goal_pub_;
   ros::Publisher robot_cmd_velocity_pub_;
   ros::Publisher environment_data_pub_;
-  ros::ServiceClient setup_rvo_planner_;
+  ros::Publisher planning_pub_;
+  ros::ServiceClient setup_new_planner_;
   ros::Subscriber bumper_kilt_sub_;
   ros::Subscriber tracker_data_sub_;
   ros::Subscriber amcl_pose_sub_;

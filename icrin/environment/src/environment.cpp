@@ -45,9 +45,10 @@ void Environment::rosSetup() {
                               robot_name_ + "/cmd_vel", 1, true);
   environment_data_pub_ = nh_->advertise<environment_msgs::EnvironmentData>(
                             "data", 1, true);
-  ros::service::waitForService(robot_name_ + "/planner/setup_rvo_planner");
-  setup_rvo_planner_ = nh_->serviceClient<planner_msgs::SetupRVOPlanner>(
-                         robot_name_ + "/planner/setup_rvo_planner", true);
+  planning_pub_ = nh_->advertise<std_msgs::Bool>("planning", 1, true);
+  ros::service::waitForService(robot_name_ + "/planner/setup_new_planner");
+  setup_new_planner_ = nh_->serviceClient<planner_msgs::SetupNewPlanner>(
+                         robot_name_ + "/planner/setup_new_planner", true);
   planning_sub_ = nh_->subscribe(robot_name_ + "/environment/planning", 1000,
                                  &Environment::planningCB, this);
   // Youbot
