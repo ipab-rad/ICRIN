@@ -41,7 +41,6 @@
   <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>amcl_wrapper</build_depend>
-  <build_depend>bumper_wrapper</build_depend>
   <build_depend>environment</build_depend>
   <build_depend>experiment</build_depend>
   <build_depend>model</build_depend>
@@ -50,7 +49,6 @@
   <build_depend>rvo_wrapper</build_depend>
   <build_depend>tracker</build_depend>
   <run_depend>amcl_wrapper</run_depend>
-  <run_depend>bumper_wrapper</run_depend>
   <run_depend>environment</run_depend>
   <run_depend>experiment</run_depend>
   <run_depend>model</run_depend>

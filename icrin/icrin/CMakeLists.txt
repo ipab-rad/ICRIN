@@ -6,7 +6,6 @@ project(icrin)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   amcl_wrapper
-  bumper_wrapper
   environment
   experiment
   model
