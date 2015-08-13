@@ -70,8 +70,7 @@ void Environment::rosSetup() {
 
 void Environment::loadParams() {
   // Experiment
-  ros::param::param(robot_name_ + "/environment/track_robots",
-                    track_robots_, false);
+  ros::param::param("/experiment/track_robots", track_robots_, false);
   // Robot specific
   ros::param::param(robot_name_ + "/environment/active", active_, false);
   if (!active_) {

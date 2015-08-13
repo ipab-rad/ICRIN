@@ -22,11 +22,6 @@ RobotComms::~RobotComms() {
 }
 
 void RobotComms::init() {
-  robot_names_.push_back("/megatron");
-  robot_names_.push_back("/soundwave");
-  robot_names_.push_back("/starscream");
-  robot_names_.push_back("/blackout");
-  robot_names_.push_back("/thundercracker");
 }
 
 void RobotComms::rosSetup() {
@@ -45,13 +40,14 @@ void RobotComms::rosSetup() {
 }
 
 void RobotComms::loadParams() {
+  ros::param::get("/experiment/robots/names", robot_names_);
   bool robot_active;
   ros::param::param(robot_name_ + "/environment/active", robot_active, false);
   if (!robot_active)
   {ROS_WARN("WARNING: Robot %s not active but robot_comms created!", robot_name_.c_str());}
   for (uint8_t i = 0; i < robot_names_.size(); ++i) {
     bool active;
-    ros::param::param(robot_names_[i] + "/environment/active", active, false);
+    ros::param::param("/" + robot_names_[i] + "/environment/active", active, false);
     if (active
         && (robot_names_[i].compare(robot_name_) != 0)
        ) {
