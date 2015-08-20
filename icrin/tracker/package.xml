@@ -42,6 +42,8 @@
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>roscpp</build_depend>
   <run_depend>roscpp</run_depend>
+  <build_depend>tracker_msgs</build_depend>
+  <run_depend>tracker_msgs</run_depend>
   <build_depend>PTrackingBridge</build_depend>
   <run_depend>PTrackingBridge</run_depend>
 
