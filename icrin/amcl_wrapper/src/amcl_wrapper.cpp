@@ -41,10 +41,6 @@ void AMCLWrapper::rosSetup() {
 }
 
 void AMCLWrapper::loadParams() {
-  bool robot_active;
-  ros::param::param(robot_name_ + "/environment/active", robot_active, false);
-  if (!robot_active)
-  {ROS_WARN("WARNING: Robot %s not active but AMCLWrapper created!", robot_name_.c_str());}
   bool use_amcl_;
   ros::param::param(robot_name_ + "/environment/amcl", use_amcl_, false);
   if (!use_amcl_)

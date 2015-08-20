@@ -18,7 +18,7 @@ Environment::Environment(ros::NodeHandle* nh) {
 }
 
 Environment::~Environment() {
-  ;
+  ros::param::del("environment");
 }
 
 void Environment::init() {
@@ -72,10 +72,7 @@ void Environment::loadParams() {
   // Experiment
   ros::param::param("/experiment/track_robots", track_robots_, false);
   // Robot specific
-  ros::param::param(robot_name_ + "/environment/active", active_, false);
-  if (!active_) {
-    ROS_WARN("WARNING: Robot %s not active but environment created!",
-             robot_name_.c_str());
+  ros::param::set("environment/ready", true);
   }
   ros::param::param(robot_name_ + "/environment/amcl", amcl_, true);
   ros::param::param(robot_name_ + "/environment/bumper", bumper_, false);

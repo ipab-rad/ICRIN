@@ -39,11 +39,14 @@ class Experiment {
                experiment_msgs::SetGoal::Response& res);
   bool setPlan(experiment_msgs::SetPlan::Request& req,
                experiment_msgs::SetPlan::Response& res);
+  bool checkReadyRobots();
   void stopExperiment();
+  bool robotsReady() {return robots_ready_;}
   static bool isInterrupted() {return interrupted_;}
 
  private:
   // Flags
+  bool robots_ready_;
   static bool interrupted_;
 
   // Variables

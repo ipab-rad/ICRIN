@@ -20,9 +20,22 @@ int main(int argc, char* argv[]) {
   // Setup Environments
   // Check which robots respond
   // Publish goals or plans for first time
+  // Setup Environments
+  INFO("Please launch robot environments now" << std::endl);
+  // experiment.waitReturn();
+  while (!Experiment::isInterrupted()) {
+    if (experiment.checkReadyRobots()) {break;}
+    ros::spinOnce();
+    r.sleep();
+  }
+  if (experiment.robotsReady() && !Experiment::isInterrupted()) {
+    INFO("All active robots ready" << std::endl);
+  } else {
+    WARN("Some robots are not ready!" << std::endl);
+  }
 
   // Setup Robots
-  // Rbotos move into area or initial goal
+  // Robots move into area or initial goal
 
   // Run experiment
   while (ros::ok() && !Experiment::isInterrupted()) {
@@ -47,12 +60,13 @@ Experiment::Experiment(ros::NodeHandle* nh) {
 }
 
 Experiment::~Experiment() {
-  ;
+  ros::param::del("experiment");
 }
 
 void Experiment::init() {
   Experiment::interrupted_ = false;
   robots_planning_.resize(robots_.size(), false);
+  robots_ready_ = false;
 }
 
 void Experiment::rosSetup() {
@@ -75,7 +89,7 @@ void Experiment::loadParams() {
   for (uint8_t i = 0; i < all_robots.size(); ++i) {
     if (active[i]) {
       robots_.push_back(all_robots[i]);
-      ROS_INFO("%s active", all_robots[i].c_str());
+      ROS_INFO("%s expected", all_robots[i].c_str());
     }
   }
 
@@ -176,8 +190,19 @@ bool Experiment::setPlan(experiment_msgs::SetPlan::Request& req,
   return true;
 }
 
+bool Experiment::checkReadyRobots() {
+  robots_ready_ = true;
+  for (size_t i = 0; i < robots_.size(); ++i) {
+    if (!ros::param::has("/" + robots_[i] + "/environment/ready"))
+    {robots_ready_ = false;} else {
+      INFO(robots_[i] << " is ready!" << std::endl);
+    }
+  }
+  return robots_ready_;
+}
+
 void Experiment::stopExperiment() {
-  robots_planning_.resize(robots_.size(), false);
+  robots_planning_.assign(robots_.size(), false);
   this->pubPlanning();
   if (Experiment::interrupted_) {ROS_INFO("User stopped experiment");}
 }

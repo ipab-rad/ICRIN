@@ -50,7 +50,6 @@ class Environment {
   // Flags
   bool planning_;
   bool track_robots_;
-  bool active_;
   bool amcl_;
   bool bumper_;
   bool rvo_planner_;
