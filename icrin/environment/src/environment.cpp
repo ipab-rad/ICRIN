@@ -18,7 +18,7 @@ Environment::Environment(ros::NodeHandle* nh) {
 }
 
 Environment::~Environment() {
-  ;
+  ros::param::del("environment");
 }
 
 void Environment::init() {
@@ -45,10 +45,15 @@ void Environment::rosSetup() {
                               robot_name_ + "/cmd_vel", 1, true);
   environment_data_pub_ = nh_->advertise<environment_msgs::EnvironmentData>(
                             "data", 1, true);
-  ros::service::waitForService(robot_name_ + "/planner/setup_rvo_planner");
-  setup_rvo_planner_ = nh_->serviceClient<planner_msgs::SetupRVOPlanner>(
-                         robot_name_ + "/planner/setup_rvo_planner", true);
+  planning_pub_ = nh_->advertise<std_msgs::Bool>("planning", 1);
+  ros::service::waitForService(robot_name_ + "/planner/setup_new_planner");
+  setup_new_planner_ = nh_->serviceClient<planner_msgs::SetupNewPlanner>(
+                         robot_name_ + "/planner/setup_new_planner", true);
+  planning_sub_ = nh_->subscribe(robot_name_ + "/environment/planning", 1000,
+                                 &Environment::planningCB, this);
   // Youbot
+  bumper_kilt_sub_ = nh_->subscribe(robot_name_ + "/bumper_kilt", 1000,
+                                    &Environment::bumperKiltCB, this);
   // Tracker
   tracker_data_sub_ = nh_->subscribe("/tracker/data", 1000,
                                      &Environment::trackerDataCB, this);
@@ -61,23 +66,24 @@ void Environment::rosSetup() {
   // Planner
   planner_cmd_vel_sub_ = nh_->subscribe(robot_name_ + "/planner/cmd_vel", 1000,
                                         &Environment::plannerCmdVelCB, this);
-  planning_sub_ = nh_->subscribe(robot_name_ + "/environment/planning", 1000,
-                                 &Environment::planningCB, this);
 }
 
 void Environment::loadParams() {
   // Experiment
-  ros::param::param(robot_name_ + "/environment/track_robots",
-                    track_robots_, false);
+  ros::param::param("/experiment/track_robots", track_robots_, false);
   // Robot specific
-  ros::param::param(robot_name_ + "/environment/active", active_, false);
-  if (!active_) {
-    ROS_WARN("WARNING: Robot %s not active but environment created!",
-             robot_name_.c_str());
+  ros::param::set("environment/ready", true);
+  ros::param::param("environment/amcl", amcl_, true);
+  ros::param::param("environment/bumper", bumper_, false);
+  ros::param::param("environment/rvo_planner", rvo_planner_, true);
+}
+
+void Environment::setupEnvironment() {
+  planner_msgs::SetupNewPlanner new_planner;
+  if (rvo_planner_) {
+    new_planner.request.planner_type = new_planner.request.RVO_PLANNER;
   }
-  ros::param::param(robot_name_ + "/environment/amcl", amcl_, true);
-  ros::param::param(robot_name_ + "/environment/bumper", bumper_, false);
-  ros::param::param(robot_name_ + "/environment/rvo_planner", rvo_planner_, true);
+  setup_new_planner_.call(new_planner);
 }
 
 void Environment::pubRobotPose() {
@@ -90,13 +96,21 @@ void Environment::pubRobotGoal() {
 }
 
 void Environment::pubRobotVelocity() {
-  if (planning_) {
+  if (planning_ && !collision_) {
     robot_cmd_velocity_ = planner_cmd_velocity_;
   } else {
     robot_cmd_velocity_.linear = zero_vect_;
     robot_cmd_velocity_.angular = zero_vect_;
   }
   robot_cmd_velocity_pub_.publish(robot_cmd_velocity_);
+}
+
+void Environment::bumperKiltCB(const std_msgs::Int32MultiArray::ConstPtr& msg) {
+  bumper_kilt_ = *msg;  // 8 Directions, clockwise starting at front
+  collision_ = false;
+  for (uint8_t i = 0; i < bumper_kilt_.data.size(); ++i) {
+    if (bumper_kilt_.data[i] > 0) {collision_ = true;}
+  }
 }
 
 void Environment::trackerDataCB(const tracker_msgs::TrackerData::ConstPtr&
@@ -156,6 +170,7 @@ int main(int argc, char** argv) {
   Environment environment(&nh);
 
   ros::Rate r(10);
+  environment.setupEnvironment();
 
   while (ros::ok()) {
     ros::spinOnce();

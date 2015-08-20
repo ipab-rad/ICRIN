@@ -2,8 +2,6 @@
 
 <launch>
         <arg name="robot" default="blackout" />
-        <node name="tracker" pkg="tracker" type="tracker" output="screen" clear_params="true">
-        </node>
         <group ns="$(arg robot)">
         <node name="rvo_wrapper" pkg="rvo_wrapper" type="rvo_wrapper" output="screen" clear_params="true">
         </node>
@@ -13,7 +11,6 @@
         </node>
         <node name="environment" pkg="environment" type="environment" output="screen" clear_params="true">
         <rosparam file="$(find icrin)/cfg/$(arg robot).yaml" command="load" />
-        <rosparam file="$(find icrin)/cfg/experiment.yaml" command="load" />
         </node>
         <node name="robot_comms" pkg="robot_comms" type="robot_comms" output="screen" clear_params="true">
         </node>

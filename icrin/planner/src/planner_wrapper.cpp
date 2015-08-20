@@ -26,6 +26,8 @@ PlannerWrapper::~PlannerWrapper() {
 void PlannerWrapper::init() {
   use_rvo_planner_ = false;
   planning_ = false;
+  arrived_ = false;
+  planner_init = false;
   curr_pose_.x = 0.0f;
   curr_pose_.y = 0.0f;
   goal_pose_ = curr_pose_;
@@ -39,6 +41,10 @@ void PlannerWrapper::init() {
 
 void PlannerWrapper::rosSetup() {
   cmd_vel_pub_ = nh_->advertise<geometry_msgs::Twist>("cmd_vel", 1, true);
+  planning_pub_ = nh_->advertise<std_msgs::Bool>(robot_name_ +
+                                                 "/environment/planning",
+                                                 1);
+  arrived_pub_ = nh_->advertise<std_msgs::Bool>("arrived", 1, true);
   srv_setup_new_planner_ =
     nh_->advertiseService("setup_new_planner",
                           &PlannerWrapper::setupNewPlanner, this);
@@ -57,14 +63,30 @@ void PlannerWrapper::rosSetup() {
                                  &PlannerWrapper::planningCB, this);
 }
 
+void PlannerWrapper::pubPlanning(bool planning) {
+  planning_ = planning;
+  std_msgs::Bool msg;
+  msg.data = planning;
+  planning_pub_.publish(msg);
+}
+
+void PlannerWrapper::pubArrived(bool arrived) {
+  arrived_ = arrived;
+  std_msgs::Bool msg;
+  msg.data = arrived;
+  arrived_pub_.publish(msg);
+}
+
 bool PlannerWrapper::setupNewPlanner(
   planner_msgs::SetupNewPlanner::Request& req,
   planner_msgs::SetupNewPlanner::Response& res) {
   res.res = true;
-  if (req.planner_type == req.RVO_PLANNER) {
+  if (req.planner_type == req.RVO_PLANNER && !planner_init) {
     rvo_planner_ = new RVOPlanner(nh_);
     use_rvo_planner_ = true;
-  } else if (req.planner_type == req.ROS_NAVIGATION) {
+    planner_init = true;
+    ROS_INFO("RVO Planner setup");
+  } else if (req.planner_type == req.ROS_NAVIGATION && !planner_init) {
     ROS_ERROR("ROS_NAVIGATION not implemented yet, sorry!");
   } else {res.res = false;}
   return true;
@@ -81,12 +103,18 @@ bool PlannerWrapper::setupRVOPlanner(
 void PlannerWrapper::plannerStep() {
   if (planning_) {
     if (use_rvo_planner_) {
-      rvo_planner_->planStep();
-      rvo_planner_vel_ = rvo_planner_->getPlannerVel();
+      ROS_INFO("Planner Wrapper- Planning!");
+      rvo_planner_vel_ = rvo_planner_->planStep();
       cmd_vel_.linear.x = rvo_planner_vel_.x;
       cmd_vel_.linear.y = rvo_planner_vel_.y;
     }
     cmd_vel_pub_.publish(cmd_vel_);
+    arrived_ = rvo_planner_->getArrived();
+  }
+  if (planning_ && arrived_) {
+    this->pubArrived(true);
+    this->pubPlanning(false);
+    ROS_INFO("Planner Wrapper- Robot %s reached goal", robot_name_.c_str());
   }
 }
 

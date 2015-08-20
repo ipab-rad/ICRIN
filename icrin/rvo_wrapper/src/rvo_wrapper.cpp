@@ -226,8 +226,12 @@ bool RVOWrapper::calcPrefVelocities(
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     for (uint32_t i = 0; i < planner_->getNumAgents(); ++i) {
       RVO::Vector2 goalVector = planner_goals_[i] - planner_->getAgentPosition(i);
-      if (RVO::absSq(goalVector) > 1.0f) {
-        goalVector = RVO::normalize(goalVector);
+      if (i == 0) {
+        if (RVO::absSq(goalVector) > 1.0f) {
+          goalVector = RVO::normalize(goalVector);
+        }
+      } else {
+        goalVector = planner_->getAgentVelocity(i);
       }
       planner_->setAgentPrefVelocity(i, goalVector);
     }
@@ -260,7 +264,7 @@ bool RVOWrapper::checkReachedGoal(
   rvo_wrapper_msgs::CheckReachedGoal::Response& res) {
   res.res = true;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
-    ROS_WARN("Goal: %f, %f. Dist: %f",
+    ROS_WARN("RVO Wrapper- Goal: %f, %f. Dist: %f",
              planner_goals_[0].x(), planner_goals_[0].y(),
              RVO::absSq(planner_->getAgentPosition(0) - planner_goals_[0]));
     if (RVO::absSq(planner_->getAgentPosition(0) - planner_goals_[0]) <

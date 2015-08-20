@@ -19,6 +19,7 @@ RVOPlanner::RVOPlanner(ros::NodeHandle* nh) {
 RVOPlanner::~RVOPlanner() {;}
 
 void RVOPlanner::init() {
+  arrived_ = false;
   PLANNER_ROBOT_ = 0;
   planner_settings_.request.sim_num = 0;
   planner_settings_.request.time_step = 0.1f;
@@ -103,9 +104,9 @@ bool RVOPlanner::checkReachedGoal() {
 
 void RVOPlanner::createPlanner() {
   create_planner_client_.call(planner_settings_);
-  if (planner_settings_.response.res) {
-    ROS_INFO("RVO Planner created");
-  } else { ROS_ERROR("Planner not created!"); }
+  if (!planner_settings_.response.res) {
+    ROS_ERROR("RVO Planner not created!");
+  }
 }
 
 // common_msgs::Vector2 RVOPlanner::getAgentPos(size_t agent_no) {
@@ -137,12 +138,15 @@ void RVOPlanner::setupEnvironment(std::vector<uint32_t> tracker_ids,
   agent_velocities_ = agent_vels;
 }
 
-void RVOPlanner::planStep() {
+common_msgs::Vector2 RVOPlanner::planStep() {
   this->createPlanner();
   this->setupPlanner();
   this->calcPrefVelocity();
   this->doSimStep();
+  arrived_ = this->checkReachedGoal();
+  planner_vel_ = this->getPlannerVel();
   this->deletePlanner();
+  return planner_vel_;
 }
 
 void RVOPlanner::setupPlanner() {

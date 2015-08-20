@@ -1,1 +1,6 @@
-track_robots: true
+track_robots: false,
+
+robots: {
+names: ['megatron', 'soundwave', 'starscream', 'blackout', 'thundercracker'],
+active: [false, false, false, true, false]
+}

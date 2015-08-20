@@ -1,5 +1,4 @@
 # Enable robot, and if they use bumpers
-active: false
 bumper: false
 amcl: false
 rvo_planner: true
