@@ -34,15 +34,22 @@ class Experiment {
   static void interrupt(int s);
   void pubPlanning();
   void pubGoals();
-  void pubPlans();
+  void pubPlans(bool setup_plan);
+  void planningCB(const std_msgs::Bool::ConstPtr& msg, const std::string& robot);
   bool setGoal(experiment_msgs::SetGoal::Request& req,
                experiment_msgs::SetGoal::Response& res);
   bool setPlan(experiment_msgs::SetPlan::Request& req,
                experiment_msgs::SetPlan::Response& res);
+  void setupPlan(size_t robot_no, uint16_t goal_no);
+  void setPlanning(size_t robot_no, bool planning)
+  {robots_planning_[robot_no] = planning;}
+  bool isPlanning(size_t robot_no) {return robots_planning_[robot_no];}
   bool checkReadyRobots();
   void stopExperiment();
+  void waitReturn();
   bool robotsReady() {return robots_ready_;}
   static bool isInterrupted() {return interrupted_;}
+  std::vector<std::string> getRobots() {return robots_;}
 
  private:
   // Flags
@@ -52,14 +59,14 @@ class Experiment {
   // Variables
   std::vector<std::string> robots_;
   size_t goal_no_;
-  // std::vector<geometry_msgs::Pose2D> goals_;
   experiment_msgs::Goals goals_;
-  // std::vector<experiment_msgs::Plan> plans_;
   experiment_msgs::Plans plans_;
+  experiment_msgs::Plans setup_plans_;
 
   // ROS
   ros::NodeHandle* nh_;
   std::vector<ros::Publisher> planning_pub_;
+  std::vector<ros::Subscriber> planning_sub_;
   std::vector<bool> robots_planning_;
   ros::Publisher goals_pub_;
   ros::Publisher plans_pub_;

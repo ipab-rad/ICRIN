@@ -264,7 +264,7 @@ bool RVOWrapper::checkReachedGoal(
   rvo_wrapper_msgs::CheckReachedGoal::Response& res) {
   res.res = true;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
-    ROS_WARN("Goal: %f, %f. Dist: %f",
+    ROS_WARN("RVO Wrapper- Goal: %f, %f. Dist: %f",
              planner_goals_[0].x(), planner_goals_[0].y(),
              RVO::absSq(planner_->getAgentPosition(0) - planner_goals_[0]));
     if (RVO::absSq(planner_->getAgentPosition(0) - planner_goals_[0]) <

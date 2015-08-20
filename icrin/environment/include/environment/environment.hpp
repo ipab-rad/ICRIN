@@ -33,6 +33,7 @@ class Environment {
   void init();
   void rosSetup();
   void loadParams();
+  void setupEnvironment();
 
   void pubRobotPose();
   void pubRobotGoal();

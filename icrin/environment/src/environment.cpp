@@ -45,7 +45,7 @@ void Environment::rosSetup() {
                               robot_name_ + "/cmd_vel", 1, true);
   environment_data_pub_ = nh_->advertise<environment_msgs::EnvironmentData>(
                             "data", 1, true);
-  planning_pub_ = nh_->advertise<std_msgs::Bool>("planning", 1, true);
+  planning_pub_ = nh_->advertise<std_msgs::Bool>("planning", 1);
   ros::service::waitForService(robot_name_ + "/planner/setup_new_planner");
   setup_new_planner_ = nh_->serviceClient<planner_msgs::SetupNewPlanner>(
                          robot_name_ + "/planner/setup_new_planner", true);
@@ -73,10 +73,17 @@ void Environment::loadParams() {
   ros::param::param("/experiment/track_robots", track_robots_, false);
   // Robot specific
   ros::param::set("environment/ready", true);
+  ros::param::param("environment/amcl", amcl_, true);
+  ros::param::param("environment/bumper", bumper_, false);
+  ros::param::param("environment/rvo_planner", rvo_planner_, true);
+}
+
+void Environment::setupEnvironment() {
+  planner_msgs::SetupNewPlanner new_planner;
+  if (rvo_planner_) {
+    new_planner.request.planner_type = new_planner.request.RVO_PLANNER;
   }
-  ros::param::param(robot_name_ + "/environment/amcl", amcl_, true);
-  ros::param::param(robot_name_ + "/environment/bumper", bumper_, false);
-  ros::param::param(robot_name_ + "/environment/rvo_planner", rvo_planner_, true);
+  setup_new_planner_.call(new_planner);
 }
 
 void Environment::pubRobotPose() {
@@ -163,6 +170,7 @@ int main(int argc, char** argv) {
   Environment environment(&nh);
 
   ros::Rate r(10);
+  environment.setupEnvironment();
 
   while (ros::ok()) {
     ros::spinOnce();
