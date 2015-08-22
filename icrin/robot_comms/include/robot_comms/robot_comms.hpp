@@ -38,7 +38,6 @@ class RobotComms {
  private:
   // Variables
   std::string robot_name_;
-  std::vector<std::string> robot_names_;
   std::vector<std::string> active_robots_;
 
   // ROS

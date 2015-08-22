@@ -12,9 +12,9 @@ Environment::Environment(ros::NodeHandle* nh) {
   nh_ = nh;
   robot_name_ = ros::this_node::getNamespace();
   robot_name_.erase (0, 1); // Remove 1 forward slash from robot_name
+  this->loadParams();
   this->init();
   this->rosSetup();
-  this->loadParams();
 }
 
 Environment::~Environment() {
@@ -35,6 +35,19 @@ void Environment::init() {
   robot_target_goal_.theta = 0.0f;
   robot_cmd_velocity_.linear = zero_vect_;
   robot_cmd_velocity_.angular = zero_vect_;
+
+  bool active = false;
+  for (size_t i = 0; i < robots_.size(); ++i) {
+    if (("/" + robots_[i]).compare(robot_name_) == 0) {
+      robot_id_ = i;
+      active = true;
+      break;
+    }
+  }
+  if (!active) {
+    ROS_ERROR("ERROR: Robot launched but not meant to be active!");
+    ros::shutdown();
+  }
 }
 
 void Environment::rosSetup() {
@@ -71,6 +84,7 @@ void Environment::rosSetup() {
 void Environment::loadParams() {
   // Experiment
   ros::param::param("/experiment/track_robots", track_robots_, false);
+  ros::param::get("/experiment/robots", robots_);
   // Robot specific
   ros::param::set("environment/ready", true);
   ros::param::param("environment/amcl", amcl_, true);

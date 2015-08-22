@@ -57,6 +57,7 @@ class Environment {
   bool collision_;
 
   // Variables
+  std::vector<std::string> robots_;
   std::string robot_name_;
   geometry_msgs::Vector3 zero_vect_;
   std_msgs::Int32MultiArray bumper_kilt_;
