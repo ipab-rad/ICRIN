@@ -12,9 +12,9 @@ Environment::Environment(ros::NodeHandle* nh) {
   nh_ = nh;
   robot_name_ = ros::this_node::getNamespace();
   robot_name_.erase (0, 1); // Remove 1 forward slash from robot_name
+  this->loadParams();
   this->init();
   this->rosSetup();
-  this->loadParams();
 }
 
 Environment::~Environment() {
@@ -23,6 +23,8 @@ Environment::~Environment() {
 
 void Environment::init() {
   planning_ = false;
+  arrived_ = false;
+  goal_id_ = 0;
   // ROS
   zero_vect_.x = 0.0f;
   zero_vect_.y = 0.0f;
@@ -35,6 +37,19 @@ void Environment::init() {
   robot_target_goal_.theta = 0.0f;
   robot_cmd_velocity_.linear = zero_vect_;
   robot_cmd_velocity_.angular = zero_vect_;
+
+  bool active = false;
+  for (size_t i = 0; i < robots_.size(); ++i) {
+    if (("/" + robots_[i]).compare(robot_name_) == 0) {
+      robot_id_ = i;
+      active = true;
+      break;
+    }
+  }
+  if (!active) {
+    ROS_ERROR("ERROR: Robot launched but not meant to be active!");
+    ros::shutdown();
+  }
 }
 
 void Environment::rosSetup() {
@@ -49,8 +64,16 @@ void Environment::rosSetup() {
   ros::service::waitForService(robot_name_ + "/planner/setup_new_planner");
   setup_new_planner_ = nh_->serviceClient<planner_msgs::SetupNewPlanner>(
                          robot_name_ + "/planner/setup_new_planner", true);
+  // Experiment
+  goals_sub_ = nh_->subscribe("/experiment/goals", 1000,
+                              &Environment::goalsCB, this);
+  plans_sub_ = nh_->subscribe("/experiment/plans", 1000,
+                              &Environment::plansCB, this);
+  // Environment
   planning_sub_ = nh_->subscribe(robot_name_ + "/environment/planning", 1000,
                                  &Environment::planningCB, this);
+  arrived_sub_ = nh_->subscribe(robot_name_ + "/environment/arrived", 1000,
+                                &Environment::arrivedCB, this);
   // Youbot
   bumper_kilt_sub_ = nh_->subscribe(robot_name_ + "/bumper_kilt", 1000,
                                     &Environment::bumperKiltCB, this);
@@ -71,6 +94,7 @@ void Environment::rosSetup() {
 void Environment::loadParams() {
   // Experiment
   ros::param::param("/experiment/track_robots", track_robots_, false);
+  ros::param::get("/experiment/robots", robots_);
   // Robot specific
   ros::param::set("environment/ready", true);
   ros::param::param("environment/amcl", amcl_, true);
@@ -84,6 +108,12 @@ void Environment::setupEnvironment() {
     new_planner.request.planner_type = new_planner.request.RVO_PLANNER;
   }
   setup_new_planner_.call(new_planner);
+  if (goals_.size() > 0) {
+    robot_target_goal_ = goals_[goal_id_];
+  } else {
+    ROS_ERROR("Environment- First goal cannot be set");
+    ros::shutdown();
+  }
 }
 
 void Environment::pubRobotPose() {
@@ -103,6 +133,50 @@ void Environment::pubRobotVelocity() {
     robot_cmd_velocity_.angular = zero_vect_;
   }
   robot_cmd_velocity_pub_.publish(robot_cmd_velocity_);
+}
+
+void Environment::pubEnvironmentData() {
+  environment_msgs::EnvironmentData env_data;
+  uint64_t nrobots = comms_data_.robot_poses.size();
+  uint64_t ntrackers = tracker_data_.identity.size();
+  // Add other robots info
+  if (!track_robots_) {
+    env_data.tracker_ids.resize(nrobots, 0);  // If robots are not tracked
+    env_data.agent_poses = comms_data_.robot_poses;
+    env_data.agent_vels = comms_data_.robot_vels;
+  }
+  // Add people tracking info
+  for (uint64_t i = 0; i < ntrackers; ++i) {
+    env_data.tracker_ids.push_back(tracker_data_.identity[i]);
+    env_data.agent_poses.push_back(tracker_data_.agent_position[i]);
+    env_data.agent_vels.push_back(tracker_data_.agent_avg_velocity[i]);
+  }
+  environment_data_pub_.publish(env_data);
+  this->pubRobotPose();
+  this->pubRobotGoal();
+  this->pubRobotVelocity();
+}
+
+void Environment::goalsCB(const experiment_msgs::Goals::ConstPtr& msg) {
+  goals_ = msg->goal;
+}
+
+void Environment::plansCB(const experiment_msgs::Plans::ConstPtr& msg) {
+  curr_plan_ = msg->plan[robot_id_];
+}
+
+void Environment::planningCB(const std_msgs::Bool::ConstPtr& msg) {
+  bool plan_now = msg->data;
+  if (!planning_ && plan_now) {
+    ROS_WARN("Robot %s now planning!", robot_name_.c_str());
+  } else if (planning_ && !plan_now) {
+    ROS_WARN("Robot %s stop planning!", robot_name_.c_str());
+  }
+  planning_ = plan_now;
+}
+
+void Environment::arrivedCB(const std_msgs::Bool::ConstPtr& msg) {
+  arrived_ = msg->data;
 }
 
 void Environment::bumperKiltCB(const std_msgs::Int32MultiArray::ConstPtr& msg) {
@@ -132,36 +206,20 @@ void Environment::plannerCmdVelCB(const geometry_msgs::Twist::ConstPtr& msg) {
   this->pubRobotVelocity();
 }
 
-void Environment::planningCB(const std_msgs::Bool::ConstPtr& msg) {
-  bool plan_now = msg->data;
-  if (!planning_ && plan_now) {
-    ROS_WARN("Robot %s now planning!", robot_name_.c_str());
-  } else if (planning_ && !plan_now) {
-    ROS_WARN("Robot %s stop planning!", robot_name_.c_str());
+void Environment::checkGoalPlan() {
+  if (!arrived_) {
+    robot_target_goal_ = goals_[curr_plan_.sequence[goal_id_]];
+  } else {
+    uint16_t next_goal = goal_id_ + 1;
+    if (next_goal < curr_plan_.sequence.size()) {
+      robot_target_goal_ = goals_[curr_plan_.sequence[next_goal]];
+      goal_id_ = next_goal;
+      arrived_ = false;
+    } else if (curr_plan_.repeat) {
+      goal_id_ = 0;
+      arrived_ = false;
+    }
   }
-  planning_ = plan_now;
-}
-
-void Environment::pubEnvironmentData() {
-  environment_msgs::EnvironmentData env_data;
-  uint64_t nrobots = comms_data_.robot_poses.size();
-  uint64_t ntrackers = tracker_data_.identity.size();
-  // Add other robots info
-  if (!track_robots_) {
-    env_data.tracker_ids.resize(nrobots, 0);  // If robots are not tracked
-    env_data.agent_poses = comms_data_.robot_poses;
-    env_data.agent_vels = comms_data_.robot_vels;
-  }
-  // Add people tracking info
-  for (uint64_t i = 0; i < ntrackers; ++i) {
-    env_data.tracker_ids.push_back(tracker_data_.identity[i]);
-    env_data.agent_poses.push_back(tracker_data_.agent_position[i]);
-    env_data.agent_vels.push_back(tracker_data_.agent_avg_velocity[i]);
-  }
-  environment_data_pub_.publish(env_data);
-  this->pubRobotPose();
-  this->pubRobotGoal();
-  this->pubRobotVelocity();
 }
 
 int main(int argc, char** argv) {
@@ -174,6 +232,7 @@ int main(int argc, char** argv) {
 
   while (ros::ok()) {
     ros::spinOnce();
+    environment.checkGoalPlan();
     environment.pubEnvironmentData();
     r.sleep();
   }

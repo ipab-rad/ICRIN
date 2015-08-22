@@ -116,16 +116,7 @@ void Experiment::rosSetup() {
 
 void Experiment::loadParams() {
   // Store active robot names
-  std::vector<std::string> all_robots;
-  ros::param::get("/experiment/robots/names", all_robots);
-  std::vector<bool> active;
-  ros::param::get("/experiment/robots/active", active);
-  for (uint8_t i = 0; i < all_robots.size(); ++i) {
-    if (active[i]) {
-      robots_.push_back(all_robots[i]);
-      ROS_INFO("%s expected", all_robots[i].c_str());
-    }
-  }
+  ros::param::get("/experiment/robots", robots_);
 
   // Store navigation goals
   int goal_n;
@@ -133,6 +124,7 @@ void Experiment::loadParams() {
   goal_no_ = static_cast<size_t>(goal_n);
   if (goal_no_ == 0) {
     ROS_ERROR("Experiment parameters not loaded properly: No Goals!");
+    ros::shutdown();
   } else {
     for (size_t i = 0; i < goal_no_; ++i) {
       geometry_msgs::Pose2D goal;
@@ -144,6 +136,7 @@ void Experiment::loadParams() {
         goals_.goal.push_back(goal);
       } else {
         ROS_ERROR("Incorrect number of goals!");
+        ros::shutdown();
       }
     }
   }

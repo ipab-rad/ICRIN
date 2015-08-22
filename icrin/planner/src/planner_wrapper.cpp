@@ -44,7 +44,8 @@ void PlannerWrapper::rosSetup() {
   planning_pub_ = nh_->advertise<std_msgs::Bool>(robot_name_ +
                                                  "/environment/planning",
                                                  1);
-  arrived_pub_ = nh_->advertise<std_msgs::Bool>("arrived", 1, true);
+  arrived_pub_ = nh_->advertise<std_msgs::Bool>(robot_name_ +
+                                                "/environment/arrived", 1);
   srv_setup_new_planner_ =
     nh_->advertiseService("setup_new_planner",
                           &PlannerWrapper::setupNewPlanner, this);

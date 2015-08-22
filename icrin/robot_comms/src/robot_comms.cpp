@@ -40,16 +40,15 @@ void RobotComms::rosSetup() {
 }
 
 void RobotComms::loadParams() {
-  ros::param::get("/experiment/robots/names", robot_names_);
+  std::vector<std::string> robot_names;
+  ros::param::get("/experiment/robots", robot_names);
   // TODO: Read active robots from experiment parameters
-  for (uint8_t i = 0; i < robot_names_.size(); ++i) {
-    bool active;
-    ros::param::param("/" + robot_names_[i] + "/environment/active", active, false);
-    if (active
-        && (("/" + robot_names_[i]).compare(robot_name_) != 0)
-       ) {
-      ROS_INFO("%s active!", robot_names_[i].c_str());
-      active_robots_.push_back(robot_names_[i]);
+  for (uint8_t i = 0; i < robot_names.size(); ++i) {
+    if (
+      (("/" + robot_names[i]).compare(robot_name_) != 0)
+    ) {
+      ROS_INFO("%s active!", robot_names[i].c_str());
+      active_robots_.push_back(robot_names[i]);
     }
   }
   ROS_INFO("%s is listening to %lu other robots",
