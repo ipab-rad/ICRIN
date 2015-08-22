@@ -48,6 +48,8 @@
   <run_depend>planner_msgs</run_depend>
   <build_depend>tracker_msgs</build_depend>
   <run_depend>tracker_msgs</run_depend>
+  <build_depend>experiment_msgs</build_depend>
+  <run_depend>experiment_msgs</run_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

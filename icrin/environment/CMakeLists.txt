@@ -8,7 +8,8 @@ find_package(catkin REQUIRED
   roscpp
   environment_msgs
   planner_msgs
-  tracker_msgs)
+  tracker_msgs
+  experiment_msgs)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -110,7 +111,8 @@ add_executable(environment src/environment.cpp)
 add_dependencies(environment
   environment_msgs_gencpp
   planner_msgs_gencpp
-  tracker_msgs_gencpp)
+  tracker_msgs_gencpp
+  experiment_msgs_gencpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(environment

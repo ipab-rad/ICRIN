@@ -124,6 +124,7 @@ void Experiment::loadParams() {
   goal_no_ = static_cast<size_t>(goal_n);
   if (goal_no_ == 0) {
     ROS_ERROR("Experiment parameters not loaded properly: No Goals!");
+    ros::shutdown();
   } else {
     for (size_t i = 0; i < goal_no_; ++i) {
       geometry_msgs::Pose2D goal;
@@ -135,6 +136,7 @@ void Experiment::loadParams() {
         goals_.goal.push_back(goal);
       } else {
         ROS_ERROR("Incorrect number of goals!");
+        ros::shutdown();
       }
     }
   }
