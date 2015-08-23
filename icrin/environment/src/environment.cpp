@@ -53,17 +53,20 @@ void Environment::init() {
 }
 
 void Environment::rosSetup() {
-  curr_pose_pub_ = nh_->advertise<geometry_msgs::Pose2D>("curr_pose", 1, true);
-  target_goal_pub_ = nh_->advertise<geometry_msgs::Pose2D>("target_goal", 1,
-                                                           true);
-  robot_cmd_velocity_pub_ = nh_->advertise<geometry_msgs::Twist>(
-                              robot_name_ + "/cmd_vel", 1, true);
-  environment_data_pub_ = nh_->advertise<environment_msgs::EnvironmentData>(
-                            "data", 1, true);
-  planning_pub_ = nh_->advertise<std_msgs::Bool>("planning", 1);
+  curr_pose_pub_ = nh_->advertise<geometry_msgs::Pose2D>
+                   ("curr_pose", 1, true);
+  target_goal_pub_ = nh_->advertise<geometry_msgs::Pose2D>
+                     ("target_goal", 1, true);
+  robot_cmd_velocity_pub_ = nh_->advertise<geometry_msgs::Twist>
+                            (robot_name_ + "/cmd_vel", 1, true);
+  environment_data_pub_ = nh_->advertise<environment_msgs::EnvironmentData>
+                          ("data", 1, true);
+  planning_pub_ = nh_->advertise<std_msgs::Bool>
+                  ("planning", 1);
+  // Planner
   ros::service::waitForService(robot_name_ + "/planner/setup_new_planner");
-  setup_new_planner_ = nh_->serviceClient<planner_msgs::SetupNewPlanner>(
-                         robot_name_ + "/planner/setup_new_planner", true);
+  setup_new_planner_ = nh_->serviceClient<planner_msgs::SetupNewPlanner>
+                       (robot_name_ + "/planner/setup_new_planner", true);
   // Experiment
   goals_sub_ = nh_->subscribe("/experiment/goals", 1000,
                               &Environment::goalsCB, this);

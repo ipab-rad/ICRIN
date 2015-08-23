@@ -8,6 +8,7 @@
         <node name="amcl_wrapper" pkg="amcl_wrapper" type="amcl_wrapper" output="screen" clear_params="true">
         </node>
         <node name="planner" pkg="planner" type="planner" output="screen" clear_params="true">
+        <rosparam file="$(find icrin)/cfg/rvo_params.yaml" command="load" />
         </node>
         <node name="environment" pkg="environment" type="environment" output="screen" clear_params="true">
         <rosparam file="$(find icrin)/cfg/$(arg robot).yaml" command="load" />

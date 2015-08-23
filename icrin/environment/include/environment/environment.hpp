@@ -17,9 +17,6 @@
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Pose2D.h>
 
-// #include "environment/youbot_wrapper.hpp"
-// #include "environment/amcl_wrapper.hpp"
-// #include "environment/bumper_wrapper.hpp"
 #include <environment_msgs/EnvironmentData.h>
 #include <tracker_msgs/TrackerData.h>
 #include <robot_comms_msgs/CommsData.h>

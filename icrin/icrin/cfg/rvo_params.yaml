@@ -1,0 +1,7 @@
+  time_step: 0.1f
+  neighbor_dist: 2.0f
+  max_neighbors: 20
+  time_horizon_agent: 5.0f
+  time_horizon_obst: 5.0f
+  radius: 0.5f
+  max_speed: 0.3f
