@@ -17,9 +17,7 @@
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Pose2D.h>
 
-// #include "environment/youbot_wrapper.hpp"
-// #include "environment/amcl_wrapper.hpp"
-// #include "environment/bumper_wrapper.hpp"
+#include <model_msgs/ModelHypotheses.h>
 #include <environment_msgs/EnvironmentData.h>
 #include <tracker_msgs/TrackerData.h>
 #include <robot_comms_msgs/CommsData.h>
@@ -42,6 +40,7 @@ class Environment {
   void pubRobotGoal();
   void pubRobotVelocity();
   void pubEnvironmentData();
+  void pubModelHypotheses();
 
   void goalsCB(const experiment_msgs::Goals::ConstPtr& msg);
   void plansCB(const experiment_msgs::Plans::ConstPtr& msg);
@@ -54,11 +53,13 @@ class Environment {
   void plannerCmdVelCB(const geometry_msgs::Twist::ConstPtr& msg);
 
   void checkGoalPlan();
+  void modelStep();
 
  private:
   // Flags
   bool planning_;
   bool arrived_;
+  bool modelling_;
   bool track_robots_;
   bool amcl_;
   bool bumper_;
@@ -68,6 +69,7 @@ class Environment {
   // Variables
   std::vector<std::string> robots_;
   std::string robot_name_;
+  size_t agent_no_;
   uint16_t robot_id_;
   uint16_t goal_id_;
   geometry_msgs::Vector3 zero_vect_;
@@ -81,6 +83,7 @@ class Environment {
   experiment_msgs::Plan curr_plan_;
   geometry_msgs::Twist robot_cmd_velocity_;
   geometry_msgs::Twist planner_cmd_velocity_;
+  model_msgs::ModelHypotheses model_hypotheses_;
 
   // ROS
   ros::NodeHandle* nh_;
@@ -89,6 +92,7 @@ class Environment {
   ros::Publisher robot_cmd_velocity_pub_;
   ros::Publisher environment_data_pub_;
   ros::Publisher planning_pub_;
+  ros::Publisher model_pub_;
   ros::ServiceClient setup_new_planner_;
   ros::Subscriber goals_sub_;
   ros::Subscriber plans_sub_;

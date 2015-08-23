@@ -33,27 +33,24 @@ void RVOPlanner::init() {
 
 void RVOPlanner::rosSetup() {
   ros::service::waitForService(robot_name_ + "/rvo_wrapper/add_agent");
-  ros::service::waitForService(robot_name_ + "/rvo_wrapper/check_reached_goal");
   ros::service::waitForService(robot_name_ + "/rvo_wrapper/calc_pref_velocities");
+  ros::service::waitForService(robot_name_ + "/rvo_wrapper/check_reached_goal");
   ros::service::waitForService(robot_name_ + "/rvo_wrapper/create_rvosim");
   ros::service::waitForService(robot_name_ + "/rvo_wrapper/delete_sim_vector");
   ros::service::waitForService(robot_name_ + "/rvo_wrapper/do_step");
-  ros::service::waitForService(robot_name_ + "/rvo_wrapper/get_agent_position");
   ros::service::waitForService(robot_name_ + "/rvo_wrapper/get_agent_velocity");
-  ros::service::waitForService(robot_name_ + "/rvo_wrapper/get_num_agents");
   ros::service::waitForService(robot_name_ + "/rvo_wrapper/set_agent_goals");
-  ros::service::waitForService(robot_name_ + "/rvo_wrapper/set_agent_defaults");
   ros::service::waitForService(robot_name_ + "/rvo_wrapper/set_agent_position");
-  ros::service::waitForService(robot_name_ + "/rvo_wrapper/set_time_step");
+  ros::service::waitForService(robot_name_ + "/rvo_wrapper/set_agent_velocity");
   add_planner_agent_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::AddAgent>(
       robot_name_ + "/rvo_wrapper/add_agent", true);
-  check_reached_goal_client_ =
-    nh_->serviceClient<rvo_wrapper_msgs::CheckReachedGoal>(
-      robot_name_ + "/rvo_wrapper/check_reached_goal", true);
   calc_pref_velocities_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::CalcPrefVelocities>(
       robot_name_ + "/rvo_wrapper/calc_pref_velocities", true);
+  check_reached_goal_client_ =
+    nh_->serviceClient<rvo_wrapper_msgs::CheckReachedGoal>(
+      robot_name_ + "/rvo_wrapper/check_reached_goal", true);
   create_planner_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::CreateRVOSim>(
       robot_name_ + "/rvo_wrapper/create_rvosim", true);
@@ -63,30 +60,18 @@ void RVOPlanner::rosSetup() {
   do_planner_step_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::DoStep>(
       robot_name_ + "/rvo_wrapper/do_step", true);
-  // get_agent_pos_client_ =
-  //   nh_->serviceClient<rvo_wrapper_msgs::GetAgentPosition>(
-  //     robot_name_ + "/rvo_wrapper/get_agent_position", true);
   get_agent_vel_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::GetAgentVelocity>(
       robot_name_ + "/rvo_wrapper/get_agent_velocity", true);
-  get_num_agents_ =
-    nh_->serviceClient<rvo_wrapper_msgs::GetNumAgents>(
-      robot_name_ + "/rvo_wrapper/get_num_agents", true);
   set_agent_goals_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::SetAgentGoals>(
       robot_name_ + "/rvo_wrapper/set_agent_goals", true);
-  set_agent_defaults_ =
-    nh_->serviceClient<rvo_wrapper_msgs::SetAgentDefaults>(
-      robot_name_ + "/rvo_wrapper/set_agent_defaults", true);
   set_agent_position_ =
     nh_->serviceClient<rvo_wrapper_msgs::SetAgentPosition>(
       robot_name_ + "/rvo_wrapper/set_agent_position", true);
   set_agent_velocity_ =
     nh_->serviceClient<rvo_wrapper_msgs::SetAgentVelocity>(
       robot_name_ + "/rvo_wrapper/set_agent_velocity", true);
-  set_time_step_ =
-    nh_->serviceClient<rvo_wrapper_msgs::SetTimeStep>(
-      robot_name_ + "/rvo_wrapper/set_time_step", true);
 }
 
 size_t RVOPlanner::addPlannerAgent(common_msgs::Vector2 agent_pos) {
@@ -104,17 +89,10 @@ bool RVOPlanner::checkReachedGoal() {
 
 void RVOPlanner::createPlanner() {
   create_planner_client_.call(planner_settings_);
-  if (!planner_settings_.response.res) {
+  if (!planner_settings_.response.ok) {
     ROS_ERROR("RVO Planner not created!");
   }
 }
-
-// common_msgs::Vector2 RVOPlanner::getAgentPos(size_t agent_no) {
-//   rvo_wrapper_msgs::GetAgentPosition msg;
-//   msg.request.agent_id = agent_no;
-//   get_agent_pos_client_.call(msg);
-//   return msg.response.position;
-// }
 
 void RVOPlanner::setPlannerSettings(float time_step,
                                     rvo_wrapper_msgs::AgentDefaults defaults) {

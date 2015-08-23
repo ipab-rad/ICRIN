@@ -24,6 +24,7 @@ Environment::~Environment() {
 void Environment::init() {
   planning_ = false;
   arrived_ = false;
+  modelling_ = true;
   goal_id_ = 0;
   // ROS
   zero_vect_.x = 0.0f;
@@ -53,17 +54,23 @@ void Environment::init() {
 }
 
 void Environment::rosSetup() {
-  curr_pose_pub_ = nh_->advertise<geometry_msgs::Pose2D>("curr_pose", 1, true);
-  target_goal_pub_ = nh_->advertise<geometry_msgs::Pose2D>("target_goal", 1,
-                                                           true);
-  robot_cmd_velocity_pub_ = nh_->advertise<geometry_msgs::Twist>(
-                              robot_name_ + "/cmd_vel", 1, true);
-  environment_data_pub_ = nh_->advertise<environment_msgs::EnvironmentData>(
-                            "data", 1, true);
-  planning_pub_ = nh_->advertise<std_msgs::Bool>("planning", 1);
+  curr_pose_pub_ = nh_->advertise<geometry_msgs::Pose2D>
+                   ("curr_pose", 1, true);
+  target_goal_pub_ = nh_->advertise<geometry_msgs::Pose2D>
+                     ("target_goal", 1, true);
+  robot_cmd_velocity_pub_ = nh_->advertise<geometry_msgs::Twist>
+                            (robot_name_ + "/cmd_vel", 1, true);
+  environment_data_pub_ = nh_->advertise<environment_msgs::EnvironmentData>
+                          ("data", 1, true);
+  planning_pub_ = nh_->advertise<std_msgs::Bool>
+                  ("planning", 1);
+  // Model
+  model_pub_ = nh_->advertise<model_msgs::ModelHypotheses>
+               (robot_name_ + "/model/hypotheses", 1);
+  // Planner
   ros::service::waitForService(robot_name_ + "/planner/setup_new_planner");
-  setup_new_planner_ = nh_->serviceClient<planner_msgs::SetupNewPlanner>(
-                         robot_name_ + "/planner/setup_new_planner", true);
+  setup_new_planner_ = nh_->serviceClient<planner_msgs::SetupNewPlanner>
+                       (robot_name_ + "/planner/setup_new_planner", true);
   // Experiment
   goals_sub_ = nh_->subscribe("/experiment/goals", 1000,
                               &Environment::goalsCB, this);
@@ -151,10 +158,23 @@ void Environment::pubEnvironmentData() {
     env_data.agent_poses.push_back(tracker_data_.agent_position[i]);
     env_data.agent_vels.push_back(tracker_data_.agent_avg_velocity[i]);
   }
+  agent_no_ = env_data.agent_poses.size() + 1;
   environment_data_pub_.publish(env_data);
   this->pubRobotPose();
   this->pubRobotGoal();
   this->pubRobotVelocity();
+}
+
+void Environment::pubModelHypotheses() {
+  // Temporary Modelling test request
+  model_hypotheses_.agents.push_back(0);  // Robot Agent
+  for (size_t i = 0; i < agent_no_; ++i) {
+    model_hypotheses_.agents.push_back(i + 1);  // Detected Agents
+  }
+  model_hypotheses_.goals = true;
+  model_hypotheses_.awareness = false;
+  model_hypotheses_.goal_hypothesis.sampling = false;
+  model_hypotheses_.goal_hypothesis.goal_sequence = goals_;
 }
 
 void Environment::goalsCB(const experiment_msgs::Goals::ConstPtr& msg) {
@@ -222,6 +242,14 @@ void Environment::checkGoalPlan() {
   }
 }
 
+void Environment::modelStep() {
+  if (modelling_) {
+    // Check what we want to model
+    // Publish hypotheses request
+    this->pubModelHypotheses();
+  }
+}
+
 int main(int argc, char** argv) {
   ros::init(argc, argv, "environment");
   ros::NodeHandle nh("environment");
@@ -234,6 +262,7 @@ int main(int argc, char** argv) {
     ros::spinOnce();
     environment.checkGoalPlan();
     environment.pubEnvironmentData();
+    environment.modelStep();
     r.sleep();
   }
 

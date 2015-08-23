@@ -40,6 +40,16 @@
   <!-- Use test_depend for packages you need only for testing: -->
   <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>roscpp</build_depend>
+  <run_depend>roscpp</run_depend>
+  <build_depend>common_msgs</build_depend>
+  <run_depend>common_msgs</run_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <build_depend>environment_msgs</build_depend>
+  <run_depend>environment_msgs</run_depend>
+  <build_depend>model_msgs</build_depend>
+  <run_depend>model_msgs</run_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

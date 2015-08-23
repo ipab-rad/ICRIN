@@ -240,12 +240,17 @@ bool RVOWrapper::calcPrefVelocities(
         (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
       for (uint32_t j = req.sim_ids.front(); j < req.sim_ids.back(); ++j) {
         for (uint32_t i = 0; i < sim_vect_[j]->getNumAgents(); ++i) {
-          RVO::Vector2 goalVector = sim_vect_goals_[j][i] -
-                                    sim_vect_[j]->getAgentPosition(i);
-          if (RVO::absSq(goalVector) > 1.0f) {
-            goalVector = RVO::normalize(goalVector);
+          if (sim_vect_goals_[j][i] != null_vect_) { // Goal has been set
+            RVO::Vector2 goalVector = sim_vect_goals_[j][i] -
+                                      sim_vect_[j]->getAgentPosition(i);
+            if (RVO::absSq(goalVector) > 1.0f) {
+              goalVector = RVO::normalize(goalVector);
+            }
+            sim_vect_[j]->setAgentPrefVelocity(i, goalVector);
+          } else { // Unmodelled agents have no goals, so pref vel is current vel
+            sim_vect_[j]->setAgentPrefVelocity(
+              i, sim_vect_[j]->getAgentVelocity(i));
           }
-          sim_vect_[j]->setAgentPrefVelocity(i, goalVector);
         }
       }
     } else {
@@ -284,7 +289,7 @@ bool RVOWrapper::checkReachedGoal(
 bool RVOWrapper::createRVOSim(
   rvo_wrapper_msgs::CreateRVOSim::Request& req,
   rvo_wrapper_msgs::CreateRVOSim::Response& res) {
-  res.res = true;
+  res.ok = true;
   if (req.sim_num == 0 && !planner_init_) { // If Planner
     if (req.time_step == 0.0f) { // If defaults not set
       planner_ = new RVO::RVOSimulator();
@@ -325,7 +330,7 @@ bool RVOWrapper::createRVOSim(
     }
   } else if (planner_init_) {
     ROS_WARN("Planner already initialised!");
-    res.res = false;
+    res.ok = false;
   }
   return true;
 }
@@ -862,9 +867,10 @@ bool RVOWrapper::setAgentGoals(
         (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
       for (uint32_t j = req.sim_ids.front(); j < req.sim_ids.back(); ++j) {
         uint32_t num_agents = sim_vect_[req.sim_ids[j]]->getNumAgents();
+        size_t sim_no = j - req.sim_ids.front();
         for (uint32_t i = 0; i < num_agents; ++i) { // Cycle through sim agents
-          sim_vect_goals_[req.sim_ids[j]][i] = RVO::Vector2(req.sim[j].agent[i].x,
-                                                            req.sim[j].agent[i].y);
+          sim_vect_goals_[j][i] = RVO::Vector2(req.sim[sim_no].agent[i].x,
+                                               req.sim[sim_no].agent[i].y);
         }
       }
     } else {
