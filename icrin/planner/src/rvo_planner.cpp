@@ -104,7 +104,7 @@ bool RVOPlanner::checkReachedGoal() {
 
 void RVOPlanner::createPlanner() {
   create_planner_client_.call(planner_settings_);
-  if (!planner_settings_.response.res) {
+  if (!planner_settings_.response.ok) {
     ROS_ERROR("RVO Planner not created!");
   }
 }

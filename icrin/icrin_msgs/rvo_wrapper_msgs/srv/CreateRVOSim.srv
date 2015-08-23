@@ -2,5 +2,5 @@ uint32 sim_num
 float32 time_step
 rvo_wrapper_msgs/AgentDefaults defaults
 ---
-bool res
+bool ok
 uint32[] sim_ids
