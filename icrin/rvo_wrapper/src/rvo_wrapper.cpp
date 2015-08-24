@@ -272,7 +272,7 @@ bool RVOWrapper::checkReachedGoal(
   rvo_wrapper_msgs::CheckReachedGoal::Response& res) {
   res.res = true;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
-    ROS_WARN("RVO Wrapper- Goal: %f, %f. Dist: %f",
+    ROS_INFO("RVO Wrapper- Goal: %f, %f. Dist: %f",
              planner_goals_[0].x(), planner_goals_[0].y(),
              RVO::absSq(planner_->getAgentPosition(0) - planner_goals_[0]));
     if (RVO::absSq(planner_->getAgentPosition(0) - planner_goals_[0]) <
@@ -343,7 +343,6 @@ bool RVOWrapper::deleteSimVector(
   rvo_wrapper_msgs::DeleteSimVector::Response& res) {
   res.res = true;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
-    ROS_INFO("Deleting Planner");
     delete planner_;
     planner_ = NULL;
     planner_init_ = false;
@@ -360,7 +359,7 @@ bool RVOWrapper::deleteSimVector(
 bool RVOWrapper::doStep(
   rvo_wrapper_msgs::DoStep::Request& req,
   rvo_wrapper_msgs::DoStep::Response& res) {
-  ROS_INFO("SimStep start");
+  // ROS_INFO("RVO Wrapper- SimStep start");
   res.res = true;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     planner_->doStep();
@@ -378,7 +377,7 @@ bool RVOWrapper::doStep(
     ROS_WARN("RVO Planner not initialised!");
     res.res = false;
   }
-  ROS_INFO("SimStep end");
+  // ROS_INFO("RVO Wrapper- SimStep end");
   return true;
 }
 

@@ -17,6 +17,7 @@ PlannerWrapper::PlannerWrapper(ros::NodeHandle* nh) {
 }
 
 PlannerWrapper::~PlannerWrapper() {
+  ros::param::del("planner");
   if (use_rvo_planner_) {
     delete rvo_planner_;
     rvo_planner_ = NULL;
@@ -37,6 +38,8 @@ void PlannerWrapper::init() {
   cmd_vel_.angular.x = 0.0f;
   cmd_vel_.angular.y = 0.0f;
   cmd_vel_.angular.z = 0.0f;
+  null_vect_.x = 0.0f;
+  null_vect_.y = 0.0f;
 }
 
 void PlannerWrapper::rosSetup() {
@@ -104,18 +107,21 @@ bool PlannerWrapper::setupRVOPlanner(
 void PlannerWrapper::plannerStep() {
   if (planning_) {
     if (use_rvo_planner_) {
-      ROS_INFO("Planner Wrapper- Planning!");
       rvo_planner_vel_ = rvo_planner_->planStep();
       cmd_vel_.linear.x = rvo_planner_vel_.x;
       cmd_vel_.linear.y = rvo_planner_vel_.y;
     }
+    ROS_INFO_STREAM("Planner- VelX: " << cmd_vel_.linear.x <<
+                    " VelY: " << cmd_vel_.linear.y);
     cmd_vel_pub_.publish(cmd_vel_);
     arrived_ = rvo_planner_->getArrived();
   }
   if (planning_ && arrived_) {
     this->pubArrived(true);
-    this->pubPlanning(false);
     ROS_INFO("Planner Wrapper- Robot %s reached goal", robot_name_.c_str());
+  }
+  if (!planning_) {
+    rvo_planner_->setCurrVel(null_vect_);
   }
 }
 

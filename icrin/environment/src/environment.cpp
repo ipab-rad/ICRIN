@@ -103,24 +103,36 @@ void Environment::loadParams() {
   ros::param::param("/experiment/track_robots", track_robots_, false);
   ros::param::get("/experiment/robots", robots_);
   // Robot specific
-  ros::param::set("environment/ready", true);
   ros::param::param("environment/amcl", amcl_, true);
   ros::param::param("environment/bumper", bumper_, false);
   ros::param::param("environment/rvo_planner", rvo_planner_, true);
 }
 
+bool Environment::interrupted_;
+
+void Environment::interrupt(int s) {
+  Environment::interrupted_ = true;
+}
+
 void Environment::setupEnvironment() {
+  planning_ = false;
+  this->pubRobotVelocity();
   planner_msgs::SetupNewPlanner new_planner;
   if (rvo_planner_) {
     new_planner.request.planner_type = new_planner.request.RVO_PLANNER;
   }
   setup_new_planner_.call(new_planner);
-  if (goals_.size() > 0) {
-    robot_target_goal_ = goals_[goal_id_];
-  } else {
-    ROS_ERROR("Environment- First goal cannot be set");
-    ros::shutdown();
+  while (goals_.size() == 0) {
+    ros::spinOnce();
+    ros::Duration(0.1).sleep();
   }
+  ROS_INFO("Environment- Goals received");
+  robot_target_goal_ = goals_[goal_id_];
+  this->setReady(true);
+}
+
+void Environment::setReady(bool ready) {
+  ros::param::set("environment/ready", ready);
 }
 
 void Environment::pubRobotPose() {
@@ -165,6 +177,12 @@ void Environment::pubEnvironmentData() {
   this->pubRobotVelocity();
 }
 
+void Environment::pubPlanning() {
+  std_msgs::Bool planning;
+  planning.data = planning_;
+  planning_pub_.publish(planning);
+}
+
 void Environment::pubModelHypotheses() {
   // Temporary Modelling test request
   model_hypotheses_.agents.push_back(0);  // Robot Agent
@@ -188,9 +206,9 @@ void Environment::plansCB(const experiment_msgs::Plans::ConstPtr& msg) {
 void Environment::planningCB(const std_msgs::Bool::ConstPtr& msg) {
   bool plan_now = msg->data;
   if (!planning_ && plan_now) {
-    ROS_WARN("Robot %s now planning!", robot_name_.c_str());
+    ROS_INFO("Environment- Robot %s now planning!", robot_name_.c_str());
   } else if (planning_ && !plan_now) {
-    ROS_WARN("Robot %s stop planning!", robot_name_.c_str());
+    ROS_INFO("Environment- Robot %s stop planning!", robot_name_.c_str());
   }
   planning_ = plan_now;
 }
@@ -230,15 +248,23 @@ void Environment::checkGoalPlan() {
   if (!arrived_) {
     robot_target_goal_ = goals_[curr_plan_.sequence[goal_id_]];
   } else {
+    planning_ = false;
     uint16_t next_goal = goal_id_ + 1;
+    ROS_INFO_STREAM("Environment- Next: " << next_goal);
     if (next_goal < curr_plan_.sequence.size()) {
+      ROS_INFO_STREAM("Environment- New goal: " << next_goal);
       robot_target_goal_ = goals_[curr_plan_.sequence[next_goal]];
       goal_id_ = next_goal;
       arrived_ = false;
+      planning_ = true;
     } else if (curr_plan_.repeat) {
+      ROS_INFO_STREAM("Environment- Restarting goal sequence ");
       goal_id_ = 0;
+      robot_target_goal_ = goals_[curr_plan_.sequence[goal_id_]];
       arrived_ = false;
+      planning_ = true;
     }
+    this->pubPlanning();
   }
 }
 
@@ -250,21 +276,32 @@ void Environment::modelStep() {
   }
 }
 
+void Environment::stopRobot() {
+  ROS_INFO("Stop!");
+  planning_ = false;
+  this->pubPlanning();
+  this->pubRobotVelocity();
+}
+
 int main(int argc, char** argv) {
   ros::init(argc, argv, "environment");
   ros::NodeHandle nh("environment");
   Environment environment(&nh);
 
+  std::signal(SIGINT, Environment::interrupt);
+
   ros::Rate r(10);
   environment.setupEnvironment();
 
-  while (ros::ok()) {
+  while (ros::ok() && !Environment::isInterrupted()) {
     ros::spinOnce();
     environment.checkGoalPlan();
     environment.pubEnvironmentData();
     environment.modelStep();
     r.sleep();
   }
+
+  environment.stopRobot();
 
   ros::shutdown();
 

@@ -26,7 +26,6 @@ int main(int argc, char* argv[]) {
   experiment.pubPlans(false);
   // Setup Environments
   INFO("Please launch robot environments now" << std::endl);
-  // experiment.waitReturn();
   while (!Experiment::isInterrupted()) {
     if (experiment.checkReadyRobots()) {break;}
     ros::spinOnce();
@@ -39,37 +38,39 @@ int main(int argc, char* argv[]) {
   }
 
   // Setup Robots
+  std::vector<std::string> robots = experiment.getRobots();
   if (!Experiment::isInterrupted()) {
-    std::vector<std::string> robots = experiment.getRobots();
-    for (size_t i = 0; i < robots.size(); ++i) {
-      size_t robot_no = i;
+    for (size_t robot_no = 0; robot_no < robots.size(); ++robot_no) {
       // INFO("Please enter start goal number" << std::endl);
       // experiment.waitReturn();
-      uint16_t goal_no = 1;
-      INFO("Press enter to perform setup for " << robots[i] << " (q to exit)" <<
-           std::endl);
+      INFO("Press enter to perform setup for " << robots[robot_no] <<
+           " (q to exit)" << std::endl);
       experiment.waitReturn();
-      experiment.setupPlan(robot_no, goal_no);
       experiment.pubPlans(true);
       experiment.setPlanning(robot_no, true);
       experiment.pubPlanning();
       while (experiment.isPlanning(robot_no) && !Experiment::isInterrupted()) {
         ros::spinOnce();
-        ROS_INFO("Checking if plan ended");
-        ROS_INFO_STREAM(experiment.isPlanning(robot_no) << std::endl);
+        CLEAR();
+        ROS_INFO_STREAM(robots[robot_no] << " setup in progress...");
         r.sleep();
       }
-      INFO("Robot " << robots[i] << " finished setting up" << std::endl);
+      INFO("Robot " << robots[robot_no] << " finished setting up" << std::endl);
     }
   }
-  // Robots move into area or initial goal
+  // Robots move to initial goal
 
   // Run experiment
   if (!Experiment::isInterrupted()) {
-    INFO("All robots are setup for experiment. Press enter to proceed. (q to exit)"
+    INFO("All robots are setup for experiment. Press enter to proceed."
          << std::endl);
     experiment.waitReturn();
   }
+  experiment.pubPlans(false);
+  for (size_t robot_no = 0; robot_no < robots.size(); ++robot_no) {
+    experiment.setPlanning(robot_no, true);
+  }
+  experiment.pubPlanning();
   while (ros::ok() && !Experiment::isInterrupted()) {
     ros::spinOnce();
     // Publish goals or plans if they have changed
@@ -187,7 +188,6 @@ void Experiment::pubPlans(bool setup_plan) {
 
 void Experiment::planningCB(const std_msgs::Bool::ConstPtr& msg,
                             const std::string& robot) {
-  ROS_INFO("PlanningCB");
   for (size_t i = 0; i < robots_.size(); ++i) {
     if (robot.compare(robots_[i]) == 0) {
       robots_planning_[i] = msg->data;
@@ -234,13 +234,6 @@ bool Experiment::setPlan(experiment_msgs::SetPlan::Request& req,
     ROS_WARN("Robot %s could not be found!", req.robot.c_str());
   }
   return true;
-}
-
-void Experiment::setupPlan(size_t robot_no, uint16_t goal_no) {
-  std::vector<uint16_t> sequence;
-  sequence.push_back(goal_no);
-  plans_.plan[robot_no].repeat = false;
-  plans_.plan[robot_no].sequence = sequence;
 }
 
 bool Experiment::checkReadyRobots() {

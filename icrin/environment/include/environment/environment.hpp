@@ -10,6 +10,7 @@
 #define ENVIRONMENT_HPP
 
 #include <ros/ros.h>
+#include <csignal>
 
 #include <std_msgs/Bool.h>
 #include <std_msgs/Int32MultiArray.h>
@@ -34,12 +35,17 @@ class Environment {
   void init();
   void rosSetup();
   void loadParams();
+
+  static void interrupt(int s);
+  static bool isInterrupted() {return interrupted_;}
   void setupEnvironment();
+  void setReady(bool ready);
 
   void pubRobotPose();
   void pubRobotGoal();
   void pubRobotVelocity();
   void pubEnvironmentData();
+  void pubPlanning();
   void pubModelHypotheses();
 
   void goalsCB(const experiment_msgs::Goals::ConstPtr& msg);
@@ -54,9 +60,11 @@ class Environment {
 
   void checkGoalPlan();
   void modelStep();
+  void stopRobot();
 
  private:
   // Flags
+  static bool interrupted_;
   bool planning_;
   bool arrived_;
   bool modelling_;

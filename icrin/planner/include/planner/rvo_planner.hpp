@@ -38,6 +38,7 @@ class RVOPlanner {
   void rosSetup();
 
   size_t addPlannerAgent(common_msgs::Vector2 agent_pos);
+  void setPlannerVel(common_msgs::Vector2 planner_vel);
 
   bool checkReachedGoal();
 
@@ -62,6 +63,7 @@ class RVOPlanner {
   void setPlannerSettings(float time_step,
                           rvo_wrapper_msgs::AgentDefaults defaults);
   void setCurrPose(common_msgs::Vector2 curr_pose);
+  void setCurrVel(common_msgs::Vector2 curr_vel);
   void setPlannerGoal(common_msgs::Vector2 goal);
   bool getArrived() {return arrived_;}
 

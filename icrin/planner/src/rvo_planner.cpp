@@ -29,6 +29,8 @@ void RVOPlanner::init() {
   planner_settings_.request.defaults.time_horizon_obst = 5.0f;
   planner_settings_.request.defaults.radius = 0.5f;
   planner_settings_.request.defaults.max_speed = 0.3f;
+  planner_vel_.x = 0.0f;
+  planner_vel_.y = 0.0f;
 }
 
 void RVOPlanner::rosSetup() {
@@ -81,6 +83,13 @@ size_t RVOPlanner::addPlannerAgent(common_msgs::Vector2 agent_pos) {
   return msg.response.agent_id;
 }
 
+void RVOPlanner::setPlannerVel(common_msgs::Vector2 planner_vel) {
+  rvo_wrapper_msgs::SetAgentVelocity msg;
+  msg.request.agent_id = 0;
+  msg.request.velocity = planner_vel;
+  set_agent_velocity_.call(msg);
+}
+
 bool RVOPlanner::checkReachedGoal() {
   rvo_wrapper_msgs::CheckReachedGoal msg;
   check_reached_goal_client_.call(msg);
@@ -128,7 +137,10 @@ common_msgs::Vector2 RVOPlanner::planStep() {
 }
 
 void RVOPlanner::setupPlanner() {
+  // Setup Planner agent
   this->addPlannerAgent(curr_pose_);
+  this->setPlannerVel(planner_vel_);
+  // Setup other agents
   for (uint64_t i = 0; i < agent_positions_.size(); ++i) {
     this->addPlannerAgent(agent_positions_[i]);
   }
@@ -196,6 +208,10 @@ void RVOPlanner::setCurrPose(common_msgs::Vector2 curr_pose) {
   // msg.request.position.x = curr_pose.x;
   // msg.request.position.y = curr_pose.y;
   // set_agent_position_.call(msg);
+}
+
+void RVOPlanner::setCurrVel(common_msgs::Vector2 curr_vel) {
+  planner_vel_ = curr_vel;
 }
 
 void RVOPlanner::setPlannerGoal(common_msgs::Vector2 goal) {
