@@ -348,6 +348,16 @@ class RVOSimulator {
 	const Vector2& getAgentPrefVelocity(size_t agentNo) const;
 
 	/**
+	 * \brief      ICRIN - Returns the two-dimensional preferred speed of a
+	 *             specified agent.
+	 * \param      agentNo         The number of the agent whose
+	 *                             two-dimensional preferred speed is to be
+	 *                             retrieved.
+	 * \return     The present two-dimensional preferred speed of the agent.
+	 */
+	float getAgentPrefSpeed(size_t agentNo) const;
+
+	/**
 	 * \brief      Returns the radius of a specified agent.
 	 * \param      agentNo         The number of the agent whose radius is to
 	 *                             be retrieved.

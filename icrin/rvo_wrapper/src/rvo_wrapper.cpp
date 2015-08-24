@@ -226,14 +226,16 @@ bool RVOWrapper::calcPrefVelocities(
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     for (uint32_t i = 0; i < planner_->getNumAgents(); ++i) {
       RVO::Vector2 goalVector = planner_goals_[i] - planner_->getAgentPosition(i);
+      RVO::Vector2 prefVel;
       if (i == 0) {
         if (RVO::absSq(goalVector) > 1.0f) {
           goalVector = RVO::normalize(goalVector);
         }
+        prefVel = planner_->getAgentPrefSpeed(i) * goalVector;
       } else {
-        goalVector = planner_->getAgentVelocity(i);
+        prefVel = planner_->getAgentVelocity(i);
       }
-      planner_->setAgentPrefVelocity(i, goalVector);
+      planner_->setAgentPrefVelocity(i, prefVel);
     }
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
     if ((req.sim_ids.back() >= req.sim_ids.front()) &&
@@ -246,7 +248,8 @@ bool RVOWrapper::calcPrefVelocities(
             if (RVO::absSq(goalVector) > 1.0f) {
               goalVector = RVO::normalize(goalVector);
             }
-            sim_vect_[j]->setAgentPrefVelocity(i, goalVector);
+            RVO::Vector2 prefVel = sim_vect_[j]->getAgentPrefSpeed(i) * goalVector;
+            sim_vect_[j]->setAgentPrefVelocity(i, prefVel);
           } else { // Unmodelled agents have no goals, so pref vel is current vel
             sim_vect_[j]->setAgentPrefVelocity(
               i, sim_vect_[j]->getAgentVelocity(i));

@@ -62,7 +62,10 @@
 namespace RVO {
 Agent::Agent(RVOSimulator* sim) : maxNeighbors_(0), maxSpeed_(0.0f),
 	neighborDist_(0.0f), radius_(0.0f), sim_(sim), timeHorizon_(0.0f),
-	timeHorizonObst_(0.0f), id_(0) { }
+	timeHorizonObst_(0.0f), id_(0) {
+	maxAccel_ = 0.8f;
+	prefSpeed_ = 0.3f;
+}
 
 void Agent::computeNeighbors() {
 	obstacleNeighbors_.clear();
@@ -452,7 +455,15 @@ void Agent::insertObstacleNeighbor(const Obstacle* obstacle, float rangeSq) {
 }
 
 void Agent::update() {
-	velocity_ = newVelocity_;
+	const float dv = abs(newVelocity_ - velocity_);
+
+	if (dv < maxAccel_ * sim_->timeStep_) {
+		velocity_ = newVelocity_;
+	} else {
+		velocity_ = (1.0f - (maxAccel_ * sim_->timeStep_ / dv))
+		            * velocity_ + (maxAccel_ * sim_->timeStep_ / dv)
+		            * newVelocity_;
+	}
 	position_ += velocity_ * sim_->timeStep_;
 }
 
