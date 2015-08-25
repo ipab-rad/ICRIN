@@ -58,6 +58,7 @@ class PlannerWrapper {
   common_msgs::Vector2 curr_pose_;
   common_msgs::Vector2 goal_pose_;
   common_msgs::Vector2 rvo_planner_vel_;
+  common_msgs::Vector2 null_vect_;
   geometry_msgs::Twist cmd_vel_;
   environment_msgs::EnvironmentData environment_;
   // ROS
@@ -69,6 +70,7 @@ class PlannerWrapper {
   ros::Subscriber curr_pose_sub_;
   ros::Subscriber target_goal_sub_;
   ros::Subscriber planning_sub_;
+  ros::Subscriber environment_sub_;
   ros::ServiceServer srv_setup_new_planner_;
   ros::ServiceServer srv_setup_rvo_planner_;
 

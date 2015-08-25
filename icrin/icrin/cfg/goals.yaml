@@ -7,6 +7,6 @@ plans: {
 megatron: {repeat: false, sequence: [0]},
 soundwave: {repeat: false, sequence: [0]},
 starscream: {repeat: false, sequence: [0]},
-blackout: {repeat: false, sequence: [1]},
+blackout: {repeat: true, sequence: [0,1,2]},
 thundercracker: {repeat: false, sequence: [0]}
 }

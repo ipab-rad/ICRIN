@@ -207,6 +207,14 @@ class RVOWrapper {
     rvo_wrapper_msgs::SetTimeStep::Response& res);
 
  private:
+  // Flags
+  bool planner_init_;
+
+  // Variables
+  RVO::Vector2 null_vect_;
+  std::vector<RVO::Vector2> planner_goals_;
+  std::vector< std::vector<RVO::Vector2> > sim_vect_goals_;
+
   // ROS
   ros::NodeHandle* nh_;
   ros::ServiceServer srv_add_agent_;
@@ -249,12 +257,7 @@ class RVOWrapper {
 
   // Class pointers
   RVO::RVOSimulator* planner_;
-  std::vector<RVO::Vector2> planner_goals_;
   std::vector<RVO::RVOSimulator*> sim_vect_;
-  std::vector< std::vector<RVO::Vector2> > sim_vect_goals_;
-
-  // Variables/Flags
-  bool planner_init_;
 
 };
 

@@ -40,7 +40,6 @@ class Experiment {
                experiment_msgs::SetGoal::Response& res);
   bool setPlan(experiment_msgs::SetPlan::Request& req,
                experiment_msgs::SetPlan::Response& res);
-  void setupPlan(size_t robot_no, uint16_t goal_no);
   void setPlanning(size_t robot_no, bool planning)
   {robots_planning_[robot_no] = planning;}
   bool isPlanning(size_t robot_no) {return robots_planning_[robot_no];}

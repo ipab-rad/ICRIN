@@ -112,6 +112,8 @@ class Agent {
 
 	std::vector<std::pair<float, const Agent*> > agentNeighbors_;
 	size_t maxNeighbors_;
+	float maxAccel_;
+	float prefSpeed_;
 	float maxSpeed_;
 	float neighborDist_;
 	Vector2 newVelocity_;

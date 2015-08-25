@@ -253,6 +253,10 @@ const Vector2& RVOSimulator::getAgentPrefVelocity(size_t agentNo) const {
 	return agents_[agentNo]->prefVelocity_;
 }
 
+float RVOSimulator::getAgentPrefSpeed(size_t agentNo) const {
+	return agents_[agentNo]->prefSpeed_;
+}
+
 float RVOSimulator::getAgentRadius(size_t agentNo) const {
 	return agents_[agentNo]->radius_;
 }
