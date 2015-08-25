@@ -170,13 +170,16 @@ void RVOPlanner::deletePlanner() {
 
 common_msgs::Vector2 RVOPlanner::getPlannerVel() {
   rvo_wrapper_msgs::GetAgentVelocity msg;
-  msg.request.agent_id = PLANNER_ROBOT_;
+  msg.request.agent_id.push_back(PLANNER_ROBOT_);
   get_agent_vel_client_.call(msg);
   if (!msg.response.res) {
-    msg.response.velocity.x = 0.0f;
-    msg.response.velocity.y = 0.0f;
+    ROS_ERROR("Planner- Velocity not received from RVO Library");
+    common_msgs::Vector2 vel;
+    vel.x = 0.0f;
+    vel.y = 0.0f;
+    return vel;
   }
-  return msg.response.velocity;
+  return msg.response.velocity[PLANNER_ROBOT_];
 }
 
 /*void RVOPlanner::setAgentPositions(std::vector<common_msgs::Vector2>
