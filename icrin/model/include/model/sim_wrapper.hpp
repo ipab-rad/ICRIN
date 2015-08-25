@@ -40,6 +40,9 @@ class SimWrapper {
   std::vector<uint32_t> goalSequence(std::vector<geometry_msgs::Pose2D>
                                      goal_sequence);
 
+  std::vector<common_msgs::Vector2> calcSimVels(std::vector<uint32_t> sims,
+                                                size_t n_goals);
+
   void setRobotModel(bool robot_model);
   void setModelAgents(std::vector<uint8_t> model_agents);
   void setRobotGoal(geometry_msgs::Pose2D robot_goal);

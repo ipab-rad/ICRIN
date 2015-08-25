@@ -30,12 +30,12 @@ ModelWrapper::~ModelWrapper() {
 
 void ModelWrapper::loadParams() {
   // Model Params
-  if (!ros::param::has("/model/robot_model"))
-  {ROS_WARN("Model- Robot model by default");}
+  if (!ros::param::has(robot_name_ + model_name_ + "/robot_model"))
+  {ROS_WARN("ModelW- Robot model by default");}
   ros::param::param(robot_name_ + model_name_ + "/robot_model",
                     robot_model_, true);
-  if (!ros::param::has("/model/goal_sum_prior"))
-  {ROS_WARN("Model- Using default Model params");}
+  if (!ros::param::has(robot_name_ + model_name_ + "/goal_sum_prior"))
+  {ROS_WARN("ModelW- Using default Model params");}
   ros::param::param(robot_name_ + model_name_ + "/goal_sum_prior",
                     goal_sum_prior_, 0.001f);
   ros::param::param(robot_name_ + model_name_ + "/goal_history_discount",
@@ -50,6 +50,9 @@ void ModelWrapper::loadParams() {
 
 void ModelWrapper::init() {
   use_rvo_lib_ = true;
+  // inferred_goals_history_.resize(3);
+  init_liks_.resize(3, false);
+  prev_prior_.resize(3);
 }
 
 void ModelWrapper::rosSetup() {
@@ -88,12 +91,98 @@ void ModelWrapper::modelCB(const model_msgs::ModelHypotheses::ConstPtr&
 }
 
 void ModelWrapper::runModel() {
-  this->inferGoals();
   this->setupModel();
   this->runSims();
+  this->inferGoals();
 }
 
 void ModelWrapper::inferGoals() {
+  float max_acc = 1.2f;
+  float ros_freq = 0.1f;
+  float PI = 3.14159265358979323846f;
+  bool reset_priors = false;
+  // size_t inf_hist = 10;
+  common_msgs::Vector2 curr_vel;
+  curr_vel.x = robot_vel_.linear.x;
+  curr_vel.y = robot_vel_.linear.y;
+  size_t n_goals = hypotheses_.goal_hypothesis.goal_sequence.size();
+  for (size_t agent = 0; agent < hypotheses_.agents.size(); ++agent) {
+    std::vector<float> g_likelihoods;
+    g_likelihoods.resize(n_goals);
+    std::vector<common_msgs::Vector2> agent_sim_vels;
+    size_t begin = (agent * n_goals);
+    size_t end = begin + (n_goals);
+    agent_sim_vels.insert(agent_sim_vels.begin(),
+                          sequence_sim_vels.begin() + begin,
+                          sequence_sim_vels.begin() + end);
+    ROS_WARN_STREAM("SimVelSize: " << agent_sim_vels.size());
+    for (size_t goal = 0; goal < n_goals; ++goal) {
+      // if (DISPLAY_INFERENCE_VALUES) {
+      ROS_INFO_STREAM("curr_vel=[" << curr_vel.x << ", " << curr_vel.y << "] " <<
+                      "simVel=[" << agent_sim_vels[goal].x << ", " <<
+                      agent_sim_vels[goal].y << "]" << std::endl);
+      // }
+      // Bivariate Gaussian
+      float x = agent_sim_vels[goal].x;
+      float y = agent_sim_vels[goal].y;
+      float ux = curr_vel.x;
+      float uy = curr_vel.y;
+      float ox = (max_acc / 2) * ros_freq;  // 2 std.dev = max vel change
+      float oy = (max_acc / 2) * ros_freq;
+      float o2x = pow(ox, 2);
+      float o2y = pow(oy, 2);
+      float corr = 0.0f;
+      float corr2 = pow(corr, 2.0f);
+      float t1 = pow(x - ux, 2.0f) / o2x;
+      float t2 = pow(y - uy, 2.0f) / o2y;
+      float t3 = (2 * corr * (x - ux) * (y - uy)) / (ox * oy);
+      float p = (1 / (2 * PI * ox * oy * sqrtf(1 - corr2)));
+      float e = exp(-(1 / (2 * (1 - corr2))) * (t1 + t2 - t3));
+      g_likelihoods[goal] = p * e;
+      ROS_INFO_STREAM("Goal: " << goal << " Lik: " << g_likelihoods[goal] <<
+                      " t1: " << t1 << " t2: " << t2 << " t3: " << t3);
+    }
+
+    float posterior_norm = 0.0f;
+    std::vector<float> g_posteriors;
+    g_posteriors.resize(n_goals);
+    float uniform_prior = 1.0f / n_goals;
+    for (std::size_t goal = 0; goal < n_goals; ++goal) {
+
+      if (reset_priors || !init_liks_[goal]) {
+        g_posteriors[goal] = uniform_prior;
+        init_liks_[goal] = true;
+      } else {
+        g_posteriors[goal] = g_likelihoods[goal] * prev_prior_[goal];
+      }
+
+      posterior_norm += g_posteriors[goal];
+      ROS_INFO_STREAM("GoalPosteriors" << goal << "=" <<
+                      g_posteriors[goal] << " " << std::endl);
+    }
+
+    float norm_posterior = 0.0f;
+    std::vector<float> norm_posteriors;
+    norm_posteriors.resize(n_goals);
+    for (std::size_t goal = 0; goal < n_goals; ++goal) {
+      if (posterior_norm == 0) {
+        norm_posterior = uniform_prior;
+        ROS_INFO_STREAM("Uni: " << norm_posterior);
+        // Avoiding NaNs when likelihoods are all 0
+      } else {
+        norm_posterior = g_posteriors[goal] / posterior_norm;
+        if (norm_posterior > 0.01f) {
+          prev_prior_[goal] = norm_posterior;
+        } else {
+          prev_prior_[goal] = 0.005f;
+        }
+        ROS_INFO_STREAM("Rat: " << norm_posterior);
+      }
+      norm_posteriors[goal] = norm_posterior;
+    }
+    ROS_INFO_STREAM("G0: " << norm_posteriors[0] << " G1: " << norm_posteriors[1] <<
+                    " G2: " << norm_posteriors[2]);
+  }
 
 }
 
@@ -124,19 +213,26 @@ void ModelWrapper::setupModel() {
     }
   }
   if (hypotheses_.awareness) {
-    ROS_WARN("Model- Awareness modelling not implemented yet!");
+    ROS_WARN("ModelW- Awareness modelling not implemented yet!");
   }
 }
 
 void ModelWrapper::runSims() {
+  sequence_sim_vels.clear();
   if (hypotheses_.goals) {
     if (hypotheses_.goal_hypothesis.sampling) {
-      ROS_WARN("Model- Run Goal Sampling Sims!");
+      ROS_WARN("ModelW- Run Goal Sampling Sims!");
     } else {
-      ROS_WARN("Model- Run Goal Sequence Sims!");
+      ROS_WARN("ModelW- Run Goal Sequence Sims!");
+      size_t n_goals = hypotheses_.goal_hypothesis.goal_sequence.size();
+      sequence_sim_vels = sim_wrapper_->calcSimVels(sequence_sims_, n_goals);
     }
   }
   if (hypotheses_.awareness) {
-    ROS_WARN("Model- Awareness modelling not implemented yet!");
+    ROS_WARN("ModelW- Awareness modelling not implemented yet!");
+  }
+  for (size_t i = 0; i < sequence_sim_vels.size(); ++i) {
+    ROS_INFO_STREAM("SimVel" << i << ": " << sequence_sim_vels[i].x <<
+                    ", " << sequence_sim_vels[i].y);
   }
 }

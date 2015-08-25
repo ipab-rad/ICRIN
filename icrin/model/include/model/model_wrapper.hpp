@@ -64,8 +64,13 @@ class ModelWrapper {
   geometry_msgs::Twist robot_vel_;
   model_msgs::ModelHypotheses hypotheses_;
   std::vector<uint32_t> sampling_sims_;
+  std::vector<common_msgs::Vector2> sampling_sim_vels;
   std::vector<uint32_t> sequence_sims_;
+  std::vector<common_msgs::Vector2> sequence_sim_vels;
   std::vector<uint32_t> awareness_sims_;
+  // std::vector<std::vector<float> > inferred_goals_history_;
+  std::vector<bool> init_liks_;
+  std::vector<float> prev_prior_;
 
   // ROS
   ros::NodeHandle* nh_;

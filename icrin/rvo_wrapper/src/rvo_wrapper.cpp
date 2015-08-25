@@ -876,6 +876,9 @@ bool RVOWrapper::setAgentGoals(
         for (uint32_t i = 0; i < num_agents; ++i) { // Cycle through sim agents
           sim_vect_goals_[j][i] = RVO::Vector2(req.sim[sim_no].agent[i].x,
                                                req.sim[sim_no].agent[i].y);
+          ROS_INFO_STREAM("SimID: " << j << " No: " << sim_no << " A: " << i <<
+                          " G: " << req.sim[sim_no].agent[i].x << ", " <<
+                          req.sim[sim_no].agent[i].y);
         }
       }
     } else {

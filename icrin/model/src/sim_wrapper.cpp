@@ -23,16 +23,20 @@ SimWrapper::~SimWrapper() {
 }
 
 void SimWrapper::loadParams() {
-  if (!ros::param::has("/model/time_step"))
+  if (!ros::param::has(robot_name_ + model_name_ + "/time_step"))
   {ROS_WARN("Model- Using default Sim params");}
   int max_neighbors;
-  ros::param::param("/model/time_step", time_step_, 0.1f);
-  ros::param::param("/model/neighbor_dist", neighbor_dist_, 2.0f);
-  ros::param::param("/model/max_neighbors", max_neighbors, 20);
-  ros::param::param("/model/time_horizon_agent", time_horizon_agent_, 5.0f);
-  ros::param::param("/model/time_horizon_obst", time_horizon_obst_, 5.0f);
-  ros::param::param("/model/radius", radius_, 0.5f);
-  ros::param::param("/model/max_speed", max_speed_, 0.3f);
+  ros::param::param(robot_name_ + model_name_ + "/time_step", time_step_, 0.1f);
+  ros::param::param(robot_name_ + model_name_ + "/neighbor_dist", neighbor_dist_,
+                    2.0f);
+  ros::param::param(robot_name_ + model_name_ + "/max_neighbors", max_neighbors,
+                    20);
+  ros::param::param(robot_name_ + model_name_ + "/time_horizon_agent",
+                    time_horizon_agent_, 5.0f);
+  ros::param::param(robot_name_ + model_name_ + "/time_horizon_obst",
+                    time_horizon_obst_, 5.0f);
+  ros::param::param(robot_name_ + model_name_ + "/radius", radius_, 0.5f);
+  ros::param::param(robot_name_ + model_name_ + "/max_speed", max_speed_, 0.3f);
   max_neighbors_ = max_neighbors;
 }
 
@@ -59,37 +63,37 @@ void SimWrapper::rosSetup() {
                                "/rvo_wrapper/set_agent_goals");
   ros::service::waitForService(robot_name_ + model_name_ +
                                "/rvo_wrapper/set_agent_velocity");
-
+  bool persistent = false;
   add_sim_agent_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::AddAgent>(
-      robot_name_ + model_name_ + "/rvo_wrapper/add_agent", true);
+      robot_name_ + model_name_ + "/rvo_wrapper/add_agent", persistent);
   calc_pref_velocities_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::CalcPrefVelocities>(
-      robot_name_ + model_name_ + "/rvo_wrapper/calc_pref_velocities", true);
+      robot_name_ + model_name_ + "/rvo_wrapper/calc_pref_velocities", persistent);
   create_sims_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::CreateRVOSim>(
-      robot_name_ + model_name_ + "/rvo_wrapper/create_rvosim", true);
+      robot_name_ + model_name_ + "/rvo_wrapper/create_rvosim", persistent);
   delete_sims_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::DeleteSimVector>(
-      robot_name_ + model_name_ + "/rvo_wrapper/delete_sim_vector", true);
+      robot_name_ + model_name_ + "/rvo_wrapper/delete_sim_vector", persistent);
   do_sim_step_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::DoStep>(
-      robot_name_ + model_name_ + "/rvo_wrapper/do_step", true);
+      robot_name_ + model_name_ + "/rvo_wrapper/do_step", persistent);
   get_agent_vel_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::GetAgentVelocity>(
-      robot_name_ + model_name_ + "/rvo_wrapper/get_agent_velocity", true);
+      robot_name_ + model_name_ + "/rvo_wrapper/get_agent_velocity", persistent);
   set_agent_goals_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::SetAgentGoals>(
-      robot_name_ + model_name_ + "/rvo_wrapper/set_agent_goals", true);
+      robot_name_ + model_name_ + "/rvo_wrapper/set_agent_goals", persistent);
   set_agent_vel_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::SetAgentVelocity>(
-      robot_name_ + model_name_ + "/rvo_wrapper/set_agent_velocity", true);
+      robot_name_ + model_name_ + "/rvo_wrapper/set_agent_velocity", persistent);
 }
 
 std::vector<uint32_t> SimWrapper::goalSampling(
   std::vector<geometry_msgs::Pose2D> sample_space, float sample_resolution) {
   std::vector<uint32_t> sim_ids;
-  ROS_INFO("Model- Sampling!");
+  ROS_INFO("ModelS- Sampling!");
   return sim_ids;
 }
 
@@ -108,10 +112,8 @@ std::vector<uint32_t> SimWrapper::goalSequence(
   sim_msg.request.defaults.max_speed = max_speed_;
   create_sims_client_.call(sim_msg);
   std::vector<uint32_t> sim_ids = sim_msg.response.sim_ids;
-  if (sim_msg.response.ok) {
-    ROS_INFO("Model- Goal sequence sims created!");
-  } else {
-    ROS_WARN("Model- Goal sequence sims failed!");
+  if (!sim_msg.response.ok) {
+    ROS_ERROR("ModelS- Goal sequence sims failed!");
   }
 
   // Create Agents with Positions
@@ -156,16 +158,47 @@ std::vector<uint32_t> SimWrapper::goalSequence(
       sim_id++;
     }
   }
-  if (sim_id == (sim_no - 1)) {
-    ROS_INFO("Model- Set Sim Goals check");
+  if (sim_id == sim_no) {
     set_agent_goals_client_.call(goal_msg);
   } else {
-    ROS_WARN("Model- Set Sim Goals check failed!");
+    ROS_ERROR("ModelS- Set Sim Goals check failed!");
   }
 
-  // Calc Pref Velocities (Opt)
-
   return sim_ids;
+}
+
+std::vector<common_msgs::Vector2> SimWrapper::calcSimVels(std::vector<uint32_t>
+                                                          sims, size_t n_goals) {
+  // Calc Preferred Velocities
+  rvo_wrapper_msgs::CalcPrefVelocities prev_vel;
+  prev_vel.request.sim_ids = sims;
+  calc_pref_velocities_client_.call(prev_vel);
+
+  // Run Sims
+  rvo_wrapper_msgs::DoStep run_sims;
+  run_sims.request.sim_ids = sims;
+  do_sim_step_client_.call(run_sims);
+  if (!run_sims.response.res) {ROS_ERROR("SimSteps could not be run!");}
+
+  // Get Velocities
+  rvo_wrapper_msgs::GetAgentVelocity get_vels;
+  get_vels.request.sim_ids = sims;
+  for (size_t model_agent = 0; model_agent < model_agent_no_; ++model_agent) {
+    for (size_t goal = 0; goal < n_goals; ++goal) {
+      get_vels.request.agent_id.push_back(model_agent);
+    }
+  }
+  // ROS_INFO_STREAM("NGoals:" << n_goals);
+  get_agent_vel_client_.call(get_vels);
+  if (!get_vels.response.res) {ROS_ERROR("SimVels could not be acquired!");}
+
+  // Delete Sims
+  rvo_wrapper_msgs::DeleteSimVector del_sims;
+  del_sims.request.sim_ids = sims;
+  delete_sims_client_.call(del_sims);
+  if (!del_sims.response.res) {ROS_ERROR("Sims could not be deleted!");}
+  // Return Velocities
+  return get_vels.response.velocity;
 }
 
 void SimWrapper::setRobotModel(bool robot_model) {
