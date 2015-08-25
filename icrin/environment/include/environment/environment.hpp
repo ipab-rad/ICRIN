@@ -91,7 +91,6 @@ class Environment {
   experiment_msgs::Plan curr_plan_;
   geometry_msgs::Twist robot_cmd_velocity_;
   geometry_msgs::Twist planner_cmd_velocity_;
-  model_msgs::ModelHypotheses model_hypotheses_;
 
   // ROS
   ros::NodeHandle* nh_;

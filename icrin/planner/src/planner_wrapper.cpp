@@ -65,6 +65,8 @@ void PlannerWrapper::rosSetup() {
                                     &PlannerWrapper::targetGoalCB, this);
   planning_sub_ = nh_->subscribe(robot_name_ + "/environment/planning", 1000,
                                  &PlannerWrapper::planningCB, this);
+  environment_sub_ = nh_->subscribe(robot_name_ + "/environment/data", 1000,
+                                    &PlannerWrapper::environmentDataCB, this);
 }
 
 void PlannerWrapper::pubPlanning(bool planning) {

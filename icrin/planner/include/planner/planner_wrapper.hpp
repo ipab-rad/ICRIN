@@ -70,6 +70,7 @@ class PlannerWrapper {
   ros::Subscriber curr_pose_sub_;
   ros::Subscriber target_goal_sub_;
   ros::Subscriber planning_sub_;
+  ros::Subscriber environment_sub_;
   ros::ServiceServer srv_setup_new_planner_;
   ros::ServiceServer srv_setup_rvo_planner_;
 

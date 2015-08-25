@@ -185,14 +185,15 @@ void Environment::pubPlanning() {
 
 void Environment::pubModelHypotheses() {
   // Temporary Modelling test request
-  model_hypotheses_.agents.push_back(0);  // Robot Agent
+  model_msgs::ModelHypotheses model_hypotheses;
   for (size_t i = 0; i < agent_no_; ++i) {
-    model_hypotheses_.agents.push_back(i + 1);  // Detected Agents
+    model_hypotheses.agents.push_back(i);  // Robot Agent
   }
-  model_hypotheses_.goals = true;
-  model_hypotheses_.awareness = false;
-  model_hypotheses_.goal_hypothesis.sampling = false;
-  model_hypotheses_.goal_hypothesis.goal_sequence = goals_;
+  model_hypotheses.goals = true;
+  model_hypotheses.awareness = false;
+  model_hypotheses.goal_hypothesis.sampling = false;
+  model_hypotheses.goal_hypothesis.goal_sequence = goals_;
+  model_pub_.publish(model_hypotheses);
 }
 
 void Environment::goalsCB(const experiment_msgs::Goals::ConstPtr& msg) {
