@@ -146,7 +146,7 @@ void RVOWrapper::rosSetup() {
 bool RVOWrapper::addAgent(
   rvo_wrapper_msgs::AddAgent::Request& req,
   rvo_wrapper_msgs::AddAgent::Response& res) {
-  res.res = true;
+  res.ok = true;
   RVO::Vector2 agent_pos(req.position.x, req.position.y);
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     if (req.defaults.radius == 0.0f) { // If defaults not set
@@ -183,11 +183,11 @@ bool RVOWrapper::addAgent(
       }
     } else {
       ROS_WARN("Please provide a proper id range for sim_vector");
-      res.res = false;
+      res.ok = false;
     }
   } else {
     ROS_WARN("RVO Planner not initialised!");
-    res.res = false;
+    res.ok = false;
   }
   return true;
 }
@@ -195,7 +195,7 @@ bool RVOWrapper::addAgent(
 bool RVOWrapper::addObstacle(
   rvo_wrapper_msgs::AddObstacle::Request& req,
   rvo_wrapper_msgs::AddObstacle::Response& res) {
-  res.res = true;
+  res.ok = true;
   std::vector<RVO::Vector2> vertices; // Get msg obstacle vertices
   for (uint32_t i = 0; i < req.vertices.size(); ++i) {
     vertices.push_back(RVO::Vector2(req.vertices[i].x, req.vertices[i].y));
@@ -210,11 +210,11 @@ bool RVOWrapper::addObstacle(
       }
     } else {
       ROS_WARN("Please provide a proper id range for sim_vector");
-      res.res = false;
+      res.ok = false;
     }
   } else {
     ROS_WARN("RVO Planner not initialised!");
-    res.res = false;
+    res.ok = false;
   }
   return true;
 }
@@ -222,7 +222,7 @@ bool RVOWrapper::addObstacle(
 bool RVOWrapper::calcPrefVelocities(
   rvo_wrapper_msgs::CalcPrefVelocities::Request& req,
   rvo_wrapper_msgs::CalcPrefVelocities::Response& res) {
-  res.res = true;
+  res.ok = true;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     for (uint32_t i = 0; i < planner_->getNumAgents(); ++i) {
       RVO::Vector2 goalVector = planner_goals_[i] - planner_->getAgentPosition(i);
@@ -258,11 +258,11 @@ bool RVOWrapper::calcPrefVelocities(
       }
     } else {
       ROS_WARN("Please provide a proper id range for sim_vector");
-      res.res = false;
+      res.ok = false;
     }
   } else {
     ROS_WARN("RVO Planner not initialised!");
-    res.res = false;
+    res.ok = false;
   }
   return true;
 }
@@ -270,7 +270,7 @@ bool RVOWrapper::calcPrefVelocities(
 bool RVOWrapper::checkReachedGoal(
   rvo_wrapper_msgs::CheckReachedGoal::Request& req,
   rvo_wrapper_msgs::CheckReachedGoal::Response& res) {
-  res.res = true;
+  res.ok = true;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     ROS_INFO("RVO Wrapper- Goal: %f, %f. Dist: %f",
              planner_goals_[0].x(), planner_goals_[0].y(),
@@ -281,10 +281,10 @@ bool RVOWrapper::checkReachedGoal(
     } else { res.reached = false; }
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
     ROS_WARN("Not yet implemented for sim goals!");
-    res.res = false;
+    res.ok = false;
   } else {
     ROS_WARN("RVO Planner not initialised!");
-    res.res = false;
+    res.ok = false;
   }
   return true;
 }
@@ -341,7 +341,7 @@ bool RVOWrapper::createRVOSim(
 bool RVOWrapper::deleteSimVector(
   rvo_wrapper_msgs::DeleteSimVector::Request& req,
   rvo_wrapper_msgs::DeleteSimVector::Response& res) {
-  res.res = true;
+  res.ok = true;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     delete planner_;
     planner_ = NULL;
@@ -360,7 +360,7 @@ bool RVOWrapper::doStep(
   rvo_wrapper_msgs::DoStep::Request& req,
   rvo_wrapper_msgs::DoStep::Response& res) {
   // ROS_INFO("RVO Wrapper- SimStep start");
-  res.res = true;
+  res.ok = true;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     planner_->doStep();
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
@@ -371,11 +371,11 @@ bool RVOWrapper::doStep(
       }
     } else {
       ROS_WARN("Please provide a proper id range for sim_vector");
-      res.res = false;
+      res.ok = false;
     }
   } else {
     ROS_WARN("RVO Planner not initialised!");
-    res.res = false;
+    res.ok = false;
   }
   // ROS_INFO("RVO Wrapper- SimStep end");
   return true;
@@ -384,7 +384,7 @@ bool RVOWrapper::doStep(
 bool RVOWrapper::getAgentAgentNeighbor(
   rvo_wrapper_msgs::GetAgentAgentNeighbor::Request& req,
   rvo_wrapper_msgs::GetAgentAgentNeighbor::Response& res) {
-  res.res = true;
+  res.ok = true;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     res.neighbor_id = planner_->getAgentAgentNeighbor(req.agent_id,
                                                       req.agent_neighbor);
@@ -397,11 +397,11 @@ bool RVOWrapper::getAgentAgentNeighbor(
       }
     } else {
       ROS_WARN("Please provide a proper id range for sim_vector");
-      res.res = false;
+      res.ok = false;
     }
   } else {
     ROS_WARN("RVO Planner not initialised!");
-    res.res = false;
+    res.ok = false;
   }
   return true;
 }
@@ -409,7 +409,7 @@ bool RVOWrapper::getAgentAgentNeighbor(
 bool RVOWrapper::getAgentMaxNeighbors(
   rvo_wrapper_msgs::GetAgentMaxNeighbors::Request& req,
   rvo_wrapper_msgs::GetAgentMaxNeighbors::Response& res) {
-  res.res = true;
+  res.ok = true;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     res.max_neighbors = planner_->getAgentMaxNeighbors(req.agent_id);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
@@ -420,11 +420,11 @@ bool RVOWrapper::getAgentMaxNeighbors(
       }
     } else {
       ROS_WARN("Please provide a proper id range for sim_vector");
-      res.res = false;
+      res.ok = false;
     }
   } else {
     ROS_WARN("RVO Planner not initialised!");
-    res.res = false;
+    res.ok = false;
   }
   return true;
 }
@@ -432,7 +432,7 @@ bool RVOWrapper::getAgentMaxNeighbors(
 bool RVOWrapper::getAgentMaxSpeed(
   rvo_wrapper_msgs::GetAgentMaxSpeed::Request& req,
   rvo_wrapper_msgs::GetAgentMaxSpeed::Response& res) {
-  res.res = true;
+  res.ok = true;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     res.max_speed = planner_->getAgentMaxSpeed(req.agent_id);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
@@ -443,11 +443,11 @@ bool RVOWrapper::getAgentMaxSpeed(
       }
     } else {
       ROS_WARN("Please provide a proper id range for sim_vector");
-      res.res = false;
+      res.ok = false;
     }
   } else {
     ROS_WARN("RVO Planner not initialised!");
-    res.res = false;
+    res.ok = false;
   }
   return true;
 }
@@ -455,7 +455,7 @@ bool RVOWrapper::getAgentMaxSpeed(
 bool RVOWrapper::getAgentNeighborDist(
   rvo_wrapper_msgs::GetAgentNeighborDist::Request& req,
   rvo_wrapper_msgs::GetAgentNeighborDist::Response& res) {
-  res.res = true;
+  res.ok = true;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     res.max_neighbor_dist = planner_->getAgentNeighborDist(req.agent_id);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
@@ -466,11 +466,11 @@ bool RVOWrapper::getAgentNeighborDist(
       }
     } else {
       ROS_WARN("Please provide a proper id range for sim_vector");
-      res.res = false;
+      res.ok = false;
     }
   } else {
     ROS_WARN("RVO Planner not initialised!");
-    res.res = false;
+    res.ok = false;
   }
   return true;
 }
@@ -478,7 +478,7 @@ bool RVOWrapper::getAgentNeighborDist(
 bool RVOWrapper::getAgentNumAgentNeighbors(
   rvo_wrapper_msgs::GetAgentNumAgentNeighbors::Request& req,
   rvo_wrapper_msgs::GetAgentNumAgentNeighbors::Response& res) {
-  res.res = true;
+  res.ok = true;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     res.num_neighbors = planner_->getAgentNumAgentNeighbors(req.agent_id);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
@@ -489,11 +489,11 @@ bool RVOWrapper::getAgentNumAgentNeighbors(
       }
     } else {
       ROS_WARN("Please provide a proper id range for sim_vector");
-      res.res = false;
+      res.ok = false;
     }
   } else {
     ROS_WARN("RVO Planner not initialised!");
-    res.res = false;
+    res.ok = false;
   }
   return true;
 }
@@ -501,7 +501,7 @@ bool RVOWrapper::getAgentNumAgentNeighbors(
 bool RVOWrapper::getAgentNumObstacleNeighbors(
   rvo_wrapper_msgs::GetAgentNumObstacleNeighbors::Request& req,
   rvo_wrapper_msgs::GetAgentNumObstacleNeighbors::Response& res) {
-  res.res = true;
+  res.ok = true;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     res.num_obstacles = planner_->getAgentNumObstacleNeighbors(req.agent_id);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
@@ -512,11 +512,11 @@ bool RVOWrapper::getAgentNumObstacleNeighbors(
       }
     } else {
       ROS_WARN("Please provide a proper id range for sim_vector");
-      res.res = false;
+      res.ok = false;
     }
   } else {
     ROS_WARN("RVO Planner not initialised!");
-    res.res = false;
+    res.ok = false;
   }
   return true;
 }
@@ -524,7 +524,7 @@ bool RVOWrapper::getAgentNumObstacleNeighbors(
 bool RVOWrapper::getAgentObstacleNeighbor(
   rvo_wrapper_msgs::GetAgentObstacleNeighbor::Request& req,
   rvo_wrapper_msgs::GetAgentObstacleNeighbor::Response& res) {
-  res.res = true;
+  res.ok = true;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     res.obstacle_vertex = planner_->getAgentObstacleNeighbor(req.agent_id,
                                                              req.agent_obstacle);
@@ -537,11 +537,11 @@ bool RVOWrapper::getAgentObstacleNeighbor(
       }
     } else {
       ROS_WARN("Please provide a proper id range for sim_vector");
-      res.res = false;
+      res.ok = false;
     }
   } else {
     ROS_WARN("RVO Planner not initialised!");
-    res.res = false;
+    res.ok = false;
   }
   return true;
 }
@@ -549,7 +549,7 @@ bool RVOWrapper::getAgentObstacleNeighbor(
 bool RVOWrapper::getAgentPosition(
   rvo_wrapper_msgs::GetAgentPosition::Request& req,
   rvo_wrapper_msgs::GetAgentPosition::Response& res) {
-  res.res = true;
+  res.ok = true;
   RVO::Vector2 position;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     position = planner_->getAgentPosition(req.agent_id);
@@ -561,11 +561,11 @@ bool RVOWrapper::getAgentPosition(
       }
     } else {
       ROS_WARN("Please provide a proper id range for sim_vector");
-      res.res = false;
+      res.ok = false;
     }
   } else {
     ROS_WARN("RVO Planner not initialised!");
-    res.res = false;
+    res.ok = false;
   }
   res.position.x = position.x();
   res.position.y = position.y();
@@ -575,7 +575,7 @@ bool RVOWrapper::getAgentPosition(
 bool RVOWrapper::getAgentPrefVelocity(
   rvo_wrapper_msgs::GetAgentPrefVelocity::Request& req,
   rvo_wrapper_msgs::GetAgentPrefVelocity::Response& res) {
-  res.res = true;
+  res.ok = true;
   RVO::Vector2 pref_velocity;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     pref_velocity = planner_->getAgentPrefVelocity(req.agent_id);
@@ -587,11 +587,11 @@ bool RVOWrapper::getAgentPrefVelocity(
       }
     } else {
       ROS_WARN("Please provide a proper id range for sim_vector");
-      res.res = false;
+      res.ok = false;
     }
   } else {
     ROS_WARN("RVO Planner not initialised!");
-    res.res = false;
+    res.ok = false;
   }
   res.pref_velocity.x = pref_velocity.x();
   res.pref_velocity.y = pref_velocity.y();
@@ -601,7 +601,7 @@ bool RVOWrapper::getAgentPrefVelocity(
 bool RVOWrapper::getAgentRadius(
   rvo_wrapper_msgs::GetAgentRadius::Request& req,
   rvo_wrapper_msgs::GetAgentRadius::Response& res) {
-  res.res = true;
+  res.ok = true;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     res.radius = planner_->getAgentRadius(req.agent_id);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
@@ -612,11 +612,11 @@ bool RVOWrapper::getAgentRadius(
       }
     } else {
       ROS_WARN("Please provide a proper id range for sim_vector");
-      res.res = false;
+      res.ok = false;
     }
   } else {
     ROS_WARN("RVO Planner not initialised!");
-    res.res = false;
+    res.ok = false;
   }
   return true;
 }
@@ -624,7 +624,7 @@ bool RVOWrapper::getAgentRadius(
 bool RVOWrapper::getAgentTimeHorizon(
   rvo_wrapper_msgs::GetAgentTimeHorizon::Request& req,
   rvo_wrapper_msgs::GetAgentTimeHorizon::Response& res) {
-  res.res = true;
+  res.ok = true;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     res.agent_time_horizon = planner_->getAgentTimeHorizon(req.agent_id);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
@@ -635,11 +635,11 @@ bool RVOWrapper::getAgentTimeHorizon(
       }
     } else {
       ROS_WARN("Please provide a proper id range for sim_vector");
-      res.res = false;
+      res.ok = false;
     }
   } else {
     ROS_WARN("RVO Planner not initialised!");
-    res.res = false;
+    res.ok = false;
   }
   return true;
 }
@@ -647,7 +647,7 @@ bool RVOWrapper::getAgentTimeHorizon(
 bool RVOWrapper::getAgentTimeHorizonObst(
   rvo_wrapper_msgs::GetAgentTimeHorizonObst::Request& req,
   rvo_wrapper_msgs::GetAgentTimeHorizonObst::Response& res) {
-  res.res = true;
+  res.ok = true;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     res.obst_time_horizon = planner_->getAgentTimeHorizonObst(req.agent_id);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
@@ -658,11 +658,11 @@ bool RVOWrapper::getAgentTimeHorizonObst(
       }
     } else {
       ROS_WARN("Please provide a proper id range for sim_vector");
-      res.res = false;
+      res.ok = false;
     }
   } else {
     ROS_WARN("RVO Planner not initialised!");
-    res.res = false;
+    res.ok = false;
   }
   return true;
 }
@@ -670,7 +670,7 @@ bool RVOWrapper::getAgentTimeHorizonObst(
 bool RVOWrapper::getAgentVelocity(
   rvo_wrapper_msgs::GetAgentVelocity::Request& req,
   rvo_wrapper_msgs::GetAgentVelocity::Response& res) {
-  res.res = true;
+  res.ok = true;
   std::vector<RVO::Vector2> velocity;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     velocity.push_back(planner_->getAgentVelocity(req.agent_id[0]));
@@ -682,11 +682,11 @@ bool RVOWrapper::getAgentVelocity(
       }
     } else {
       ROS_WARN("Please provide a proper id range for sim_vector");
-      res.res = false;
+      res.ok = false;
     }
   } else {
     ROS_WARN("RVO Planner not initialised!");
-    res.res = false;
+    res.ok = false;
   }
   res.velocity.resize(velocity.size());
   for (size_t i = 0; i < velocity.size(); ++i) {
@@ -699,7 +699,7 @@ bool RVOWrapper::getAgentVelocity(
 bool RVOWrapper::getGlobalTime(
   rvo_wrapper_msgs::GetGlobalTime::Request& req,
   rvo_wrapper_msgs::GetGlobalTime::Response& res) {
-  res.res = true;
+  res.ok = true;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     res.global_time = planner_->getGlobalTime();
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
@@ -710,11 +710,11 @@ bool RVOWrapper::getGlobalTime(
       }
     } else {
       ROS_WARN("Please provide a proper id range for sim_vector");
-      res.res = false;
+      res.ok = false;
     }
   } else {
     ROS_WARN("RVO Planner not initialised!");
-    res.res = false;
+    res.ok = false;
   }
   return true;
 }
@@ -722,7 +722,7 @@ bool RVOWrapper::getGlobalTime(
 bool RVOWrapper::getNumAgents(
   rvo_wrapper_msgs::GetNumAgents::Request& req,
   rvo_wrapper_msgs::GetNumAgents::Response& res) {
-  res.res = true;
+  res.ok = true;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     res.num_agents = planner_->getNumAgents();
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
@@ -733,11 +733,11 @@ bool RVOWrapper::getNumAgents(
       }
     } else {
       ROS_WARN("Please provide a proper id range for sim_vector");
-      res.res = false;
+      res.ok = false;
     }
   } else {
     ROS_WARN("RVO Planner not initialised!");
-    res.res = false;
+    res.ok = false;
   }
   return true;
 }
@@ -745,7 +745,7 @@ bool RVOWrapper::getNumAgents(
 bool RVOWrapper::getTimeStep(
   rvo_wrapper_msgs::GetTimeStep::Request& req,
   rvo_wrapper_msgs::GetTimeStep::Response& res) {
-  res.res = true;
+  res.ok = true;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     res.time_step = planner_->getTimeStep();
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
@@ -756,11 +756,11 @@ bool RVOWrapper::getTimeStep(
       }
     } else {
       ROS_WARN("Please provide a proper id range for sim_vector");
-      res.res = false;
+      res.ok = false;
     }
   } else {
     ROS_WARN("RVO Planner not initialised!");
-    res.res = false;
+    res.ok = false;
   }
   return true;
 }
@@ -768,7 +768,7 @@ bool RVOWrapper::getTimeStep(
 bool RVOWrapper::processObstacles(
   rvo_wrapper_msgs::ProcessObstacles::Request& req,
   rvo_wrapper_msgs::ProcessObstacles::Response& res) {
-  res.res = true;
+  res.ok = true;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     planner_->processObstacles();
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
@@ -779,11 +779,11 @@ bool RVOWrapper::processObstacles(
       }
     } else {
       ROS_WARN("Please provide a proper id range for sim_vector");
-      res.res = false;
+      res.ok = false;
     }
   } else {
     ROS_WARN("RVO Planner not initialised!");
-    res.res = false;
+    res.ok = false;
   }
   return true;
 }
@@ -791,7 +791,7 @@ bool RVOWrapper::processObstacles(
 bool RVOWrapper::queryVisibility(
   rvo_wrapper_msgs::QueryVisibility::Request& req,
   rvo_wrapper_msgs::QueryVisibility::Response& res) {
-  res.res = true;
+  res.ok = true;
   RVO::Vector2 point1(req.point1.x, req.point1.y);
   RVO::Vector2 point2(req.point2.x, req.point2.y);
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
@@ -804,11 +804,11 @@ bool RVOWrapper::queryVisibility(
       }
     } else {
       ROS_WARN("Please provide a proper id range for sim_vector");
-      res.res = false;
+      res.ok = false;
     }
   } else {
     ROS_WARN("RVO Planner not initialised!");
-    res.res = false;
+    res.ok = false;
   }
   return true;
 }
@@ -816,7 +816,7 @@ bool RVOWrapper::queryVisibility(
 bool RVOWrapper::setAgentDefaults(
   rvo_wrapper_msgs::SetAgentDefaults::Request& req,
   rvo_wrapper_msgs::SetAgentDefaults::Response& res) {
-  res.res = true;
+  res.ok = true;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     planner_->setAgentDefaults(req.defaults.neighbor_dist,
                                req.defaults.max_neighbors,
@@ -837,11 +837,11 @@ bool RVOWrapper::setAgentDefaults(
       }
     } else {
       ROS_WARN("Please provide a proper id range for sim_vector");
-      res.res = false;
+      res.ok = false;
     }
   } else {
     ROS_WARN("RVO Planner not initialised!");
-    res.res = false;
+    res.ok = false;
   }
   return true;
 }
@@ -849,7 +849,7 @@ bool RVOWrapper::setAgentDefaults(
 bool RVOWrapper::setAgentGoals(
   rvo_wrapper_msgs::SetAgentGoals::Request& req,
   rvo_wrapper_msgs::SetAgentGoals::Response& res) {
-  res.res = true;
+  res.ok = true;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     uint32_t num_agents = planner_->getNumAgents();
     for (uint32_t i = 0; i < num_agents; ++i) {
@@ -865,7 +865,7 @@ bool RVOWrapper::setAgentGoals(
       }
     } else {
       ROS_WARN("Please provide a proper sim id within range");
-      res.res = false;
+      res.ok = false;
     }
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
     if ((req.sim_ids.back() >= req.sim_ids.front()) &&
@@ -883,11 +883,11 @@ bool RVOWrapper::setAgentGoals(
       }
     } else {
       ROS_WARN("Please provide a proper id range for sim_vector");
-      res.res = false;
+      res.ok = false;
     }
   } else {
     ROS_WARN("RVO Planner not initialised!");
-    res.res = false;
+    res.ok = false;
   }
   return true;
 }
@@ -895,7 +895,7 @@ bool RVOWrapper::setAgentGoals(
 bool RVOWrapper::setAgentMaxNeighbors(
   rvo_wrapper_msgs::SetAgentMaxNeighbors::Request& req,
   rvo_wrapper_msgs::SetAgentMaxNeighbors::Response& res) {
-  res.res = true;
+  res.ok = true;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     planner_->setAgentMaxNeighbors(req.agent_id, req.max_neighbors);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
@@ -906,11 +906,11 @@ bool RVOWrapper::setAgentMaxNeighbors(
       }
     } else {
       ROS_WARN("Please provide a proper id range for sim_vector");
-      res.res = false;
+      res.ok = false;
     }
   } else {
     ROS_WARN("RVO Planner not initialised!");
-    res.res = false;
+    res.ok = false;
   }
   return true;
 }
@@ -918,7 +918,7 @@ bool RVOWrapper::setAgentMaxNeighbors(
 bool RVOWrapper::setAgentMaxSpeed(
   rvo_wrapper_msgs::SetAgentMaxSpeed::Request& req,
   rvo_wrapper_msgs::SetAgentMaxSpeed::Response& res) {
-  res.res = true;
+  res.ok = true;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     planner_->setAgentMaxSpeed(req.agent_id, req.max_speed);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
@@ -929,11 +929,11 @@ bool RVOWrapper::setAgentMaxSpeed(
       }
     } else {
       ROS_WARN("Please provide a proper id range for sim_vector");
-      res.res = false;
+      res.ok = false;
     }
   } else {
     ROS_WARN("RVO Planner not initialised!");
-    res.res = false;
+    res.ok = false;
   }
   return true;
 }
@@ -941,7 +941,7 @@ bool RVOWrapper::setAgentMaxSpeed(
 bool RVOWrapper::setAgentNeighborDist(
   rvo_wrapper_msgs::SetAgentNeighborDist::Request& req,
   rvo_wrapper_msgs::SetAgentNeighborDist::Response& res) {
-  res.res = true;
+  res.ok = true;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     planner_->setAgentNeighborDist(req.agent_id, req.neighbor_dist);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
@@ -952,11 +952,11 @@ bool RVOWrapper::setAgentNeighborDist(
       }
     } else {
       ROS_WARN("Please provide a proper id range for sim_vector");
-      res.res = false;
+      res.ok = false;
     }
   } else {
     ROS_WARN("RVO Planner not initialised!");
-    res.res = false;
+    res.ok = false;
   }
   return true;
 }
@@ -964,7 +964,7 @@ bool RVOWrapper::setAgentNeighborDist(
 bool RVOWrapper::setAgentPosition(
   rvo_wrapper_msgs::SetAgentPosition::Request& req,
   rvo_wrapper_msgs::SetAgentPosition::Response& res) {
-  res.res = true;
+  res.ok = true;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     planner_->setAgentPosition(req.agent_id, RVO::Vector2(req.position.x,
                                                           req.position.y));
@@ -977,11 +977,11 @@ bool RVOWrapper::setAgentPosition(
       }
     } else {
       ROS_WARN("Please provide a proper id range for sim_vector");
-      res.res = false;
+      res.ok = false;
     }
   } else {
     ROS_WARN("RVO Planner not initialised!");
-    res.res = false;
+    res.ok = false;
   }
   return true;
 }
@@ -989,7 +989,7 @@ bool RVOWrapper::setAgentPosition(
 bool RVOWrapper::setAgentPrefVelocity(
   rvo_wrapper_msgs::SetAgentPrefVelocity::Request& req,
   rvo_wrapper_msgs::SetAgentPrefVelocity::Response& res) {
-  res.res = true;
+  res.ok = true;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     planner_->setAgentPrefVelocity(req.agent_id, RVO::Vector2(req.pref_velocity.x,
                                                               req.pref_velocity.y));
@@ -1003,11 +1003,11 @@ bool RVOWrapper::setAgentPrefVelocity(
       }
     } else {
       ROS_WARN("Please provide a proper id range for sim_vector");
-      res.res = false;
+      res.ok = false;
     }
   } else {
     ROS_WARN("RVO Planner not initialised!");
-    res.res = false;
+    res.ok = false;
   }
   return true;
 }
@@ -1015,7 +1015,7 @@ bool RVOWrapper::setAgentPrefVelocity(
 bool RVOWrapper::setAgentRadius(
   rvo_wrapper_msgs::SetAgentRadius::Request& req,
   rvo_wrapper_msgs::SetAgentRadius::Response& res) {
-  res.res = true;
+  res.ok = true;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     planner_->setAgentRadius(req.agent_id, req.radius);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
@@ -1026,11 +1026,11 @@ bool RVOWrapper::setAgentRadius(
       }
     } else {
       ROS_WARN("Please provide a proper id range for sim_vector");
-      res.res = false;
+      res.ok = false;
     }
   } else {
     ROS_WARN("RVO Planner not initialised!");
-    res.res = false;
+    res.ok = false;
   }
   return true;
 }
@@ -1038,7 +1038,7 @@ bool RVOWrapper::setAgentRadius(
 bool RVOWrapper::setAgentTimeHorizon(
   rvo_wrapper_msgs::SetAgentTimeHorizon::Request& req,
   rvo_wrapper_msgs::SetAgentTimeHorizon::Response& res) {
-  res.res = true;
+  res.ok = true;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     planner_->setAgentTimeHorizon(req.agent_id, req.agent_time_horizon);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
@@ -1049,11 +1049,11 @@ bool RVOWrapper::setAgentTimeHorizon(
       }
     } else {
       ROS_WARN("Please provide a proper id range for sim_vector");
-      res.res = false;
+      res.ok = false;
     }
   } else {
     ROS_WARN("RVO Planner not initialised!");
-    res.res = false;
+    res.ok = false;
   }
   return true;
 }
@@ -1061,7 +1061,7 @@ bool RVOWrapper::setAgentTimeHorizon(
 bool RVOWrapper::setAgentTimeHorizonObst(
   rvo_wrapper_msgs::SetAgentTimeHorizonObst::Request& req,
   rvo_wrapper_msgs::SetAgentTimeHorizonObst::Response& res) {
-  res.res = true;
+  res.ok = true;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     planner_->setAgentTimeHorizonObst(req.agent_id, req.obst_time_horizon);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
@@ -1072,11 +1072,11 @@ bool RVOWrapper::setAgentTimeHorizonObst(
       }
     } else {
       ROS_WARN("Please provide a proper id range for sim_vector");
-      res.res = false;
+      res.ok = false;
     }
   } else {
     ROS_WARN("RVO Planner not initialised!");
-    res.res = false;
+    res.ok = false;
   }
   return true;
 }
@@ -1084,7 +1084,7 @@ bool RVOWrapper::setAgentTimeHorizonObst(
 bool RVOWrapper::setAgentVelocity(
   rvo_wrapper_msgs::SetAgentVelocity::Request& req,
   rvo_wrapper_msgs::SetAgentVelocity::Response& res) {
-  res.res = true;
+  res.ok = true;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     planner_->setAgentVelocity(req.agent_id, RVO::Vector2(req.velocity.x,
                                                           req.velocity.y));
@@ -1097,11 +1097,11 @@ bool RVOWrapper::setAgentVelocity(
       }
     } else {
       ROS_WARN("Please provide a proper id range for sim_vector");
-      res.res = false;
+      res.ok = false;
     }
   } else {
     ROS_WARN("RVO Planner not initialised!");
-    res.res = false;
+    res.ok = false;
   }
   return true;
 }
@@ -1109,7 +1109,7 @@ bool RVOWrapper::setAgentVelocity(
 bool RVOWrapper::setTimeStep(
   rvo_wrapper_msgs::SetTimeStep::Request& req,
   rvo_wrapper_msgs::SetTimeStep::Response& res) {
-  res.res = true;
+  res.ok = true;
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     planner_->setTimeStep(req.time_step);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
@@ -1120,11 +1120,11 @@ bool RVOWrapper::setTimeStep(
       }
     } else {
       ROS_WARN("Please provide a proper id range for sim_vector");
-      res.res = false;
+      res.ok = false;
     }
   } else {
     ROS_WARN("RVO Planner not initialised!");
-    res.res = false;
+    res.ok = false;
   }
   return true;
 }

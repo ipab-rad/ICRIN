@@ -2,4 +2,4 @@ uint32[] sim_ids
 uint8 agent_id
 float32 neighbor_dist
 ---
-bool res
+bool ok

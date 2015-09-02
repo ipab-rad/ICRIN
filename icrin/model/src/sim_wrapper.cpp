@@ -178,7 +178,7 @@ std::vector<common_msgs::Vector2> SimWrapper::calcSimVels(std::vector<uint32_t>
   rvo_wrapper_msgs::DoStep run_sims;
   run_sims.request.sim_ids = sims;
   do_sim_step_client_.call(run_sims);
-  if (!run_sims.response.res) {ROS_ERROR("SimSteps could not be run!");}
+  if (!run_sims.response.ok) {ROS_ERROR("SimSteps could not be run!");}
 
   // Get Velocities
   rvo_wrapper_msgs::GetAgentVelocity get_vels;
@@ -190,13 +190,13 @@ std::vector<common_msgs::Vector2> SimWrapper::calcSimVels(std::vector<uint32_t>
   }
   // ROS_INFO_STREAM("NGoals:" << n_goals);
   get_agent_vel_client_.call(get_vels);
-  if (!get_vels.response.res) {ROS_ERROR("SimVels could not be acquired!");}
+  if (!get_vels.response.ok) {ROS_ERROR("SimVels could not be acquired!");}
 
   // Delete Sims
   rvo_wrapper_msgs::DeleteSimVector del_sims;
   del_sims.request.sim_ids = sims;
   delete_sims_client_.call(del_sims);
-  if (!del_sims.response.res) {ROS_ERROR("Sims could not be deleted!");}
+  if (!del_sims.response.ok) {ROS_ERROR("Sims could not be deleted!");}
   // Return Velocities
   return get_vels.response.velocity;
 }

@@ -1,4 +1,4 @@
 uint8 goal_no
 geometry_msgs/Pose2D goal
 ---
-bool res
+bool ok

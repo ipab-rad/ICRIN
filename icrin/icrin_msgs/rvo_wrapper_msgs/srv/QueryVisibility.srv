@@ -3,5 +3,5 @@ common_msgs/Vector2 point1
 common_msgs/Vector2 point2
 float32 radius
 ---
-bool res
+bool ok
 bool visible

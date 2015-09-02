@@ -86,7 +86,7 @@ void PlannerWrapper::pubArrived(bool arrived) {
 bool PlannerWrapper::setupNewPlanner(
   planner_msgs::SetupNewPlanner::Request& req,
   planner_msgs::SetupNewPlanner::Response& res) {
-  res.res = true;
+  res.ok = true;
   if (req.planner_type == req.RVO_PLANNER && !planner_init) {
     rvo_planner_ = new RVOPlanner(nh_);
     use_rvo_planner_ = true;
@@ -94,7 +94,7 @@ bool PlannerWrapper::setupNewPlanner(
     ROS_INFO("RVO Planner setup");
   } else if (req.planner_type == req.ROS_NAVIGATION && !planner_init) {
     ROS_ERROR("ROS_NAVIGATION not implemented yet, sorry!");
-  } else {res.res = false;}
+  } else {res.ok = false;}
   return true;
 }
 
@@ -102,7 +102,7 @@ bool PlannerWrapper::setupRVOPlanner(
   planner_msgs::SetupRVOPlanner::Request& req,
   planner_msgs::SetupRVOPlanner::Response& res) {
   rvo_planner_->setPlannerSettings(req.time_step, req.defaults);
-  res.res = true;
+  res.ok = true;
   return true;
 }
 

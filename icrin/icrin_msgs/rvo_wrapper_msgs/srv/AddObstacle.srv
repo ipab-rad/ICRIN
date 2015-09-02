@@ -1,4 +1,4 @@
 uint32[] sim_ids
 common_msgs/Vector2[] vertices
 ---
-bool res
+bool ok

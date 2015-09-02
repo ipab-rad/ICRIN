@@ -198,7 +198,7 @@ void Experiment::planningCB(const std_msgs::Bool::ConstPtr& msg,
 
 bool Experiment::setGoal(experiment_msgs::SetGoal::Request& req,
                          experiment_msgs::SetGoal::Response& res) {
-  res.res = true;
+  res.ok = true;
   if (req.goal_no < goals_.goal.size()) {
     goals_.goal[req.goal_no] = req.goal;
   } else {
@@ -211,7 +211,7 @@ bool Experiment::setGoal(experiment_msgs::SetGoal::Request& req,
 
 bool Experiment::setPlan(experiment_msgs::SetPlan::Request& req,
                          experiment_msgs::SetPlan::Response& res) {
-  res.res = false;
+  res.ok = false;
   bool sequence_ok = true;
   for (size_t i = 0; i < robots_.size(); ++i) {
     if (req.robot.compare(robots_[i]) == 0) {
@@ -223,14 +223,14 @@ bool Experiment::setPlan(experiment_msgs::SetPlan::Request& req,
       }
       if (sequence_ok) {
         plans_.plan[i] = req.plan;
-        res.res = true;
+        res.ok = true;
       } else {
         ROS_WARN("Incorrect sequence goal ids!");
       }
       break;
     }
   }
-  if (!res.res && sequence_ok) {
+  if (!res.ok && sequence_ok) {
     ROS_WARN("Robot %s could not be found!", req.robot.c_str());
   }
   return true;

@@ -1,4 +1,4 @@
 float32 time_step
 rvo_wrapper_msgs/AgentDefaults defaults
 ---
-bool res
+bool ok

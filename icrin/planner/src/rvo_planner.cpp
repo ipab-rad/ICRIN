@@ -172,7 +172,7 @@ common_msgs::Vector2 RVOPlanner::getPlannerVel() {
   rvo_wrapper_msgs::GetAgentVelocity msg;
   msg.request.agent_id.push_back(PLANNER_ROBOT_);
   get_agent_vel_client_.call(msg);
-  if (!msg.response.res) {
+  if (!msg.response.ok) {
     ROS_ERROR("Planner- Velocity not received from RVO Library");
     common_msgs::Vector2 vel;
     vel.x = 0.0f;
