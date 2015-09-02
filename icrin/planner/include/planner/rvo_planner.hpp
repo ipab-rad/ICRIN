@@ -33,6 +33,8 @@ class RVOPlanner {
   RVOPlanner(ros::NodeHandle* nh);
   ~RVOPlanner();
 
+  void loadParams();
+
   void init();
 
   void rosSetup();

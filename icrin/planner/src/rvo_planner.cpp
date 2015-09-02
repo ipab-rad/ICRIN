@@ -12,23 +12,41 @@ RVOPlanner::RVOPlanner(ros::NodeHandle* nh) {
   nh_ = nh;
   robot_name_ = ros::this_node::getNamespace();
   robot_name_.erase (0, 1); // Remove 1 forward slash from robot_name
+  this->loadParams();
   this->init();
   this->rosSetup();
 }
 
 RVOPlanner::~RVOPlanner() {;}
 
+void RVOPlanner::loadParams() {
+  if (!ros::param::has(robot_name_ + "/time_step"))
+  {ROS_WARN("Planner- Using default RVO Planner Sim params");}
+  int max_neighbors;
+  ros::param::param(robot_name_ + "/time_step",
+                    planner_settings_.request.time_step, 0.1f);
+  ros::param::param(robot_name_ + "/neighbor_dist",
+                    planner_settings_.request.defaults.neighbor_dist, 2.0f);
+  ros::param::param(robot_name_ + "/max_neighbors", max_neighbors, 20);
+  planner_settings_.request.defaults.max_neighbors = uint(max_neighbors);
+  ros::param::param(robot_name_ + "/time_horizon_agent",
+                    planner_settings_.request.defaults.time_horizon_agent, 5.0f);
+  ros::param::param(robot_name_ + "/time_horizon_obst",
+                    planner_settings_.request.defaults.time_horizon_obst, 5.0f);
+  ros::param::param(robot_name_ + "/radius",
+                    planner_settings_.request.defaults.radius, 0.5f);
+  ros::param::param(robot_name_ + "/max_speed",
+                    planner_settings_.request.defaults.max_speed, 0.3f);
+  ros::param::param(robot_name_ + "/max_accel",
+                    planner_settings_.request.defaults.max_accel, 1.2f);
+  ros::param::param(robot_name_ + "/pref_speed",
+                    planner_settings_.request.defaults.pref_speed, 0.3f);
+}
+
 void RVOPlanner::init() {
   arrived_ = false;
   PLANNER_ROBOT_ = 0;
   planner_settings_.request.sim_num = 0;
-  planner_settings_.request.time_step = 0.1f;
-  planner_settings_.request.defaults.neighbor_dist = 2.0f;
-  planner_settings_.request.defaults.max_neighbors = 20;
-  planner_settings_.request.defaults.time_horizon_agent = 5.0f;
-  planner_settings_.request.defaults.time_horizon_obst = 5.0f;
-  planner_settings_.request.defaults.radius = 0.5f;
-  planner_settings_.request.defaults.max_speed = 0.3f;
   planner_vel_.x = 0.0f;
   planner_vel_.y = 0.0f;
 }

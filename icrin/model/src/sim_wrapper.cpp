@@ -24,7 +24,7 @@ SimWrapper::~SimWrapper() {
 
 void SimWrapper::loadParams() {
   if (!ros::param::has(robot_name_ + model_name_ + "/time_step"))
-  {ROS_WARN("Model- Using default Sim params");}
+  {ROS_WARN("Model- Using default RVO Model Sim params");}
   int max_neighbors;
   ros::param::param(robot_name_ + model_name_ + "/time_step", time_step_, 0.1f);
   ros::param::param(robot_name_ + model_name_ + "/neighbor_dist", neighbor_dist_,
@@ -37,6 +37,8 @@ void SimWrapper::loadParams() {
                     time_horizon_obst_, 5.0f);
   ros::param::param(robot_name_ + model_name_ + "/radius", radius_, 0.5f);
   ros::param::param(robot_name_ + model_name_ + "/max_speed", max_speed_, 0.3f);
+  ros::param::param(robot_name_ + model_name_ + "/max_accel", max_accel_, 1.2f);
+  ros::param::param(robot_name_ + model_name_ + "/pref_speed", pref_speed_, 0.3f);
   max_neighbors_ = max_neighbors;
 }
 
@@ -110,6 +112,8 @@ std::vector<uint32_t> SimWrapper::goalSequence(
   sim_msg.request.defaults.time_horizon_obst = time_horizon_obst_;
   sim_msg.request.defaults.radius = radius_;
   sim_msg.request.defaults.max_speed = max_speed_;
+  sim_msg.request.defaults.max_accel = max_accel_;
+  sim_msg.request.defaults.pref_speed = pref_speed_;
   create_sims_client_.call(sim_msg);
   std::vector<uint32_t> sim_ids = sim_msg.response.sim_ids;
   if (!sim_msg.response.ok) {

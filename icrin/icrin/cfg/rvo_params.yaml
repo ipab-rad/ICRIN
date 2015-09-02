@@ -5,3 +5,5 @@
   time_horizon_obst: 5.0f
   radius: 0.5f
   max_speed: 0.6f
+  max_accel: 1.2f
+  pref_speed: 0.3f

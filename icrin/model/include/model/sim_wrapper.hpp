@@ -64,6 +64,8 @@ class SimWrapper {
   float time_horizon_obst_;
   float radius_;
   float max_speed_;
+  float max_accel_;
+  float pref_speed_;
 
   // Variables
   bool robot_model_;
