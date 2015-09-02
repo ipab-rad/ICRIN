@@ -152,7 +152,8 @@ class RVOSimulator {
 	 */
 	RVOSimulator(float timeStep, float neighborDist, size_t maxNeighbors,
 	             float timeHorizon, float timeHorizonObst, float radius,
-	             float maxSpeed, const Vector2& velocity = Vector2());
+	             float maxSpeed, float maxAccel, float prefSpeed,
+	             const Vector2& velocity = Vector2());
 
 	/**
 	 * \brief      Destroys this simulator instance.
@@ -213,6 +214,7 @@ class RVOSimulator {
 	size_t addAgent(const Vector2& position, float neighborDist,
 	                size_t maxNeighbors, float timeHorizon,
 	                float timeHorizonObst, float radius, float maxSpeed,
+	                float maxAccel, float prefSpeed,
 	                const Vector2& velocity = Vector2());
 
 	/**
@@ -514,7 +516,18 @@ class RVOSimulator {
 	void setAgentDefaults(float neighborDist, size_t maxNeighbors,
 	                      float timeHorizon, float timeHorizonObst,
 	                      float radius, float maxSpeed,
+	                      float maxAccel, float prefSpeed,
 	                      const Vector2& velocity = Vector2());
+
+	/**
+	 * \brief      Sets the float maximum acceleration of a specified agent.
+	 * \param      agentNo         The number of the agent whose
+	 *                             float maximum acceleration is to be
+	 *                             modified.
+	 * \param      prefVelocity    The replacement of the float
+	 *                             maximum acceleration.
+	 */
+	void setAgentMaxAcceleration(size_t agentNo, float maxAccel);
 
 	/**
 	 * \brief      Sets the maximum neighbor count of a specified agent.
@@ -550,6 +563,16 @@ class RVOSimulator {
 	 *                             position.
 	 */
 	void setAgentPosition(size_t agentNo, const Vector2& position);
+
+	/**
+	 * \brief      Sets the float preferred speed of a specified agent.
+	 * \param      agentNo         The number of the agent whose
+	 *                             float preferred speed is to be
+	 *                             modified.
+	 * \param      prefVelocity    The replacement of the float
+	 *                             preferred speed.
+	 */
+	void setAgentPrefSpeed(size_t agentNo, float prefSpeed);
 
 	/**
 	 * \brief      Sets the two-dimensional preferred velocity of a

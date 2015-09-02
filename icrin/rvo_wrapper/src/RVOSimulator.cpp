@@ -71,8 +71,10 @@ RVOSimulator::RVOSimulator() : defaultAgent_(NULL), globalTime_(0.0f),
 }
 
 RVOSimulator::RVOSimulator(float timeStep, float neighborDist,
-                           size_t maxNeighbors, float timeHorizon, float timeHorizonObst, float radius,
-                           float maxSpeed, const Vector2& velocity) : defaultAgent_(NULL),
+                           size_t maxNeighbors, float timeHorizon,
+                           float timeHorizonObst, float radius, float maxSpeed,
+                           float maxAccel, float prefSpeed,
+                           const Vector2& velocity) : defaultAgent_(NULL),
 	globalTime_(0.0f), kdTree_(NULL), timeStep_(timeStep) {
 	kdTree_ = new KdTree(this);
 	defaultAgent_ = new Agent(this);
@@ -83,6 +85,8 @@ RVOSimulator::RVOSimulator(float timeStep, float neighborDist,
 	defaultAgent_->radius_ = radius;
 	defaultAgent_->timeHorizon_ = timeHorizon;
 	defaultAgent_->timeHorizonObst_ = timeHorizonObst;
+	defaultAgent_->maxAccel_ = maxAccel;
+	defaultAgent_->prefSpeed_ = prefSpeed;
 	defaultAgent_->velocity_ = velocity;
 }
 
@@ -116,6 +120,8 @@ size_t RVOSimulator::addAgent(const Vector2& position) {
 	agent->radius_ = defaultAgent_->radius_;
 	agent->timeHorizon_ = defaultAgent_->timeHorizon_;
 	agent->timeHorizonObst_ = defaultAgent_->timeHorizonObst_;
+	agent->maxAccel_ = defaultAgent_->maxAccel_;
+	agent->prefSpeed_ = defaultAgent_->prefSpeed_;
 	agent->velocity_ = defaultAgent_->velocity_;
 
 	agent->id_ = agents_.size();
@@ -126,8 +132,10 @@ size_t RVOSimulator::addAgent(const Vector2& position) {
 }
 
 size_t RVOSimulator::addAgent(const Vector2& position, float neighborDist,
-                              size_t maxNeighbors, float timeHorizon, float timeHorizonObst, float radius,
-                              float maxSpeed, const Vector2& velocity) {
+                              size_t maxNeighbors, float timeHorizon,
+                              float timeHorizonObst, float radius,
+                              float maxSpeed, float maxAccel, float prefSpeed,
+                              const Vector2& velocity) {
 	Agent* agent = new Agent(this);
 
 	agent->position_ = position;
@@ -137,6 +145,8 @@ size_t RVOSimulator::addAgent(const Vector2& position, float neighborDist,
 	agent->radius_ = radius;
 	agent->timeHorizon_ = timeHorizon;
 	agent->timeHorizonObst_ = timeHorizonObst;
+	agent->maxAccel_ = maxAccel;
+	agent->prefSpeed_ = prefSpeed;
 	agent->velocity_ = velocity;
 
 	agent->id_ = agents_.size();
@@ -311,7 +321,9 @@ bool RVOSimulator::queryVisibility(const Vector2& point1, const Vector2& point2,
 }
 
 void RVOSimulator::setAgentDefaults(float neighborDist, size_t maxNeighbors,
-                                    float timeHorizon, float timeHorizonObst, float radius, float maxSpeed,
+                                    float timeHorizon, float timeHorizonObst,
+                                    float radius, float maxSpeed,
+                                    float maxAccel, float prefSpeed,
                                     const Vector2& velocity) {
 	if (defaultAgent_ == NULL) {
 		defaultAgent_ = new Agent(this);
@@ -323,7 +335,13 @@ void RVOSimulator::setAgentDefaults(float neighborDist, size_t maxNeighbors,
 	defaultAgent_->radius_ = radius;
 	defaultAgent_->timeHorizon_ = timeHorizon;
 	defaultAgent_->timeHorizonObst_ = timeHorizonObst;
+	defaultAgent_->maxAccel_ = maxAccel;
+	defaultAgent_->prefSpeed_ = prefSpeed;
 	defaultAgent_->velocity_ = velocity;
+}
+
+void RVOSimulator::setAgentMaxAcceleration(size_t agentNo, float maxAccel) {
+	agents_[agentNo]->maxAccel_ = maxAccel;
 }
 
 void RVOSimulator::setAgentMaxNeighbors(size_t agentNo, size_t maxNeighbors) {
@@ -340,6 +358,10 @@ void RVOSimulator::setAgentNeighborDist(size_t agentNo, float neighborDist) {
 
 void RVOSimulator::setAgentPosition(size_t agentNo, const Vector2& position) {
 	agents_[agentNo]->position_ = position;
+}
+
+void RVOSimulator::setAgentPrefSpeed(size_t agentNo, float prefSpeed) {
+	agents_[agentNo]->prefSpeed_ = prefSpeed;
 }
 
 void RVOSimulator::setAgentPrefVelocity(size_t agentNo,

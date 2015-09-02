@@ -112,8 +112,6 @@ class Agent {
 
 	std::vector<std::pair<float, const Agent*> > agentNeighbors_;
 	size_t maxNeighbors_;
-	float maxAccel_;
-	float prefSpeed_;
 	float maxSpeed_;
 	float neighborDist_;
 	Vector2 newVelocity_;
@@ -125,6 +123,8 @@ class Agent {
 	RVOSimulator* sim_;
 	float timeHorizon_;
 	float timeHorizonObst_;
+	float maxAccel_;
+	float prefSpeed_;
 	Vector2 velocity_;
 
 	size_t id_;

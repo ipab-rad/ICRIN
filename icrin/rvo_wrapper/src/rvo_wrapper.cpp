@@ -158,7 +158,9 @@ bool RVOWrapper::addAgent(
                                         req.defaults.time_horizon_agent,
                                         req.defaults.time_horizon_obst,
                                         req.defaults.radius,
-                                        req.defaults.max_speed);
+                                        req.defaults.max_speed,
+                                        req.defaults.max_accel,
+                                        req.defaults.pref_speed);
     }
     planner_goals_.push_back(RVO::Vector2(0.0f, 0.0f));
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
@@ -177,7 +179,9 @@ bool RVOWrapper::addAgent(
                                                 req.defaults.time_horizon_agent,
                                                 req.defaults.time_horizon_obst,
                                                 req.defaults.radius,
-                                                req.defaults.max_speed);
+                                                req.defaults.max_speed,
+                                                req.defaults.max_accel,
+                                                req.defaults.pref_speed);
           sim_vect_goals_[i].push_back(RVO::Vector2(0.0f, 0.0f));
         }
       }
@@ -303,7 +307,9 @@ bool RVOWrapper::createRVOSim(
                                        req.defaults.time_horizon_agent,
                                        req.defaults.time_horizon_obst,
                                        req.defaults.radius,
-                                       req.defaults.max_speed);
+                                       req.defaults.max_speed,
+                                       req.defaults.max_accel,
+                                       req.defaults.pref_speed);
     }
     res.sim_ids.push_back(0);
     planner_init_ = true;
@@ -324,7 +330,9 @@ bool RVOWrapper::createRVOSim(
                                                   req.defaults.time_horizon_agent,
                                                   req.defaults.time_horizon_obst,
                                                   req.defaults.radius,
-                                                  req.defaults.max_speed));
+                                                  req.defaults.max_speed,
+                                                  req.defaults.max_accel,
+                                                  req.defaults.pref_speed));
         std::vector<RVO::Vector2> empty;
         sim_vect_goals_.push_back(empty);
       }
@@ -823,7 +831,9 @@ bool RVOWrapper::setAgentDefaults(
                                req.defaults.time_horizon_agent,
                                req.defaults.time_horizon_obst,
                                req.defaults.radius,
-                               req.defaults.max_speed);
+                               req.defaults.max_speed,
+                               req.defaults.max_accel,
+                               req.defaults.pref_speed);
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
     if ((req.sim_ids.back() >= req.sim_ids.front()) &&
         (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
@@ -833,7 +843,9 @@ bool RVOWrapper::setAgentDefaults(
                                        req.defaults.time_horizon_agent,
                                        req.defaults.time_horizon_obst,
                                        req.defaults.radius,
-                                       req.defaults.max_speed);
+                                       req.defaults.max_speed,
+                                       req.defaults.max_accel,
+                                       req.defaults.pref_speed);
       }
     } else {
       ROS_WARN("Please provide a proper id range for sim_vector");

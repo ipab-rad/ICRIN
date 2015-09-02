@@ -4,4 +4,6 @@ float32 time_horizon_agent
 float32 time_horizon_obst
 float32 radius
 float32 max_speed
+float32 max_accel
+float32 pref_speed
 common_msgs/Vector2 velocity
