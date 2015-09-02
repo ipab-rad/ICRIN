@@ -9,7 +9,8 @@ find_package(catkin REQUIRED
   geometry_msgs
   common_msgs
   environment_msgs
-  model_msgs)
+  model_msgs
+  rvo_wrapper_msgs)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -115,7 +116,8 @@ add_executable(model
 add_dependencies(model
  common_msgs_gencpp
  environment_msgs_gencpp
- model_msgs_gencpp)
+ model_msgs_gencpp
+ rvo_wrapper_msgs_gencpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(model
