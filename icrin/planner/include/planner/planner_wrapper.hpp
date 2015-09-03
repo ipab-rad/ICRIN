@@ -16,11 +16,14 @@
 #include <geometry_msgs/Twist.h>
 #include <common_msgs/Vector2.h>
 
+#include <geometry_msgs/PoseStamped.h>
+
 #include <environment_msgs/EnvironmentData.h>
 #include <planner_msgs/SetupNewPlanner.h>
 #include <planner_msgs/SetupRVOPlanner.h>
 
 #include <planner/rvo_planner.hpp>
+#include <planner/ros_navigation.hpp>
 
 class PlannerWrapper {
  public:
@@ -50,7 +53,9 @@ class PlannerWrapper {
  private:
   // Flags
   bool use_rvo_planner_;
+  bool use_ros_navigation_;
   bool planning_;
+  bool aborted_;
   bool arrived_;
   bool planner_init;
   // Variables
@@ -61,6 +66,7 @@ class PlannerWrapper {
   common_msgs::Vector2 null_vect_;
   geometry_msgs::Twist cmd_vel_;
   environment_msgs::EnvironmentData environment_;
+  geometry_msgs::PoseStamped target_pose_;
   // ROS
   ros::NodeHandle* nh_;
 
@@ -76,6 +82,7 @@ class PlannerWrapper {
 
   // Class pointers
   RVOPlanner* rvo_planner_;
+  ROSNavigation* ros_navigation_;
 };
 
 #endif  /* PLANNER_WRAPPER_HPP */

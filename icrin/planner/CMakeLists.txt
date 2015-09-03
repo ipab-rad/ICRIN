@@ -8,6 +8,9 @@ find_package(catkin REQUIRED
   roscpp
   common_msgs
   planner_msgs
+  actionlib
+  move_base_msgs
+  geometry_msgs
   rvo_wrapper_msgs
   rvo_wrapper)
 
@@ -83,7 +86,7 @@ find_package(catkin REQUIRED
 catkin_package(
  INCLUDE_DIRS include
 #  LIBRARIES planner
- CATKIN_DEPENDS roscpp common_msgs planner_msgs rvo_wrapper_msgs rvo_wrapper
+ CATKIN_DEPENDS roscpp common_msgs planner_msgs rvo_wrapper_msgs rvo_wrapper actionlib
 #  DEPENDS system_lib
 )
 
@@ -108,7 +111,8 @@ include_directories(
 add_executable(planner
   src/planner.cpp
   src/planner_wrapper.cpp
-  src/rvo_planner.cpp)
+  src/rvo_planner.cpp
+  src/ros_navigation.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes

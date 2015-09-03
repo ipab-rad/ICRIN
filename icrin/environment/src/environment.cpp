@@ -120,6 +120,8 @@ void Environment::setupEnvironment() {
   planner_msgs::SetupNewPlanner new_planner;
   if (rvo_planner_) {
     new_planner.request.planner_type = new_planner.request.RVO_PLANNER;
+  } else {
+    new_planner.request.planner_type = new_planner.request.ROS_NAVIGATION;
   }
   setup_new_planner_.call(new_planner);
   while (goals_.size() == 0) {

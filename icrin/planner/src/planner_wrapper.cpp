@@ -26,12 +26,17 @@ PlannerWrapper::~PlannerWrapper() {
 
 void PlannerWrapper::init() {
   use_rvo_planner_ = false;
+  use_ros_navigation_ = false;
   planning_ = false;
   arrived_ = false;
   planner_init = false;
   curr_pose_.x = 0.0f;
   curr_pose_.y = 0.0f;
   goal_pose_ = curr_pose_;
+  target_pose_.pose.orientation.x = 0.0;
+  target_pose_.pose.orientation.y = 0.0;
+  target_pose_.pose.orientation.z = 0.0;
+  target_pose_.pose.orientation.w = 1.0;
   cmd_vel_.linear.x = 0.0f;
   cmd_vel_.linear.y = 0.0f;
   cmd_vel_.linear.z = 0.0f;
@@ -43,7 +48,9 @@ void PlannerWrapper::init() {
 }
 
 void PlannerWrapper::rosSetup() {
-  cmd_vel_pub_ = nh_->advertise<geometry_msgs::Twist>("cmd_vel", 1, true);
+  cmd_vel_pub_ = nh_->advertise<geometry_msgs::Twist>(robot_name_ +
+                                                      "/planner/cmd_vel", 1,
+                                                      true);
   planning_pub_ = nh_->advertise<std_msgs::Bool>(robot_name_ +
                                                  "/environment/planning",
                                                  1);
@@ -94,6 +101,10 @@ bool PlannerWrapper::setupNewPlanner(
     ROS_INFO("RVO Planner setup");
   } else if (req.planner_type == req.ROS_NAVIGATION && !planner_init) {
     ROS_ERROR("ROS_NAVIGATION not implemented yet, sorry!");
+    ros_navigation_ = new ROSNavigation(nh_);
+    use_ros_navigation_ = true;
+    planner_init = true;
+    ROS_INFO("ROS Navigation setup");
   } else {res.ok = false;}
   return true;
 }
@@ -112,18 +123,23 @@ void PlannerWrapper::plannerStep() {
       rvo_planner_vel_ = rvo_planner_->planStep();
       cmd_vel_.linear.x = rvo_planner_vel_.x;
       cmd_vel_.linear.y = rvo_planner_vel_.y;
+      arrived_ = rvo_planner_->getArrived();
+      cmd_vel_pub_.publish(cmd_vel_);
+    } else if (use_ros_navigation_) {
+      ros_navigation_->planStep();
+      arrived_ = ros_navigation_->getArrived();
+      aborted_ = ros_navigation_->getAborted();
     }
-    ROS_INFO_STREAM("Planner- VelX: " << cmd_vel_.linear.x <<
-                    " VelY: " << cmd_vel_.linear.y);
-    cmd_vel_pub_.publish(cmd_vel_);
-    arrived_ = rvo_planner_->getArrived();
   }
   if (planning_ && arrived_) {
     this->pubArrived(true);
     ROS_INFO("Planner Wrapper- Robot %s reached goal", robot_name_.c_str());
   }
-  if (!planning_) {
+  if (!planning_ && use_rvo_planner_) {
     rvo_planner_->setCurrVel(null_vect_);
+  }
+  if (aborted_ && use_ros_navigation_) {
+    this->pubPlanning(false);
   }
 }
 
@@ -132,6 +148,8 @@ void PlannerWrapper::currPoseCB(const geometry_msgs::Pose2D::ConstPtr& msg) {
   curr_pose_.y = msg->y;
   if (use_rvo_planner_) {
     rvo_planner_->setCurrPose(curr_pose_);
+  } else if (use_ros_navigation_) {
+    // ROS_NAV
   }
 }
 
@@ -140,6 +158,11 @@ void PlannerWrapper::targetGoalCB(const geometry_msgs::Pose2D::ConstPtr& msg) {
   goal_pose_.y = msg->y;
   if (use_rvo_planner_) {
     rvo_planner_->setPlannerGoal(goal_pose_);
+  } else if (use_ros_navigation_) {
+    geometry_msgs::PoseStamped goal_pose;
+    target_pose_.pose.position.x = goal_pose_.x;
+    target_pose_.pose.position.y = goal_pose_.y;
+    ros_navigation_->setPlannerGoal(target_pose_);
   }
 }
 
@@ -164,5 +187,7 @@ void PlannerWrapper::environmentDataCB(
     }
     rvo_planner_->setupEnvironment(environment_.tracker_ids,
                                    agent_poses, agent_vels);
+  } else if (use_ros_navigation_) {
+    // ROS_NAV
   }
 }
