@@ -22,6 +22,7 @@
 #include <model_msgs/ModelHypotheses.h>
 #include <model_msgs/GoalHypothesis.h>
 #include <model_msgs/AwareHypothesis.h>
+#include <model_msgs/InteractivePrediction.h>
 
 class ModelWrapper {
  public:
@@ -42,10 +43,12 @@ class ModelWrapper {
   void inferGoals();
   void setupModel();
   void runSims();
+  void interactivePrediction();
 
  private:
   // Flags
   bool use_rvo_lib_;
+  bool interactive_costmap_;
 
   // Constants
   bool robot_model_;
@@ -71,6 +74,8 @@ class ModelWrapper {
   // std::vector<std::vector<float> > inferred_goals_history_;
   std::vector<bool> init_liks_;
   std::vector<float> prev_prior_;
+  std::vector<uint32_t> costmap_sims_;
+  std::vector<std::vector<float> > agent_goal_inference_;
 
   // ROS
   ros::NodeHandle* nh_;
@@ -79,6 +84,7 @@ class ModelWrapper {
   ros::Subscriber robot_vel_sub_;
   ros::Subscriber env_data_sub_;
   ros::Subscriber model_hyp_sub_;
+  ros::Publisher inter_pred_pub_;
 
   // Class pointers
   SimWrapper* sim_wrapper_;

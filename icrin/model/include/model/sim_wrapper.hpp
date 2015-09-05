@@ -24,6 +24,9 @@
 #include <rvo_wrapper_msgs/GetAgentVelocity.h>
 #include <rvo_wrapper_msgs/SetAgentGoals.h>
 #include <rvo_wrapper_msgs/SetAgentVelocity.h>
+#include <rvo_wrapper_msgs/GetAgentPosition.h>
+
+#include <model_msgs/InteractivePrediction.h>
 
 class SimWrapper {
  public:
@@ -48,6 +51,9 @@ class SimWrapper {
   void setRobotGoal(geometry_msgs::Pose2D robot_goal);
   void setEnvironment(std::vector<geometry_msgs::Pose2D> agent_poses,
                       std::vector<geometry_msgs::Twist> agent_vels);
+  model_msgs::InteractivePrediction
+  interactiveSim(std::vector<size_t> max_lik_goals, size_t foresight,
+                 float time_step, std::vector<geometry_msgs::Pose2D> goals);
 
  private:
   // Flags
@@ -88,6 +94,7 @@ class SimWrapper {
   ros::ServiceClient get_agent_vel_client_;
   ros::ServiceClient set_agent_goals_client_;
   ros::ServiceClient set_agent_vel_client_;
+  ros::ServiceClient get_agent_position_client_;
 };
 
 #endif  /* SIM_WRAPPER_HPP */

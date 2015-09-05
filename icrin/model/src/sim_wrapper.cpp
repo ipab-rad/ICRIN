@@ -65,6 +65,8 @@ void SimWrapper::rosSetup() {
                                "/rvo_wrapper/set_agent_goals");
   ros::service::waitForService(robot_name_ + model_name_ +
                                "/rvo_wrapper/set_agent_velocity");
+  ros::service::waitForService(robot_name_ + model_name_ +
+                               "/rvo_wrapper/get_agent_position");
   bool persistent = false;
   add_sim_agent_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::AddAgent>(
@@ -90,6 +92,9 @@ void SimWrapper::rosSetup() {
   set_agent_vel_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::SetAgentVelocity>(
       robot_name_ + model_name_ + "/rvo_wrapper/set_agent_velocity", persistent);
+  get_agent_position_client_ =
+    nh_->serviceClient<rvo_wrapper_msgs::GetAgentPosition>(
+      robot_name_ + model_name_ + "/rvo_wrapper/get_agent_position", persistent);
 }
 
 std::vector<uint32_t> SimWrapper::goalSampling(
@@ -174,9 +179,9 @@ std::vector<uint32_t> SimWrapper::goalSequence(
 std::vector<common_msgs::Vector2> SimWrapper::calcSimVels(std::vector<uint32_t>
                                                           sims, size_t n_goals) {
   // Calc Preferred Velocities
-  rvo_wrapper_msgs::CalcPrefVelocities prev_vel;
-  prev_vel.request.sim_ids = sims;
-  calc_pref_velocities_client_.call(prev_vel);
+  rvo_wrapper_msgs::CalcPrefVelocities pref_vel;
+  pref_vel.request.sim_ids = sims;
+  calc_pref_velocities_client_.call(pref_vel);
 
   // Run Sims
   rvo_wrapper_msgs::DoStep run_sims;
@@ -232,4 +237,92 @@ void SimWrapper::setEnvironment(std::vector<geometry_msgs::Pose2D> agent_poses,
     agent_vels_[i].x = agent_vels[i].linear.x;
     agent_vels_[i].y = agent_vels[i].linear.y;
   }
+}
+
+model_msgs::InteractivePrediction SimWrapper::interactiveSim(
+  std::vector<size_t> max_lik_goals, size_t foresight, float time_step,
+  std::vector<geometry_msgs::Pose2D> goals) {
+  model_msgs::InteractivePrediction inter_pred_msg;
+  inter_pred_msg.foresight = foresight;
+  inter_pred_msg.planner_pose.resize(foresight);
+  inter_pred_msg.agent.resize(agent_no_);
+  rvo_wrapper_msgs::CreateRVOSim sim_msg;
+  // sim_msg.request.sim_num = model_agent_no_ * goal_no;
+  sim_msg.request.time_step = time_step;
+  sim_msg.request.defaults.neighbor_dist = neighbor_dist_;
+  sim_msg.request.defaults.max_neighbors = max_neighbors_;
+  sim_msg.request.defaults.time_horizon_agent = time_horizon_agent_;
+  sim_msg.request.defaults.time_horizon_obst = time_horizon_obst_;
+  sim_msg.request.defaults.radius = radius_;
+  sim_msg.request.defaults.max_speed = max_speed_;
+  sim_msg.request.defaults.max_accel = max_accel_;
+  sim_msg.request.defaults.pref_speed = pref_speed_;
+  create_sims_client_.call(sim_msg);
+
+  // Create Agents with Positions
+  for (size_t agent = 0; agent < agent_no_; ++agent) {
+    rvo_wrapper_msgs::AddAgent agent_msg;
+    // agent_msg.request.sim_ids = sim_ids;
+    agent_msg.request.position = agent_poses_[agent];
+    add_sim_agent_client_.call(agent_msg);
+  }
+
+  // Set Agent Velocities
+  for (size_t agent = 0; agent < agent_no_; ++agent) {
+    rvo_wrapper_msgs::SetAgentVelocity vel_msg;
+    // vel_msg.request.sim_ids = sim_ids;
+    vel_msg.request.velocity = agent_vels_[agent];
+    set_agent_vel_client_.call(vel_msg);
+  }
+
+  // Transform Pose2D goals into Vector2 goals
+  std::vector<common_msgs::Vector2> a_goals;
+  size_t goal_no = goals.size();
+  a_goals.resize(goal_no);
+  for (size_t goal = 0; goal < goal_no; ++goal) {
+    a_goals[goal].x = goals[goal].x;
+    a_goals[goal].y = goals[goal].y;
+  }
+
+  rvo_wrapper_msgs::SimGoals sim_goals_msg;
+  for (size_t agent = 0; agent < agent_no_; ++agent) {
+    sim_goals_msg.agent.push_back(a_goals[max_lik_goals[agent]]);
+  }
+  rvo_wrapper_msgs::SetAgentGoals goal_msg;
+  goal_msg.request.sim.push_back(sim_goals_msg);
+  set_agent_goals_client_.call(goal_msg);
+
+
+  // Run Sims
+  for (size_t i = 0; i < foresight; ++i) {
+    // Calc Preferred Velocities
+    rvo_wrapper_msgs::CalcPrefVelocities pref_vel;
+    // pref_vel.request.sim_ids = sims;
+    calc_pref_velocities_client_.call(pref_vel);
+
+    rvo_wrapper_msgs::DoStep run_sims;
+    // run_sims.request.sim_ids = sims;
+    do_sim_step_client_.call(run_sims);
+    if (!run_sims.response.ok) {ROS_ERROR("SimSteps could not be run!");}
+
+    // Get Positions
+    for (size_t agent = 0; agent < agent_no_; ++agent) {
+      rvo_wrapper_msgs::GetAgentPosition get_poses;
+      get_poses.request.agent_id = agent;
+      get_agent_position_client_.call(get_poses);
+      if (!get_poses.response.ok) {
+        ROS_ERROR("SimPoses could not be acquired!");
+      } else {
+        geometry_msgs::Pose2D pose;
+        pose.x = get_poses.response.position.x;
+        pose.y = get_poses.response.position.y;
+        inter_pred_msg.agent[agent].pose.push_back(pose);
+      }
+    }
+  }
+
+  rvo_wrapper_msgs::DeleteSimVector del_msg;
+  delete_sims_client_.call(del_msg);
+
+  return inter_pred_msg;
 }

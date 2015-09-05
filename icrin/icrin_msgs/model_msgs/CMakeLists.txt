@@ -47,6 +47,8 @@ add_message_files(
   AwareHypothesis.msg
   GoalHypothesis.msg
   ModelHypotheses.msg
+  AgentPrediction.msg
+  InteractivePrediction.msg
 )
 
 ## Generate services in the 'srv' folder
