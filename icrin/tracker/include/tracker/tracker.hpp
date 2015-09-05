@@ -10,12 +10,15 @@
 #define TRACKER_HPP
 
 #include <ros/ros.h>
+#include <string>
 
 #include <geometry_msgs/Pose2D.h>
 #include <geometry_msgs/Twist.h>
 
 #include <PTrackingBridge/TargetEstimations.h>
 #include <tracker_msgs/TrackerData.h>
+#include <people_msgs/People.h>
+#include <people_msgs/Person.h>
 
 class Tracker {
  public:
@@ -42,6 +45,7 @@ class Tracker {
   // ROS
   ros::NodeHandle* nh_;
   ros::Publisher tracker_pub_;
+  ros::Publisher people_pub_;
   ros::Subscriber ptracker_sub_;
 
 };

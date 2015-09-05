@@ -32,6 +32,7 @@ void Tracker::init() {
 
 void Tracker::rosSetup() {
   tracker_pub_ = nh_->advertise<tracker_msgs::TrackerData>("data", 1, true);
+  people_pub_ = nh_->advertise<people_msgs::People>("/people", 1, true);
   ptracker_sub_ = nh_->subscribe("/agent_1/PTrackingBridge/targetEstimations",
                                  1, &Tracker::receivePTrackerData, this);
 }
@@ -49,8 +50,10 @@ void Tracker::pubTrackerData() {
   if (ptracker_rec_) {
     // Unpack tracker data
     tracker_msgs::TrackerData tracker_data;
+    people_msgs::People people_msg;
     uint32_t nagents = ptracker_msg_.identities.size();
     for (uint32_t i = 0; i < nagents; ++i) {
+      // Prepare Tracker Data
       geometry_msgs::Pose2D pos;
       pos.x = ptracker_msg_.positions[i].x * invert_x_;
       pos.y = ptracker_msg_.positions[i].y;
@@ -69,8 +72,18 @@ void Tracker::pubTrackerData() {
       vel_avg.linear.x = ptracker_msg_.averagedVelocities[i].x * invert_x_;
       vel_avg.linear.y = ptracker_msg_.averagedVelocities[i].y;
       tracker_data.agent_avg_velocity.push_back(vel_avg);
+      // Prepare People Msg
+      people_msgs::Person person_msg;
+      person_msg.name = std::to_string(ptracker_msg_.identities[i]);
+      person_msg.position.x = ptracker_msg_.positions[i].x;
+      person_msg.position.y = ptracker_msg_.positions[i].y;
+      person_msg.velocity.x = ptracker_msg_.averagedVelocities[i].x;
+      person_msg.velocity.y = ptracker_msg_.averagedVelocities[i].y;
+      person_msg.reliability = ptracker_msg_.standardDeviations[i].x;
+      people_msg.people.push_back(person_msg);
     }
     tracker_pub_.publish(tracker_data);
+    people_pub_.publish(people_msg);
     if (!ptracker_sent_) {ROS_INFO("Tracker data received!");}
     ptracker_rec_ = false;
     ptracker_sent_ = true;

@@ -44,6 +44,8 @@
   <run_depend>roscpp</run_depend>
   <build_depend>tracker_msgs</build_depend>
   <run_depend>tracker_msgs</run_depend>
+  <build_depend>people_msgs</build_depend>
+  <run_depend>people_msgs</run_depend>
   <build_depend>PTrackingBridge</build_depend>
   <run_depend>PTrackingBridge</run_depend>
 
