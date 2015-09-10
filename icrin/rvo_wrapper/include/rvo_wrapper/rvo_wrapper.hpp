@@ -46,6 +46,8 @@
 #include <rvo_wrapper_msgs/SetAgentGoals.h>
 #include <rvo_wrapper_msgs/SetAgentMaxNeighbors.h>
 #include <rvo_wrapper_msgs/SetAgentMaxSpeed.h>
+#include <rvo_wrapper_msgs/SetAgentMaxAccel.h>
+#include <rvo_wrapper_msgs/SetAgentPrefSpeed.h>
 #include <rvo_wrapper_msgs/SetAgentNeighborDist.h>
 #include <rvo_wrapper_msgs/SetAgentPosition.h>
 #include <rvo_wrapper_msgs/SetAgentPrefVelocity.h>
@@ -174,6 +176,14 @@ class RVOWrapper {
     rvo_wrapper_msgs::SetAgentMaxSpeed::Request& req,
     rvo_wrapper_msgs::SetAgentMaxSpeed::Response& res);
 
+  bool setAgentMaxAccel(
+    rvo_wrapper_msgs::SetAgentMaxAccel::Request& req,
+    rvo_wrapper_msgs::SetAgentMaxAccel::Response& res);
+
+  bool setAgentPrefSpeed(
+    rvo_wrapper_msgs::SetAgentPrefSpeed::Request& req,
+    rvo_wrapper_msgs::SetAgentPrefSpeed::Response& res);
+
   bool setAgentNeighborDist(
     rvo_wrapper_msgs::SetAgentNeighborDist::Request& req,
     rvo_wrapper_msgs::SetAgentNeighborDist::Response& res);
@@ -247,6 +257,8 @@ class RVOWrapper {
   ros::ServiceServer srv_set_agent_goals_;
   ros::ServiceServer srv_set_agent_max_neighbors_;
   ros::ServiceServer srv_set_agent_max_speed_;
+  ros::ServiceServer srv_set_agent_max_accel_;
+  ros::ServiceServer srv_set_agent_pref_speed_;
   ros::ServiceServer srv_set_agent_neighbor_dist_;
   ros::ServiceServer srv_set_agent_position_;
   ros::ServiceServer srv_set_agent_pref_velocity_;

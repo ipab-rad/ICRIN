@@ -36,10 +36,22 @@ void SimWrapper::loadParams() {
   ros::param::param(robot_name_ + model_name_ + "/time_horizon_obst",
                     time_horizon_obst_, 5.0f);
   ros::param::param(robot_name_ + model_name_ + "/radius", radius_, 0.5f);
-  ros::param::param(robot_name_ + model_name_ + "/max_speed", max_speed_, 0.3f);
-  ros::param::param(robot_name_ + model_name_ + "/max_accel", max_accel_, 1.2f);
-  ros::param::param(robot_name_ + model_name_ + "/pref_speed", pref_speed_, 0.3f);
+  ros::param::param(robot_name_ + model_name_ + "/max_speed", max_speed_, 1.2f);
+  ros::param::param(robot_name_ + model_name_ + "/max_accel", max_accel_, 2.4f);
+  ros::param::param(robot_name_ + model_name_ + "/pref_speed", pref_speed_, 0.6f);
   max_neighbors_ = max_neighbors;
+  bool robot_model;
+  ros::param::param(robot_name_ + model_name_ + "/robot_model",
+                    robot_model, true);
+  if (robot_model) {
+    ros::param::param(robot_name_ + "/planner/max_speed",
+                      planner_max_speed_, 0.6f);
+    ros::param::param(robot_name_ + "/planner/max_accel",
+                      planner_max_accel_, 1.2f);
+    ros::param::param(robot_name_ + "/planner/pref_speed",
+                      planner_pref_speed_, 0.3f);
+  }
+
 }
 
 void SimWrapper::init() {
@@ -69,6 +81,12 @@ void SimWrapper::rosSetup() {
                                "/rvo_wrapper/set_agent_velocity");
   ros::service::waitForService(robot_name_ + model_name_ +
                                "/rvo_wrapper/get_agent_position");
+  ros::service::waitForService(robot_name_ + model_name_ +
+                               "/rvo_wrapper/set_agent_max_speed");
+  ros::service::waitForService(robot_name_ + model_name_ +
+                               "/rvo_wrapper/set_agent_max_accel");
+  ros::service::waitForService(robot_name_ + model_name_ +
+                               "/rvo_wrapper/set_agent_pref_speed");
   add_sim_agent_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::AddAgent>(
       robot_name_ + model_name_ + "/rvo_wrapper/add_agent", persistence_);
@@ -96,6 +114,15 @@ void SimWrapper::rosSetup() {
   get_agent_position_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::GetAgentPosition>(
       robot_name_ + model_name_ + "/rvo_wrapper/get_agent_position", persistence_);
+  set_agent_max_speed_client_ =
+    nh_->serviceClient<rvo_wrapper_msgs::SetAgentMaxSpeed>(
+      robot_name_ + model_name_ + "/rvo_wrapper/set_agent_max_speed", persistence_);
+  set_agent_max_accel_client_ =
+    nh_->serviceClient<rvo_wrapper_msgs::SetAgentMaxAccel>(
+      robot_name_ + model_name_ + "/rvo_wrapper/set_agent_max_accel", persistence_);
+  set_agent_pref_speed_client_ =
+    nh_->serviceClient<rvo_wrapper_msgs::SetAgentPrefSpeed>(
+      robot_name_ + model_name_ + "/rvo_wrapper/set_agent_pref_speed", persistence_);
 }
 
 std::vector<uint32_t> SimWrapper::goalSampling(
@@ -298,6 +325,25 @@ model_msgs::InteractivePrediction SimWrapper::interactiveSim(
     vel_msg.request.sim_ids.push_back(sim_id);
     vel_msg.request.velocity = agent_vels_[agent];
     set_agent_vel_client_.call(vel_msg);
+  }
+
+  // Setup Planner parameters (Different from modelling params)
+  if (robot_model_) {
+    rvo_wrapper_msgs::SetAgentMaxSpeed max_speed_msg;
+    max_speed_msg.request.sim_ids.push_back(sim_id);
+    max_speed_msg.request.agent_id = 0;
+    max_speed_msg.request.max_speed = planner_max_speed_;
+    rvo_wrapper_msgs::SetAgentMaxAccel max_accel_msg;
+    max_accel_msg.request.sim_ids.push_back(sim_id);
+    max_accel_msg.request.agent_id = 0;
+    max_accel_msg.request.max_accel = planner_max_accel_;
+    rvo_wrapper_msgs::SetAgentPrefSpeed pref_speed_msg;
+    pref_speed_msg.request.sim_ids.push_back(sim_id);
+    pref_speed_msg.request.agent_id = 0;
+    pref_speed_msg.request.pref_speed = planner_pref_speed_;
+    set_agent_max_speed_client_.call(max_speed_msg);
+    set_agent_max_accel_client_.call(max_accel_msg);
+    set_agent_pref_speed_client_.call(pref_speed_msg);
   }
 
   // Transform Pose2D goals into Vector2 goals

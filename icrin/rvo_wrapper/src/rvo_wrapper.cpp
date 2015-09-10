@@ -118,6 +118,12 @@ void RVOWrapper::rosSetup() {
   srv_set_agent_max_speed_ =
     nh_->advertiseService("set_agent_max_speed",
                           &RVOWrapper::setAgentMaxSpeed, this);
+  srv_set_agent_max_accel_ =
+    nh_->advertiseService("set_agent_max_accel",
+                          &RVOWrapper::setAgentMaxAccel, this);
+  srv_set_agent_pref_speed_ =
+    nh_->advertiseService("set_agent_pref_speed",
+                          &RVOWrapper::setAgentPrefSpeed, this);
   srv_set_agent_neighbor_dist_ =
     nh_->advertiseService("set_agent_neighbor_dist",
                           &RVOWrapper::setAgentNeighborDist, this);
@@ -944,6 +950,54 @@ bool RVOWrapper::setAgentMaxSpeed(
         (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
       for (uint32_t i = req.sim_ids.front(); i <= req.sim_ids.back(); ++i) {
         sim_vect_[i]->setAgentMaxSpeed(req.agent_id, req.max_speed);
+      }
+    } else {
+      ROS_WARN("Please provide a proper id range for sim_vector");
+      res.ok = false;
+    }
+  } else {
+    ROS_WARN("RVO Planner not initialised!");
+    res.ok = false;
+  }
+  return true;
+}
+
+
+bool RVOWrapper::setAgentMaxAccel(
+  rvo_wrapper_msgs::SetAgentMaxAccel::Request& req,
+  rvo_wrapper_msgs::SetAgentMaxAccel::Response& res) {
+  res.ok = true;
+  if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
+    planner_->setAgentMaxAcceleration(req.agent_id, req.max_accel);
+  } else if (req.sim_ids.size() > 0) { // If Sim Vector
+    if ((req.sim_ids.back() >= req.sim_ids.front()) &&
+        (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
+      for (uint32_t i = req.sim_ids.front(); i <= req.sim_ids.back(); ++i) {
+        sim_vect_[i]->setAgentMaxAcceleration(req.agent_id, req.max_accel);
+      }
+    } else {
+      ROS_WARN("Please provide a proper id range for sim_vector");
+      res.ok = false;
+    }
+  } else {
+    ROS_WARN("RVO Planner not initialised!");
+    res.ok = false;
+  }
+  return true;
+}
+
+
+bool RVOWrapper::setAgentPrefSpeed(
+  rvo_wrapper_msgs::SetAgentPrefSpeed::Request& req,
+  rvo_wrapper_msgs::SetAgentPrefSpeed::Response& res) {
+  res.ok = true;
+  if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
+    planner_->setAgentPrefSpeed(req.agent_id, req.pref_speed);
+  } else if (req.sim_ids.size() > 0) { // If Sim Vector
+    if ((req.sim_ids.back() >= req.sim_ids.front()) &&
+        (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
+      for (uint32_t i = req.sim_ids.front(); i <= req.sim_ids.back(); ++i) {
+        sim_vect_[i]->setAgentPrefSpeed(req.agent_id, req.pref_speed);
       }
     } else {
       ROS_WARN("Please provide a proper id range for sim_vector");

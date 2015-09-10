@@ -82,6 +82,8 @@ add_service_files(
   SetAgentGoals.srv
   SetAgentMaxNeighbors.srv
   SetAgentMaxSpeed.srv
+  SetAgentMaxAccel.srv
+  SetAgentPrefSpeed.srv
   SetAgentNeighborDist.srv
   SetAgentPosition.srv
   SetAgentPrefVelocity.srv

@@ -25,6 +25,9 @@
 #include <rvo_wrapper_msgs/SetAgentGoals.h>
 #include <rvo_wrapper_msgs/SetAgentVelocity.h>
 #include <rvo_wrapper_msgs/GetAgentPosition.h>
+#include <rvo_wrapper_msgs/SetAgentMaxSpeed.h>
+#include <rvo_wrapper_msgs/SetAgentMaxAccel.h>
+#include <rvo_wrapper_msgs/SetAgentPrefSpeed.h>
 
 #include <model_msgs/InteractivePrediction.h>
 
@@ -75,6 +78,9 @@ class SimWrapper {
   float max_speed_;
   float max_accel_;
   float pref_speed_;
+  float planner_max_speed_;
+  float planner_max_accel_;
+  float planner_pref_speed_;
 
   // Variables
   bool robot_model_;
@@ -98,6 +104,9 @@ class SimWrapper {
   ros::ServiceClient set_agent_goals_client_;
   ros::ServiceClient set_agent_vel_client_;
   ros::ServiceClient get_agent_position_client_;
+  ros::ServiceClient set_agent_max_speed_client_;
+  ros::ServiceClient set_agent_max_accel_client_;
+  ros::ServiceClient set_agent_pref_speed_client_;
 };
 
 #endif  /* SIM_WRAPPER_HPP */
