@@ -26,6 +26,7 @@ void Environment::init() {
   arrived_ = false;
   modelling_ = true;
   goal_id_ = 0;
+  collision_ = false;
   // ROS
   zero_vect_.x = 0.0f;
   zero_vect_.y = 0.0f;
