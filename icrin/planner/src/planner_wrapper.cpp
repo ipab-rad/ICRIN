@@ -100,7 +100,6 @@ bool PlannerWrapper::setupNewPlanner(
     planner_init = true;
     ROS_INFO("RVO Planner setup");
   } else if (req.planner_type == req.ROS_NAVIGATION && !planner_init) {
-    ROS_ERROR("ROS_NAVIGATION not implemented yet, sorry!");
     ros_navigation_ = new ROSNavigation(nh_);
     use_ros_navigation_ = true;
     planner_init = true;

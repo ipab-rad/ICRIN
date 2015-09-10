@@ -47,6 +47,7 @@ class ModelWrapper {
 
  private:
   // Flags
+  bool debug_;
   bool use_rvo_lib_;
   bool interactive_costmap_;
 
@@ -57,6 +58,7 @@ class ModelWrapper {
   int goal_inference_history_;
   int velocity_average_window_;
   float prior_lambda_;
+  float max_accel_;
 
   // Variables
   std::string robot_name_;

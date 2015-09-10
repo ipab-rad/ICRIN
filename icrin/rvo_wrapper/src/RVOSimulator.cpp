@@ -198,17 +198,17 @@ size_t RVOSimulator::addObstacle(const std::vector<Vector2>& vertices) {
 void RVOSimulator::doStep() {
 	kdTree_->buildAgentTree();
 
-#ifdef _OPENMP
-	#pragma omp parallel for
-#endif
+// #ifdef _OPENMP
+// 	#pragma omp parallel for
+// #endif
 	for (int i = 0; i < static_cast<int>(agents_.size()); ++i) {
 		agents_[i]->computeNeighbors();
 		agents_[i]->computeNewVelocity();
 	}
 
-#ifdef _OPENMP
-	#pragma omp parallel for
-#endif
+// #ifdef _OPENMP
+// 	#pragma omp parallel for
+// #endif
 	for (int i = 0; i < static_cast<int>(agents_.size()); ++i) {
 		agents_[i]->update();
 	}

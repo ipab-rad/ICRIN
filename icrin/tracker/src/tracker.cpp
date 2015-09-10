@@ -52,8 +52,10 @@ void Tracker::pubTrackerData() {
     tracker_msgs::TrackerData tracker_data;
     people_msgs::People people_msg;
     uint32_t nagents = ptracker_msg_.identities.size();
+    tracker_data.identity.resize(nagents);
     for (uint32_t i = 0; i < nagents; ++i) {
       // Prepare Tracker Data
+      tracker_data.identity[i] = (uint)ptracker_msg_.identities[i];
       geometry_msgs::Pose2D pos;
       pos.x = ptracker_msg_.positions[i].x * invert_x_;
       pos.y = ptracker_msg_.positions[i].y;

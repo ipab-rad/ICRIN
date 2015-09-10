@@ -12,4 +12,4 @@ fi
 white_list=$(printf "%s;" "${packages[@]}")
 
 cd ./../..
-catkin_make -DCATKIN_WHITELIST_PACKAGES=$white_list
+catkin_make -DCATKIN_WHITELIST_PACKAGES=$white_list -DCMAKE_BUILD_TYPE=Release

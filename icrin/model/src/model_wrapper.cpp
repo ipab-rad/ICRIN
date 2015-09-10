@@ -46,11 +46,13 @@ void ModelWrapper::loadParams() {
                     velocity_average_window_, 10);
   ros::param::param(robot_name_ + model_name_ + "/prior_lambda",
                     prior_lambda_, 0.5f);
+  ros::param::param(robot_name_ + model_name_ + "/max_accel", max_accel_, 1.2f);
 }
 
 void ModelWrapper::init() {
   use_rvo_lib_ = true;
   interactive_costmap_ = true;
+  debug_ = false;
   // inferred_goals_history_.resize(3);
   init_liks_.resize(3, false);
   prev_prior_.resize(3);
@@ -94,27 +96,30 @@ void ModelWrapper::modelCB(const model_msgs::ModelHypotheses::ConstPtr&
 }
 
 void ModelWrapper::runModel() {
+  if (debug_) {ROS_INFO("BeginModel");}
   this->setupModel();
-  this->runSims();
-  this->inferGoals();
+  if (hypotheses_.agents.size() > 0) {
+    this->runSims();
+    this->inferGoals();
+  }
   if (interactive_costmap_) {this->interactivePrediction();}
+  if (debug_) {ROS_INFO("EndModel");}
 }
 
 void ModelWrapper::inferGoals() {
-  float max_acc = 1.2f;
   float ros_freq = 0.1f;
   float PI = 3.14159265358979323846f;
   bool reset_priors = false;
   // size_t inf_hist = 10;
   common_msgs::Vector2 curr_vel;
-  curr_vel.x = robot_vel_.linear.x;
-  curr_vel.y = robot_vel_.linear.y;
   size_t n_goals = hypotheses_.goal_hypothesis.goal_sequence.size();
   size_t n_agents = hypotheses_.agents.size();
   std::vector<float> goals;
   goals.resize(n_goals);
   agent_goal_inference_.assign(n_agents, goals);
   for (size_t agent = 0; agent < n_agents; ++agent) {
+    curr_vel.x = env_data_.agent_vels[agent].linear.x;
+    curr_vel.y = env_data_.agent_vels[agent].linear.y;
     std::vector<float> g_likelihoods;
     g_likelihoods.resize(n_goals);
     std::vector<common_msgs::Vector2> agent_sim_vels;
@@ -123,20 +128,22 @@ void ModelWrapper::inferGoals() {
     agent_sim_vels.insert(agent_sim_vels.begin(),
                           sequence_sim_vels.begin() + begin,
                           sequence_sim_vels.begin() + end);
-    ROS_WARN_STREAM("SimVelSize: " << agent_sim_vels.size());
+    if (debug_) {ROS_WARN_STREAM("SimVelSize: " << agent_sim_vels.size());}
     for (size_t goal = 0; goal < n_goals; ++goal) {
       // if (DISPLAY_INFERENCE_VALUES) {
-      ROS_INFO_STREAM("curr_vel=[" << curr_vel.x << ", " << curr_vel.y << "] " <<
-                      "simVel=[" << agent_sim_vels[goal].x << ", " <<
-                      agent_sim_vels[goal].y << "]" << std::endl);
+      if (debug_) {
+        ROS_INFO_STREAM("curr_vel=[" << curr_vel.x << ", " << curr_vel.y << "] " <<
+                        "simVel=[" << agent_sim_vels[goal].x << ", " <<
+                        agent_sim_vels[goal].y << "]" << std::endl);
+      }
       // }
       // Bivariate Gaussian
       float x = agent_sim_vels[goal].x;
       float y = agent_sim_vels[goal].y;
       float ux = curr_vel.x;
       float uy = curr_vel.y;
-      float ox = (max_acc / 2) * ros_freq;  // 2 std.dev = max vel change
-      float oy = (max_acc / 2) * ros_freq;
+      float ox = (max_accel_ / 2) * ros_freq;  // 2 std.dev = max vel change
+      float oy = (max_accel_ / 2) * ros_freq;
       float o2x = pow(ox, 2);
       float o2y = pow(oy, 2);
       float corr = 0.0f;
@@ -147,8 +154,8 @@ void ModelWrapper::inferGoals() {
       float p = (1 / (2 * PI * ox * oy * sqrtf(1 - corr2)));
       float e = exp(-(1 / (2 * (1 - corr2))) * (t1 + t2 - t3));
       g_likelihoods[goal] = p * e;
-      ROS_INFO_STREAM("Goal: " << goal << " Lik: " << g_likelihoods[goal] <<
-                      " t1: " << t1 << " t2: " << t2 << " t3: " << t3);
+      // if (debug_) {ROS_INFO_STREAM("Goal: " << goal << " Lik: " << g_likelihoods[goal] <<
+      //                 " t1: " << t1 << " t2: " << t2 << " t3: " << t3);}
     }
 
     float posterior_norm = 0.0f;
@@ -165,8 +172,10 @@ void ModelWrapper::inferGoals() {
       }
 
       posterior_norm += g_posteriors[goal];
-      ROS_INFO_STREAM("GoalPosteriors" << goal << "=" <<
-                      g_posteriors[goal] << " " << std::endl);
+      if (debug_) {
+        ROS_INFO_STREAM("GoalPosteriors" << goal << "=" <<
+                        g_posteriors[goal] << " " << std::endl);
+      }
     }
 
     float norm_posterior = 0.0f;
@@ -175,7 +184,7 @@ void ModelWrapper::inferGoals() {
     for (std::size_t goal = 0; goal < n_goals; ++goal) {
       if (posterior_norm == 0) {
         norm_posterior = uniform_prior;
-        ROS_INFO_STREAM("Uni: " << norm_posterior);
+        // if (debug_) {ROS_INFO_STREAM("Uni: " << norm_posterior);
         // Avoiding NaNs when likelihoods are all 0
       } else {
         norm_posterior = g_posteriors[goal] / posterior_norm;
@@ -184,13 +193,16 @@ void ModelWrapper::inferGoals() {
         } else {
           prev_prior_[goal] = 0.005f;
         }
-        ROS_INFO_STREAM("Rat: " << norm_posterior);
       }
-      norm_posteriors[goal] = norm_posterior;
-      agent_goal_inference_[agent][goal] = norm_posterior;
+      norm_posteriors[goal] = prev_prior_[goal];
+      agent_goal_inference_[agent][goal] = prev_prior_[goal];
     }
-    ROS_INFO_STREAM("G0: " << norm_posteriors[0] << " G1: " << norm_posteriors[1] <<
-                    " G2: " << norm_posteriors[2]);
+    if (debug_) {
+      ROS_INFO_STREAM("InferAgent: " << (int)hypotheses_.agents[agent] <<
+                      " G0: " << norm_posteriors[0] <<
+                      " G1: " << norm_posteriors[1] <<
+                      " G2: " << norm_posteriors[2]);
+    }
   }
 
 }
@@ -211,18 +223,20 @@ void ModelWrapper::setupModel() {
   sim_wrapper_->setEnvironment(agent_poses_, agent_vels_);
 
   sim_wrapper_->setModelAgents(hypotheses_.agents);
-  if (hypotheses_.goals) {
-    if (hypotheses_.goal_hypothesis.sampling) {
-      sampling_sims_ = sim_wrapper_->goalSampling(
-                         hypotheses_.goal_hypothesis.sample_space,
-                         hypotheses_.goal_hypothesis.sample_resolution);
-    } else {
-      sequence_sims_ = sim_wrapper_->goalSequence(
-                         hypotheses_.goal_hypothesis.goal_sequence);
+  if (hypotheses_.agents.size() > 0) {
+    if (hypotheses_.goals) {
+      if (hypotheses_.goal_hypothesis.sampling) {
+        sampling_sims_ = sim_wrapper_->goalSampling(
+                           hypotheses_.goal_hypothesis.sample_space,
+                           hypotheses_.goal_hypothesis.sample_resolution);
+      } else {
+        sequence_sims_ = sim_wrapper_->goalSequence(
+                           hypotheses_.goal_hypothesis.goal_sequence);
+      }
     }
-  }
-  if (hypotheses_.awareness) {
-    ROS_WARN("ModelW- Awareness modelling not implemented yet!");
+    if (hypotheses_.awareness) {
+      ROS_WARN("ModelW- Awareness modelling not implemented yet!");
+    }
   }
 }
 
@@ -232,7 +246,7 @@ void ModelWrapper::runSims() {
     if (hypotheses_.goal_hypothesis.sampling) {
       ROS_WARN("ModelW- Run Goal Sampling Sims!");
     } else {
-      ROS_WARN("ModelW- Run Goal Sequence Sims!");
+      if (debug_) {ROS_WARN("ModelW- Run Goal Sequence Sims!");}
       size_t n_goals = hypotheses_.goal_hypothesis.goal_sequence.size();
       sequence_sim_vels = sim_wrapper_->calcSimVels(sequence_sims_, n_goals);
     }
@@ -240,18 +254,24 @@ void ModelWrapper::runSims() {
   if (hypotheses_.awareness) {
     ROS_WARN("ModelW- Awareness modelling not implemented yet!");
   }
-  for (size_t i = 0; i < sequence_sim_vels.size(); ++i) {
-    ROS_INFO_STREAM("SimVel" << i << ": " << sequence_sim_vels[i].x <<
-                    ", " << sequence_sim_vels[i].y);
-  }
+  // for (size_t i = 0; i < sequence_sim_vels.size(); ++i) {
+  // ROS_INFO_STREAM("SimVel" << i << ": " << sequence_sim_vels[i].x <<
+  //                 ", " << sequence_sim_vels[i].y);
+  // }
 }
 
 void ModelWrapper::interactivePrediction() {
   // Find Maximum Likelihood Goals for each agent given predictions
-  std::vector<size_t> max_lik_goals;
+  std::vector<common_msgs::Vector2> a_goals;
+  common_msgs::Vector2 goal;
   size_t n_agents = hypotheses_.agents.size();
   size_t n_goals = hypotheses_.goal_hypothesis.goal_sequence.size();
-  max_lik_goals.assign(n_agents, 0);
+  if (robot_model_) { // TODO: Add proper check for non-modelled agents
+    goal.x = robot_goal_.x;
+    goal.y = robot_goal_.y;
+    a_goals.push_back(goal);
+    // ROS_INFO_STREAM("R_Goal: " << a_goals.back().x << ", " << a_goals.back().y);
+  }
   for (size_t a = 0; a < n_agents; ++a) {
     size_t max_goal = 0;
     for (size_t g = 1; g < n_goals; ++g) {
@@ -259,18 +279,24 @@ void ModelWrapper::interactivePrediction() {
         max_goal = g;
       }
     }
-    max_lik_goals[a] = max_goal;
+    goal.x = hypotheses_.goal_hypothesis.goal_sequence[max_goal].x;
+    goal.y = hypotheses_.goal_hypothesis.goal_sequence[max_goal].y;
+    a_goals.push_back(goal);
+    if (debug_) {
+      ROS_INFO_STREAM("A_Goal: " << " x: " << a_goals.back().x
+                      << " y: " << a_goals.back().y);
+    }
   }
 
-  size_t foresight = 10;
+  size_t foresight = 20;
   float time_step = 0.5;
 
-  // Run simulation for all agents given goals and foresight
-  if (n_agents > 0) {
-    model_msgs::InteractivePrediction inter_pred_msg;
-    inter_pred_msg = sim_wrapper_->interactiveSim
-                     (max_lik_goals, foresight, time_step,
-                      hypotheses_.goal_hypothesis.goal_sequence);
-    inter_pred_pub_.publish(inter_pred_msg);
-  }
+// Run simulation for all agents given goals and foresight
+  // if (n_agents > 0) {
+  model_msgs::InteractivePrediction inter_pred_msg;
+  inter_pred_msg = sim_wrapper_->interactiveSim
+                   (a_goals, foresight, time_step,
+                    hypotheses_.goal_hypothesis.goal_sequence);
+  inter_pred_pub_.publish(inter_pred_msg);
+  // }
 }

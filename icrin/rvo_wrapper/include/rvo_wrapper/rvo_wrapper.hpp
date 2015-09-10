@@ -209,6 +209,7 @@ class RVOWrapper {
  private:
   // Flags
   bool planner_init_;
+  bool debug_;
 
   // Variables
   RVO::Vector2 null_vect_;

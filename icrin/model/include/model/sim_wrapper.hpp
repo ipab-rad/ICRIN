@@ -52,12 +52,15 @@ class SimWrapper {
   void setEnvironment(std::vector<geometry_msgs::Pose2D> agent_poses,
                       std::vector<geometry_msgs::Twist> agent_vels);
   model_msgs::InteractivePrediction
-  interactiveSim(std::vector<size_t> max_lik_goals, size_t foresight,
+  interactiveSim(std::vector<common_msgs::Vector2> a_goals,
+                 size_t foresight,
                  float time_step, std::vector<geometry_msgs::Pose2D> goals);
 
  private:
   // Flags
   bool use_rvo_lib_;
+  bool debug_;
+  bool persistence_;
 
   // Constants
   common_msgs::Vector2 null_vect_;

@@ -72,6 +72,7 @@ class RVOPlanner {
  private:
   // Flags
   bool arrived_;
+  bool persistence_;
 
   // Constants
   uint8_t PLANNER_ROBOT_;

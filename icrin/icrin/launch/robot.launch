@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <launch>
-        <arg name="robot" default="blackout" />
+        <arg name="robot" default="soundwave" />
         <group ns="$(arg robot)">
         <node name="rvo_wrapper" pkg="rvo_wrapper" type="rvo_wrapper" output="screen" clear_params="true">
         </node>

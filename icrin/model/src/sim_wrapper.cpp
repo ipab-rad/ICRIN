@@ -44,6 +44,8 @@ void SimWrapper::loadParams() {
 
 void SimWrapper::init() {
   use_rvo_lib_ = true;
+  debug_ = false;
+  persistence_ = true;
   null_vect_.x = 0.0f;
   null_vect_.y = 0.0f;
 }
@@ -67,34 +69,33 @@ void SimWrapper::rosSetup() {
                                "/rvo_wrapper/set_agent_velocity");
   ros::service::waitForService(robot_name_ + model_name_ +
                                "/rvo_wrapper/get_agent_position");
-  bool persistent = false;
   add_sim_agent_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::AddAgent>(
-      robot_name_ + model_name_ + "/rvo_wrapper/add_agent", persistent);
+      robot_name_ + model_name_ + "/rvo_wrapper/add_agent", persistence_);
   calc_pref_velocities_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::CalcPrefVelocities>(
-      robot_name_ + model_name_ + "/rvo_wrapper/calc_pref_velocities", persistent);
+      robot_name_ + model_name_ + "/rvo_wrapper/calc_pref_velocities", persistence_);
   create_sims_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::CreateRVOSim>(
-      robot_name_ + model_name_ + "/rvo_wrapper/create_rvosim", persistent);
+      robot_name_ + model_name_ + "/rvo_wrapper/create_rvosim", persistence_);
   delete_sims_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::DeleteSimVector>(
-      robot_name_ + model_name_ + "/rvo_wrapper/delete_sim_vector", persistent);
+      robot_name_ + model_name_ + "/rvo_wrapper/delete_sim_vector", persistence_);
   do_sim_step_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::DoStep>(
-      robot_name_ + model_name_ + "/rvo_wrapper/do_step", persistent);
+      robot_name_ + model_name_ + "/rvo_wrapper/do_step", persistence_);
   get_agent_vel_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::GetAgentVelocity>(
-      robot_name_ + model_name_ + "/rvo_wrapper/get_agent_velocity", persistent);
+      robot_name_ + model_name_ + "/rvo_wrapper/get_agent_velocity", persistence_);
   set_agent_goals_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::SetAgentGoals>(
-      robot_name_ + model_name_ + "/rvo_wrapper/set_agent_goals", persistent);
+      robot_name_ + model_name_ + "/rvo_wrapper/set_agent_goals", persistence_);
   set_agent_vel_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::SetAgentVelocity>(
-      robot_name_ + model_name_ + "/rvo_wrapper/set_agent_velocity", persistent);
+      robot_name_ + model_name_ + "/rvo_wrapper/set_agent_velocity", persistence_);
   get_agent_position_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::GetAgentPosition>(
-      robot_name_ + model_name_ + "/rvo_wrapper/get_agent_position", persistent);
+      robot_name_ + model_name_ + "/rvo_wrapper/get_agent_position", persistence_);
 }
 
 std::vector<uint32_t> SimWrapper::goalSampling(
@@ -130,6 +131,10 @@ std::vector<uint32_t> SimWrapper::goalSequence(
     rvo_wrapper_msgs::AddAgent agent_msg;
     agent_msg.request.sim_ids = sim_ids;
     agent_msg.request.position = agent_poses_[i];
+    if (debug_) {
+      ROS_INFO_STREAM("SIMW- A:" << i << "Px: " << agent_poses_[i].x <<
+                      ", Py:" << agent_poses_[i].y);
+    }
     add_sim_agent_client_.call(agent_msg);
   }
 
@@ -138,6 +143,10 @@ std::vector<uint32_t> SimWrapper::goalSequence(
     rvo_wrapper_msgs::SetAgentVelocity vel_msg;
     vel_msg.request.sim_ids = sim_ids;
     vel_msg.request.velocity = agent_vels_[i];
+    if (debug_) {
+      ROS_INFO_STREAM("SIMW- A:" << i << "Vx: " << agent_vels_[i].x <<
+                      ", Vy:" << agent_vels_[i].y);
+    }
     set_agent_vel_client_.call(vel_msg);
   }
 
@@ -158,10 +167,26 @@ std::vector<uint32_t> SimWrapper::goalSequence(
   for (size_t model_agent = 0; model_agent < model_agent_no_; ++model_agent) {
     for (size_t goal = 0; goal < goal_no; ++goal) {
       for (size_t agent = 0; agent < agent_no_; ++agent) {
-        if (agent == model_agents_[model_agent]) {
-          goal_msg.request.sim[sim_id].agent.push_back(goals[goal]);
+        if ((agent == 0) && (robot_model_)) {
+          goal_msg.request.sim[sim_id].agent.push_back(robot_goal_);
+          if (debug_) {
+            ROS_INFO_STREAM("SIMW- A:" << agent << " Gx: " << robot_goal_.x <<
+                            ", Gy: " << robot_goal_.y);
+          }
         } else {
-          goal_msg.request.sim[sim_id].agent.push_back(null_vect_);
+          if (agent == model_agents_[model_agent]) {
+            goal_msg.request.sim[sim_id].agent.push_back(goals[goal]);
+            if (debug_) {
+              ROS_INFO_STREAM("SIMW- A:" << agent << " Gx: " << goals[goal].x
+                              << ", Gy: " << goals[goal].y);
+            }
+          } else {
+            goal_msg.request.sim[sim_id].agent.push_back(null_vect_);
+            if (debug_) {
+              ROS_INFO_STREAM("SIMW- A:" << agent << " Gx: " << "null"
+                              << ", Gy: " << "null");
+            }
+          }
         }
       }
       sim_id++;
@@ -194,7 +219,7 @@ std::vector<common_msgs::Vector2> SimWrapper::calcSimVels(std::vector<uint32_t>
   get_vels.request.sim_ids = sims;
   for (size_t model_agent = 0; model_agent < model_agent_no_; ++model_agent) {
     for (size_t goal = 0; goal < n_goals; ++goal) {
-      get_vels.request.agent_id.push_back(model_agent);
+      get_vels.request.agent_id.push_back(model_agents_[model_agent]);
     }
   }
   // ROS_INFO_STREAM("NGoals:" << n_goals);
@@ -240,14 +265,13 @@ void SimWrapper::setEnvironment(std::vector<geometry_msgs::Pose2D> agent_poses,
 }
 
 model_msgs::InteractivePrediction SimWrapper::interactiveSim(
-  std::vector<size_t> max_lik_goals, size_t foresight, float time_step,
+  std::vector<common_msgs::Vector2> a_goals, size_t foresight, float time_step,
   std::vector<geometry_msgs::Pose2D> goals) {
   model_msgs::InteractivePrediction inter_pred_msg;
   inter_pred_msg.foresight = foresight;
-  inter_pred_msg.planner_pose.resize(foresight);
-  inter_pred_msg.agent.resize(agent_no_);
+  inter_pred_msg.agent.resize(agent_no_ - 1); // TODO: Bad Practice
   rvo_wrapper_msgs::CreateRVOSim sim_msg;
-  // sim_msg.request.sim_num = model_agent_no_ * goal_no;
+  sim_msg.request.sim_num = 1;
   sim_msg.request.time_step = time_step;
   sim_msg.request.defaults.neighbor_dist = neighbor_dist_;
   sim_msg.request.defaults.max_neighbors = max_neighbors_;
@@ -258,11 +282,12 @@ model_msgs::InteractivePrediction SimWrapper::interactiveSim(
   sim_msg.request.defaults.max_accel = max_accel_;
   sim_msg.request.defaults.pref_speed = pref_speed_;
   create_sims_client_.call(sim_msg);
+  uint sim_id = sim_msg.response.sim_ids[0];
 
   // Create Agents with Positions
   for (size_t agent = 0; agent < agent_no_; ++agent) {
     rvo_wrapper_msgs::AddAgent agent_msg;
-    // agent_msg.request.sim_ids = sim_ids;
+    agent_msg.request.sim_ids.push_back(sim_id);
     agent_msg.request.position = agent_poses_[agent];
     add_sim_agent_client_.call(agent_msg);
   }
@@ -270,25 +295,27 @@ model_msgs::InteractivePrediction SimWrapper::interactiveSim(
   // Set Agent Velocities
   for (size_t agent = 0; agent < agent_no_; ++agent) {
     rvo_wrapper_msgs::SetAgentVelocity vel_msg;
-    // vel_msg.request.sim_ids = sim_ids;
+    vel_msg.request.sim_ids.push_back(sim_id);
     vel_msg.request.velocity = agent_vels_[agent];
     set_agent_vel_client_.call(vel_msg);
   }
 
   // Transform Pose2D goals into Vector2 goals
-  std::vector<common_msgs::Vector2> a_goals;
-  size_t goal_no = goals.size();
-  a_goals.resize(goal_no);
-  for (size_t goal = 0; goal < goal_no; ++goal) {
-    a_goals[goal].x = goals[goal].x;
-    a_goals[goal].y = goals[goal].y;
-  }
+  // std::vector<common_msgs::Vector2> a_goals;
+  // size_t goal_no = goals.size();
+  // a_goals.resize(goal_no);
+  // for (size_t goal = 0; goal < goal_no; ++goal) {
+  //   a_goals[goal].x = goals[goal].x;
+  //   a_goals[goal].y = goals[goal].y;
+  // }
 
   rvo_wrapper_msgs::SimGoals sim_goals_msg;
-  for (size_t agent = 0; agent < agent_no_; ++agent) {
-    sim_goals_msg.agent.push_back(a_goals[max_lik_goals[agent]]);
-  }
+  // for (size_t agent = 0; agent < agent_no_; ++agent) {
+  //   sim_goals_msg.agent.push_back(a_goals[agent]);
+  // }
+  sim_goals_msg.agent = a_goals;
   rvo_wrapper_msgs::SetAgentGoals goal_msg;
+  goal_msg.request.sim_ids.push_back(sim_id);
   goal_msg.request.sim.push_back(sim_goals_msg);
   set_agent_goals_client_.call(goal_msg);
 
@@ -297,17 +324,18 @@ model_msgs::InteractivePrediction SimWrapper::interactiveSim(
   for (size_t i = 0; i < foresight; ++i) {
     // Calc Preferred Velocities
     rvo_wrapper_msgs::CalcPrefVelocities pref_vel;
-    // pref_vel.request.sim_ids = sims;
+    pref_vel.request.sim_ids.push_back(sim_id);
     calc_pref_velocities_client_.call(pref_vel);
 
     rvo_wrapper_msgs::DoStep run_sims;
-    // run_sims.request.sim_ids = sims;
+    run_sims.request.sim_ids.push_back(sim_id);
     do_sim_step_client_.call(run_sims);
     if (!run_sims.response.ok) {ROS_ERROR("SimSteps could not be run!");}
 
     // Get Positions
     for (size_t agent = 0; agent < agent_no_; ++agent) {
       rvo_wrapper_msgs::GetAgentPosition get_poses;
+      get_poses.request.sim_ids.push_back(sim_id);
       get_poses.request.agent_id = agent;
       get_agent_position_client_.call(get_poses);
       if (!get_poses.response.ok) {
@@ -316,12 +344,17 @@ model_msgs::InteractivePrediction SimWrapper::interactiveSim(
         geometry_msgs::Pose2D pose;
         pose.x = get_poses.response.position.x;
         pose.y = get_poses.response.position.y;
-        inter_pred_msg.agent[agent].pose.push_back(pose);
+        if ((agent == 0) && (robot_model_)) {
+          inter_pred_msg.planner_pose.push_back(pose);
+        } else {
+          inter_pred_msg.agent[agent - 1].pose.push_back(pose); // TODO: Bad practice
+        }
       }
     }
   }
 
   rvo_wrapper_msgs::DeleteSimVector del_msg;
+  del_msg.request.sim_ids.push_back(sim_id);
   delete_sims_client_.call(del_msg);
 
   return inter_pred_msg;

@@ -18,8 +18,7 @@ int main(int argc, char* argv[]) {
 
   ros::Rate r(10);
   CLEAR();
-  INFO("Experiment launch complete. Press Enter to continue or q to exit" <<
-       std::endl);
+  ROS_INFO("Experiment launch complete. Press Enter to continue or q to exit");
   experiment.waitReturn();
   // Publish goals or plans for first time
   experiment.pubGoals();
@@ -261,6 +260,7 @@ void Experiment::waitReturn() {
       break;
     } else if (key == 'q') {
       Experiment::interrupted_ = true;
+      break;
     }
   }
 }

@@ -27,6 +27,7 @@ RVOWrapper::~RVOWrapper() {
 
 void RVOWrapper::init() {
   planner_init_ = false;
+  debug_ = false;
 }
 
 void RVOWrapper::rosSetup() {
@@ -374,6 +375,9 @@ bool RVOWrapper::doStep(
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
     if ((req.sim_ids.back() >= req.sim_ids.front()) &&
         (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
+#ifdef _OPENMP
+      #pragma omp parallel for
+#endif
       for (uint32_t i = req.sim_ids.front(); i <= req.sim_ids.back(); ++i) {
         sim_vect_[i]->doStep();
       }
@@ -888,9 +892,11 @@ bool RVOWrapper::setAgentGoals(
         for (uint32_t i = 0; i < num_agents; ++i) { // Cycle through sim agents
           sim_vect_goals_[j][i] = RVO::Vector2(req.sim[sim_no].agent[i].x,
                                                req.sim[sim_no].agent[i].y);
-          ROS_INFO_STREAM("SimID: " << j << " No: " << sim_no << " A: " << i <<
-                          " G: " << req.sim[sim_no].agent[i].x << ", " <<
-                          req.sim[sim_no].agent[i].y);
+          if (debug_) {
+            ROS_INFO_STREAM("RVOW- SimID: " << j << " No: " << sim_no << " A: " << i <<
+                            " G: " << req.sim[sim_no].agent[i].x << ", " <<
+                            req.sim[sim_no].agent[i].y);
+          }
         }
       }
     } else {

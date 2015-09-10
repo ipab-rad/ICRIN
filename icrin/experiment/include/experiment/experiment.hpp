@@ -11,6 +11,7 @@
 
 #include <string>
 #include <csignal>
+#include <stdlib.h>
 #include <ros/ros.h>
 #include <experiment/console.hpp>
 
