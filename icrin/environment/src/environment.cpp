@@ -256,7 +256,6 @@ void Environment::checkGoalPlan() {
   } else {
     planning_ = false;
     uint16_t next_goal = goal_id_ + 1;
-    ROS_INFO_STREAM("Environment- Next: " << next_goal);
     if (next_goal < curr_plan_.sequence.size()) {
       ROS_INFO_STREAM("Environment- New goal: " << next_goal);
       robot_target_goal_ = goals_[curr_plan_.sequence[next_goal]];
