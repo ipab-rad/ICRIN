@@ -8,3 +8,7 @@ UNDER CONSTRUCTION
 Upgraded repo of https://github.com/ipab-rad/Youbot-RVO
 
 By Alejandro Bordallo Mico
+
+Depends on:
+ 
+PTrackingBridge (Clone inside ICRIN)
