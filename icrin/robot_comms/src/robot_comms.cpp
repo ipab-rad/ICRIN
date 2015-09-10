@@ -48,7 +48,7 @@ void RobotComms::loadParams() {
       (("/" + robot_names[i]).compare(robot_name_) != 0)
     ) {
       ROS_INFO("%s active!", robot_names[i].c_str());
-      active_robots_.push_back(robot_names[i]);
+      active_robots_.push_back("/" + robot_names[i]);
     }
   }
   ROS_INFO("%s is listening to %lu other robots",

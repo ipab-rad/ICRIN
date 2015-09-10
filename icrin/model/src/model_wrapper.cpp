@@ -70,7 +70,7 @@ void ModelWrapper::rosSetup() {
   model_hyp_sub_ = nh_->subscribe(robot_name_ + "/model/hypotheses", 1000,
                                   &ModelWrapper::modelCB, this);
   inter_pred_pub_ = nh_->advertise<model_msgs::InteractivePrediction>
-                    ("/interactive_prediction", 1);
+                    (robot_name_ + "/model/interactive_prediction", 1);
 }
 
 void ModelWrapper::robotPoseCB(const geometry_msgs::Pose2D::ConstPtr& msg) {
