@@ -137,9 +137,9 @@ void PlannerWrapper::plannerStep() {
   if (!planning_ && use_rvo_planner_) {
     rvo_planner_->setCurrVel(null_vect_);
   }
-  if (aborted_ && use_ros_navigation_) {
-    this->pubPlanning(false);
-  }
+  // if (aborted_ && use_ros_navigation_) {
+  //   this->pubPlanning(false);
+  // }
 }
 
 void PlannerWrapper::currPoseCB(const geometry_msgs::Pose2D::ConstPtr& msg) {

@@ -28,6 +28,7 @@ void Tracker::init() {
   ptracker_rec_ = false;
   ptracker_sent_ = true;
   invert_x_ = -1; // Set to -1 to invert x axis relative to robot frame
+  vel_reduct_fact_ = 3.0; // Reduce recorded velocities by a factor
 }
 
 void Tracker::rosSetup() {
@@ -68,11 +69,11 @@ void Tracker::pubTrackerData() {
       tracker_data.standard_deviation.push_back(pos_dev);
       geometry_msgs::Twist vel;
       vel.linear.x = ptracker_msg_.velocities[i].x * invert_x_;
-      vel.linear.y = ptracker_msg_.velocities[i].y;
+      vel.linear.y = ptracker_msg_.velocities[i].y / vel_reduct_fact_;
       tracker_data.agent_velocity.push_back(vel);
       geometry_msgs::Twist vel_avg;
       vel_avg.linear.x = ptracker_msg_.averagedVelocities[i].x * invert_x_;
-      vel_avg.linear.y = ptracker_msg_.averagedVelocities[i].y;
+      vel_avg.linear.y = ptracker_msg_.averagedVelocities[i].y / vel_reduct_fact_;
       tracker_data.agent_avg_velocity.push_back(vel_avg);
       // Prepare People Msg
       people_msgs::Person person_msg;
@@ -80,7 +81,8 @@ void Tracker::pubTrackerData() {
       person_msg.position.x = ptracker_msg_.positions[i].x;
       person_msg.position.y = ptracker_msg_.positions[i].y;
       person_msg.velocity.x = ptracker_msg_.averagedVelocities[i].x;
-      person_msg.velocity.y = ptracker_msg_.averagedVelocities[i].y;
+      person_msg.velocity.y = ptracker_msg_.averagedVelocities[i].y /
+                              vel_reduct_fact_;
       person_msg.reliability = ptracker_msg_.standardDeviations[i].x;
       people_msg.people.push_back(person_msg);
     }

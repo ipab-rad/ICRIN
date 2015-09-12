@@ -92,8 +92,9 @@ void ROSNavigation::monitorNavigation() {
     this->stopRobot();
     arrived_ = false;
     moving_ = false;
-    aborted_ = true;
+    // aborted_ = true;
     ROS_WARN("ROS_NAV:Aborted!");
+    this->sendGoal();
   }
 }
 
