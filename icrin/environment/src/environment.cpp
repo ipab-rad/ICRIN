@@ -190,10 +190,10 @@ void Environment::pubModelHypotheses() {
   // Temporary Modelling test request
   model_msgs::ModelHypotheses model_hypotheses;
   // ROS_INFO_STREAM("ENV- NAgents: " << agent_no_);
-  // for (size_t i = 1; i < agent_no_; ++i) { // i = 0 includes Robot Agent
-  //   model_hypotheses.agents.push_back(i);
-  // }
-  if (agent_no_ > 1) {model_hypotheses.agents.push_back(1);}
+  //for (size_t i = 1; i < agent_no_; ++i) { // i = 0 includes Robot Agent
+  //  model_hypotheses.agents.push_back(i);
+  //}
+  if (agent_no_ > 1) {model_hypotheses.agents.push_back(1);} // Temp fix
   model_hypotheses.goals = true;
   model_hypotheses.awareness = false;
   model_hypotheses.goal_hypothesis.sampling = false;

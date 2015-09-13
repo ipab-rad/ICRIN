@@ -103,10 +103,11 @@ void ModelWrapper::runModel() {
     this->inferGoals();
   }
   if (interactive_costmap_) {this->interactivePrediction();}
-  if (debug_) {ROS_INFO("EndModel");}
+  if (debug_) {ROS_INFO_STREAM("EndModel" << std::endl);}
 }
 
 void ModelWrapper::inferGoals() {
+  if (debug_) {ROS_INFO("Infer");}
   float ros_freq = 0.1f;
   float PI = 3.14159265358979323846f;
   bool reset_priors = false;

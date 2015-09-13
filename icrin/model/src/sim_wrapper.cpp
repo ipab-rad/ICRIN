@@ -149,6 +149,13 @@ std::vector<uint32_t> SimWrapper::goalSequence(
   sim_msg.request.defaults.pref_speed = pref_speed_;
   create_sims_client_.call(sim_msg);
   std::vector<uint32_t> sim_ids = sim_msg.response.sim_ids;
+  if (debug_) {
+    ROS_INFO_STREAM("ModelANo: " << model_agent_no_ <<
+                    " SimNum: " << sim_msg.request.sim_num);
+    ROS_INFO_STREAM("ID Size: " << sim_ids.size());
+    ROS_INFO_STREAM("IDs:" << sim_ids.front() << " - " << sim_ids.back());
+  }
+
   if (!sim_msg.response.ok) {
     ROS_ERROR("ModelS- Goal sequence sims failed!");
   }
@@ -190,6 +197,7 @@ std::vector<uint32_t> SimWrapper::goalSequence(
   goal_msg.request.sim_ids = sim_ids;
   size_t sim_no = sim_ids[1] - sim_ids[0] + 1;
   goal_msg.request.sim.resize(sim_no);
+  // sim_msg.request.sim_num
   size_t sim_id = 0;
   for (size_t model_agent = 0; model_agent < model_agent_no_; ++model_agent) {
     for (size_t goal = 0; goal < goal_no; ++goal) {
@@ -230,6 +238,10 @@ std::vector<uint32_t> SimWrapper::goalSequence(
 
 std::vector<common_msgs::Vector2> SimWrapper::calcSimVels(std::vector<uint32_t>
                                                           sims, size_t n_goals) {
+  if (debug_) {
+    ROS_INFO_STREAM("SimsSize: " << sims.size());
+    ROS_INFO_STREAM("SimIDs: " << sims[0] << " - " << sims[1]);
+  }
   // Calc Preferred Velocities
   rvo_wrapper_msgs::CalcPrefVelocities pref_vel;
   pref_vel.request.sim_ids = sims;

@@ -362,11 +362,13 @@ bool RVOWrapper::deleteSimVector(
     planner_ = NULL;
     planner_init_ = false;
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
+    // ROS_INFO_STREAM("SizeBefore: " << sim_vect_.size());
     for (uint32_t i = 0; i < sim_vect_.size(); ++i) {
       delete (sim_vect_[i]);
     }
     sim_vect_.clear();
     sim_vect_goals_.clear();
+    // ROS_INFO_STREAM("SizeAfter: " << sim_vect_.size());
   }
   return true;
 }

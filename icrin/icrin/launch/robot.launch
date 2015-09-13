@@ -13,7 +13,7 @@
         <node name="environment" pkg="environment" type="environment" output="screen" clear_params="true">
         <rosparam file="$(find icrin)/cfg/$(arg robot).yaml" command="load" />
         </node>
-        <node name="robot_comms" pkg="robot_comms" type="robot_comms" output="screen" clear_params="true">
-        </node>
+        <!-- <node name="robot_comms" pkg="robot_comms" type="robot_comms" output="screen" clear_params="true">
+        </node> -->
         </group>
 </launch>
