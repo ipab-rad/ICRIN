@@ -53,9 +53,10 @@ void ModelWrapper::init() {
   use_rvo_lib_ = true;
   interactive_costmap_ = true;
   debug_ = false;
+  initialised_ = false;
   // inferred_goals_history_.resize(3);
-  init_liks_.resize(3, false);
-  prev_prior_.resize(3);
+  // init_liks_.resize(3, false);
+  // prev_prior_.resize(3);
 }
 
 void ModelWrapper::rosSetup() {
@@ -165,11 +166,11 @@ void ModelWrapper::inferGoals() {
     float uniform_prior = 1.0f / n_goals;
     for (std::size_t goal = 0; goal < n_goals; ++goal) {
 
-      if (reset_priors || !init_liks_[goal]) {
+      if (reset_priors || !init_liks_[agent][goal]) {
         g_posteriors[goal] = uniform_prior;
-        init_liks_[goal] = true;
+        init_liks_[agent][goal] = true;
       } else {
-        g_posteriors[goal] = g_likelihoods[goal] * prev_prior_[goal];
+        g_posteriors[goal] = g_likelihoods[goal] * prev_prior_[agent][goal];
       }
 
       posterior_norm += g_posteriors[goal];
@@ -190,13 +191,13 @@ void ModelWrapper::inferGoals() {
       } else {
         norm_posterior = g_posteriors[goal] / posterior_norm;
         if (norm_posterior > 0.01f) {
-          prev_prior_[goal] = norm_posterior;
+          prev_prior_[agent][goal] = norm_posterior;
         } else {
-          prev_prior_[goal] = 0.005f;
+          prev_prior_[agent][goal] = 0.005f;
         }
       }
-      norm_posteriors[goal] = prev_prior_[goal];
-      agent_goal_inference_[agent][goal] = prev_prior_[goal];
+      norm_posteriors[goal] = prev_prior_[agent][goal];
+      agent_goal_inference_[agent][goal] = prev_prior_[agent][goal];
     }
     if (debug_) {
       ROS_INFO_STREAM("InferAgent: " << (int)hypotheses_.agents[agent] <<
@@ -209,6 +210,20 @@ void ModelWrapper::inferGoals() {
 }
 
 void ModelWrapper::setupModel() {
+  // if (!initialised_) {
+  //   prev_prior_.resize(3);
+  //   initialised_ = true;
+  // }
+  init_liks_.resize(hypotheses_.agents.size());
+  for (size_t i = 0; i < hypotheses_.agents.size(); ++i) {
+    init_liks_[i].resize(hypotheses_.goal_hypothesis.goal_sequence.size(), false);
+  }
+  prev_prior_.resize(hypotheses_.agents.size());
+  for (size_t i = 0; i < hypotheses_.agents.size(); ++i) {
+    prev_prior_[i].resize(hypotheses_.goal_hypothesis.goal_sequence.size(),
+                          1.0f / hypotheses_.goal_hypothesis.goal_sequence.size());
+  }
+
   std::vector<geometry_msgs::Pose2D> agent_poses_;
   std::vector<geometry_msgs::Twist> agent_vels_;
   sim_wrapper_->setRobotModel(robot_model_);
