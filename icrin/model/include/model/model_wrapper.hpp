@@ -50,6 +50,7 @@ class ModelWrapper {
   bool debug_;
   bool use_rvo_lib_;
   bool interactive_costmap_;
+  bool initialised_;
 
   // Constants
   bool robot_model_;
@@ -74,9 +75,11 @@ class ModelWrapper {
   std::vector<common_msgs::Vector2> sequence_sim_vels;
   std::vector<uint32_t> awareness_sims_;
   // std::vector<std::vector<float> > inferred_goals_history_;
-  std::vector<bool> init_liks_;
-  std::vector<float> prev_prior_;
+  // std::vector<bool> init_liks_;
+  // std::vector<float> prev_prior_;
   std::vector<uint32_t> costmap_sims_;
+  std::vector<std::vector<bool> > init_liks_;
+  std::vector<std::vector<float> > prev_prior_;
   std::vector<std::vector<float> > agent_goal_inference_;
 
   // ROS

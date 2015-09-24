@@ -234,6 +234,21 @@ bool RVOWrapper::calcPrefVelocities(
   rvo_wrapper_msgs::CalcPrefVelocities::Request& req,
   rvo_wrapper_msgs::CalcPrefVelocities::Response& res) {
   res.ok = true;
+  // ROS_INFO("Calc");
+  // sim_vect_goals_.resize(sim_vect_.size());
+  // for (size_t i = 0; i < sim_vect_goals_.size(); ++i) {
+  //   sim_vect_goals_[i].resize(sim_vect_[i]->getNumAgents());
+  // }
+  // ROS_INFO_STREAM("CalcPrefVel: " << req.sim_ids.back() << " - " <<
+  //                 req.sim_ids.front());
+  // ROS_INFO_STREAM("CalcV- SimSize: " << sim_vect_goals_.size());
+  // for (uint32_t j = req.sim_ids.front(); j <= req.sim_ids.back(); ++j) {
+  //   ROS_INFO_STREAM("Sim:" << j << "NumA: " << sim_vect_[j]->getNumAgents());
+  //   for (uint32_t i = 0; i < sim_vect_[j]->getNumAgents(); ++i) {
+  //     ROS_INFO_STREAM(" A: " << i <<  " G:" << sim_vect_goals_[j][i].x() <<
+  //                     ", " << sim_vect_goals_[j][i].y());
+  //   }
+  // }
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     for (uint32_t i = 0; i < planner_->getNumAgents(); ++i) {
       RVO::Vector2 goalVector = planner_goals_[i] - planner_->getAgentPosition(i);
@@ -251,8 +266,8 @@ bool RVOWrapper::calcPrefVelocities(
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
     if ((req.sim_ids.back() >= req.sim_ids.front()) &&
         (req.sim_ids.back() < sim_vect_.size())) { // If good sim id range
-      for (uint32_t j = req.sim_ids.front(); j <= req.sim_ids.back(); ++j) {
-        for (uint32_t i = 0; i < sim_vect_[j]->getNumAgents(); ++i) {
+      for (size_t j = req.sim_ids.front(); j <= req.sim_ids.back(); ++j) {
+        for (size_t i = 0; i < sim_vect_[j]->getNumAgents(); ++i) {
           if (sim_vect_goals_[j][i] != null_vect_) { // Goal has been set
             RVO::Vector2 goalVector = sim_vect_goals_[j][i] -
                                       sim_vect_[j]->getAgentPosition(i);
@@ -362,11 +377,13 @@ bool RVOWrapper::deleteSimVector(
     planner_ = NULL;
     planner_init_ = false;
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
+    // ROS_INFO_STREAM("SizeBefore: " << sim_vect_.size());
     for (uint32_t i = 0; i < sim_vect_.size(); ++i) {
       delete (sim_vect_[i]);
     }
     sim_vect_.clear();
     sim_vect_goals_.clear();
+    // ROS_INFO_STREAM("SizeAfter: " << sim_vect_.size());
   }
   return true;
 }
@@ -376,6 +393,7 @@ bool RVOWrapper::doStep(
   rvo_wrapper_msgs::DoStep::Response& res) {
   // ROS_INFO("RVO Wrapper- SimStep start");
   res.ok = true;
+  // ROS_INFO_STREAM("RVOW- SimSize: " << sim_vect_.size());
   if (req.sim_ids.size() == 0 && planner_init_) { // If Planner
     planner_->doStep();
   } else if (req.sim_ids.size() > 0) { // If Sim Vector
@@ -385,6 +403,7 @@ bool RVOWrapper::doStep(
       #pragma omp parallel for
 #endif
       for (uint32_t i = req.sim_ids.front(); i <= req.sim_ids.back(); ++i) {
+        // ROS_INFO_STREAM("RVOW- ID: " << i);
         sim_vect_[i]->doStep();
       }
     } else {
