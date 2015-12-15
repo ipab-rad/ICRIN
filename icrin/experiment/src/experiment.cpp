@@ -129,9 +129,12 @@ void Experiment::loadParams() {
     for (size_t i = 0; i < goal_no_; ++i) {
       geometry_msgs::Pose2D goal;
       if (ros::param::has("/experiment/goals/g_" + std::to_string(i))) {
-        ros::param::get("/experiment/goals/g_" + std::to_string(i) + "/x", goal.x);
-        ros::param::get("/experiment/goals/g_" + std::to_string(i) + "/y", goal.y);
-        ros::param::get("/experiment/goals/g_" + std::to_string(i) + "/theta",
+        ros::param::get("/experiment/goals/g_" +
+                        std::to_string(i) + "/x", goal.x);
+        ros::param::get("/experiment/goals/g_" +
+                        std::to_string(i) + "/y", goal.y);
+        ros::param::get("/experiment/goals/g_" +
+                        std::to_string(i) + "/theta",
                         goal.theta);
         goals_.goal.push_back(goal);
       } else {
@@ -158,7 +161,6 @@ void Experiment::loadParams() {
     plan.sequence.resize(1);
     setup_plans_.plan.push_back(plan);
   }
-
 }
 
 void Experiment::interrupt(int s) {

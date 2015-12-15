@@ -10,8 +10,6 @@
 #define TRACKER_HPP
 
 #include <ros/ros.h>
-#include <string>
-
 #include <geometry_msgs/Pose2D.h>
 #include <geometry_msgs/Twist.h>
 
@@ -20,9 +18,11 @@
 #include <people_msgs/People.h>
 #include <people_msgs/Person.h>
 
+#include <string>
+
 class Tracker {
  public:
-  Tracker(ros::NodeHandle* nh);
+  explicit Tracker(ros::NodeHandle* nh);
   ~Tracker();
 
   void init();
@@ -48,7 +48,6 @@ class Tracker {
   ros::Publisher tracker_pub_;
   ros::Publisher people_pub_;
   ros::Subscriber ptracker_sub_;
-
 };
 
 #endif /* TRACKER_HPP */

@@ -10,14 +10,13 @@
 AMCLWrapper::AMCLWrapper(ros::NodeHandle* nh) {
   nh_ = nh;
   robot_name_ = ros::this_node::getNamespace();
-  robot_name_.erase (0, 1); // Remove 1 forward slash from robot_name
+  robot_name_.erase(0, 1);  // Remove 1 forward slash from robot_name
   this->init();
   this->loadParams();
   this->rosSetup();
 }
 
 AMCLWrapper::~AMCLWrapper() {
-  ;
 }
 
 void AMCLWrapper::init() {
@@ -81,7 +80,7 @@ void AMCLWrapper::pubRobotPose() {
     ROS_WARN("WARNING: No odometry received from robot");
   } else {
     if (use_amcl_) {this->calcAMCL();}
-    this->calcOdomDiff(); // Since AMCL msg may be sporadic at best
+    this->calcOdomDiff();  // Since AMCL msg may be sporadic at best
     robot_pose_pub_.publish(robot_pose_);
   }
 }

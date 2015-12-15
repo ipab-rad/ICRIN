@@ -11,7 +11,7 @@
 ROSNavigation::ROSNavigation(ros::NodeHandle* nh) : nh_(nh),
   move_ac("move_base", true) {
   robot_name_ = ros::this_node::getNamespace();
-  robot_name_.erase (0, 1); // Remove 1 forward slash from robot_name
+  robot_name_.erase(0, 1);  // Remove 1 forward slash from robot_name
   this->loadParams();
   this->init();
   this->rosSetup();
@@ -37,15 +37,14 @@ void ROSNavigation::init() {
 }
 
 void ROSNavigation::rosSetup() {
-  // cmd_vel_pub_ = nh_->advertise<geometry_msgs::Twist>(robot_name_ + "/cmd_vel",
-  //                                                     1000);
+  // cmd_vel_pub_ = nh_->advertise<geometry_msgs::Twist>
+  // (robot_name_ + "/cmd_vel", 1000);
   ROS_INFO("Waiting for Move Base Action Server...");
   move_ac.waitForServer();
   ROS_INFO("Move Base Action Server ready!");
 }
 
 void ROSNavigation::stopRobot() {
-
   ROS_INFO("ROS_NAV: STOP!");
   // ros::Rate r(10);
   // for (size_t i = 0; i < stop_msgs_; i++) {

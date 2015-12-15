@@ -19,14 +19,15 @@
 
 class AMCLWrapper {
  public:
-  AMCLWrapper(ros::NodeHandle* nh);
+  explicit AMCLWrapper(ros::NodeHandle* nh);
   ~AMCLWrapper();
 
   void init();
   void rosSetup();
   void loadParams();
 
-  void AMCLPoseCB(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& msg);
+  void AMCLPoseCB(
+    const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& msg);
   void OdomCB(const nav_msgs::Odometry::ConstPtr& msg);
   void SetPoseCB(const geometry_msgs::Pose2D::ConstPtr& msg);
   void pubRobotPose();

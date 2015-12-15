@@ -8,7 +8,7 @@
 
 #include <ros/ros.h>
 
-#include "planner/planner_wrapper.hpp"
+#include <planner/planner_wrapper.hpp>
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "planner");

@@ -11,14 +11,13 @@
 RobotComms::RobotComms(ros::NodeHandle* nh) {
   nh_ = nh;
   robot_name_ = ros::this_node::getNamespace();
-  robot_name_.erase (0, 1); // Remove 1 forward slash from robot_name
+  robot_name_.erase(0, 1);  // Remove 1 forward slash from robot_name
   this->init();
   this->loadParams();
   this->rosSetup();
 }
 
 RobotComms::~RobotComms() {
-  ;
 }
 
 void RobotComms::init() {
@@ -42,7 +41,7 @@ void RobotComms::rosSetup() {
 void RobotComms::loadParams() {
   std::vector<std::string> robot_names;
   ros::param::get("/experiment/robots", robot_names);
-  // TODO: Read active robots from experiment parameters
+  // TODO(Alex): Read active robots from experiment parameters
   for (uint8_t i = 0; i < robot_names.size(); ++i) {
     if (
       (("/" + robot_names[i]).compare(robot_name_) != 0)

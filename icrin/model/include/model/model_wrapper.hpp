@@ -16,7 +16,6 @@
 #include <model/sim_wrapper.hpp>
 
 #include <geometry_msgs/Pose2D.h>
-#include <geometry_msgs/Pose2D.h>
 #include <geometry_msgs/Twist.h>
 #include <environment_msgs/EnvironmentData.h>
 #include <model_msgs/ModelHypotheses.h>
@@ -26,7 +25,7 @@
 
 class ModelWrapper {
  public:
-  ModelWrapper(ros::NodeHandle* nh);
+  explicit ModelWrapper(ros::NodeHandle* nh);
   ~ModelWrapper();
 
   void loadParams();

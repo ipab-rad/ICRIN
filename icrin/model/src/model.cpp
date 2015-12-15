@@ -8,7 +8,7 @@
 
 #include <ros/ros.h>
 
-#include "model/model_wrapper.hpp"
+#include <model/model_wrapper.hpp>
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "model");

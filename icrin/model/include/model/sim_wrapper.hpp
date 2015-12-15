@@ -33,7 +33,7 @@
 
 class SimWrapper {
  public:
-  SimWrapper(ros::NodeHandle* nh);
+  explicit SimWrapper(ros::NodeHandle* nh);
   ~SimWrapper();
 
   void loadParams();

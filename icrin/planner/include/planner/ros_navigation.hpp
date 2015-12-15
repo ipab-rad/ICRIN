@@ -17,7 +17,7 @@
 
 class ROSNavigation {
  public:
-  ROSNavigation(ros::NodeHandle* nh);
+  explicit ROSNavigation(ros::NodeHandle* nh);
   ~ROSNavigation();
 
   void loadParams();
@@ -52,7 +52,6 @@ class ROSNavigation {
   ros::NodeHandle* nh_;
   ros::Publisher cmd_vel_pub_;
   actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> move_ac;
-
 };
 
 #endif /* ROS_NAVIGATION_HPP */

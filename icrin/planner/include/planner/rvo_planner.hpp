@@ -10,12 +10,10 @@
 #define RVO_PLANNER_HPP
 
 #include <ros/ros.h>
-#include <vector>
+#include <rvo_wrapper/rvo_wrapper.hpp>
 
 #include <geometry_msgs/Pose2D.h>
 #include <geometry_msgs/Twist.h>
-
-#include <rvo_wrapper/rvo_wrapper.hpp>
 
 #include <rvo_wrapper_msgs/AddAgent.h>
 #include <rvo_wrapper_msgs/CalcPrefVelocities.h>
@@ -28,9 +26,11 @@
 #include <rvo_wrapper_msgs/SetAgentPosition.h>
 #include <rvo_wrapper_msgs/SetAgentVelocity.h>
 
+#include <vector>
+
 class RVOPlanner {
  public:
-  RVOPlanner(ros::NodeHandle* nh);
+  explicit RVOPlanner(ros::NodeHandle* nh);
   ~RVOPlanner();
 
   void loadParams();

@@ -9,8 +9,6 @@
 #ifndef EXPERIMENT_HPP_
 #define EXPERIMENT_HPP_
 
-#include <string>
-#include <csignal>
 #include <stdlib.h>
 #include <ros/ros.h>
 #include <experiment/console.hpp>
@@ -23,9 +21,12 @@
 #include <experiment_msgs/SetGoal.h>
 #include <experiment_msgs/SetPlan.h>
 
+#include <string>
+#include <csignal>
+
 class Experiment {
  public:
-  Experiment(ros::NodeHandle* nh);
+  explicit Experiment(ros::NodeHandle* nh);
   ~Experiment();
 
   void init();
@@ -36,7 +37,8 @@ class Experiment {
   void pubPlanning();
   void pubGoals();
   void pubPlans(bool setup_plan);
-  void planningCB(const std_msgs::Bool::ConstPtr& msg, const std::string& robot);
+  void planningCB(const std_msgs::Bool::ConstPtr& msg,
+                  const std::string& robot);
   bool setGoal(experiment_msgs::SetGoal::Request& req,
                experiment_msgs::SetGoal::Response& res);
   bool setPlan(experiment_msgs::SetPlan::Request& req,

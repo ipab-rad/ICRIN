@@ -11,9 +11,9 @@
 SimWrapper::SimWrapper(ros::NodeHandle* nh) {
   nh_ = nh;
   robot_name_ = ros::this_node::getNamespace();
-  robot_name_.erase (0, 1); // Remove 1 forward slash from robot_name
+  robot_name_.erase(0, 1);  // Remove 1 forward slash from robot_name
   model_name_ = ros::this_node::getName();
-  model_name_.erase (0, robot_name_.length()); // Remove robot name
+  model_name_.erase(0, robot_name_.length());  // Remove robot name
   this->loadParams();
   this->init();
   this->rosSetup();
@@ -27,8 +27,8 @@ void SimWrapper::loadParams() {
   {ROS_WARN("Model- Using default RVO Model Sim params");}
   int max_neighbors;
   ros::param::param(robot_name_ + model_name_ + "/time_step", time_step_, 0.1f);
-  ros::param::param(robot_name_ + model_name_ + "/neighbor_dist", neighbor_dist_,
-                    2.0f);
+  ros::param::param(robot_name_ + model_name_ +
+                    "/neighbor_dist", neighbor_dist_, 2.0f);
   ros::param::param(robot_name_ + model_name_ + "/max_neighbors", max_neighbors,
                     20);
   ros::param::param(robot_name_ + model_name_ + "/time_horizon_agent",
@@ -38,7 +38,8 @@ void SimWrapper::loadParams() {
   ros::param::param(robot_name_ + model_name_ + "/radius", radius_, 0.5f);
   ros::param::param(robot_name_ + model_name_ + "/max_speed", max_speed_, 1.2f);
   ros::param::param(robot_name_ + model_name_ + "/max_accel", max_accel_, 2.4f);
-  ros::param::param(robot_name_ + model_name_ + "/pref_speed", pref_speed_, 0.6f);
+  ros::param::param(robot_name_ + model_name_ +
+                    "/pref_speed", pref_speed_, 0.6f);
   max_neighbors_ = max_neighbors;
   bool robot_model;
   ros::param::param(robot_name_ + model_name_ + "/robot_model",
@@ -51,7 +52,6 @@ void SimWrapper::loadParams() {
     ros::param::param(robot_name_ + "/planner/pref_speed",
                       planner_pref_speed_, 0.3f);
   }
-
 }
 
 void SimWrapper::init() {
@@ -92,37 +92,48 @@ void SimWrapper::rosSetup() {
       robot_name_ + model_name_ + "/rvo_wrapper/add_agent", persistence_);
   calc_pref_velocities_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::CalcPrefVelocities>(
-      robot_name_ + model_name_ + "/rvo_wrapper/calc_pref_velocities", persistence_);
+      robot_name_ + model_name_ +
+      "/rvo_wrapper/calc_pref_velocities", persistence_);
   create_sims_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::CreateRVOSim>(
-      robot_name_ + model_name_ + "/rvo_wrapper/create_rvosim", persistence_);
+      robot_name_ + model_name_ +
+      "/rvo_wrapper/create_rvosim", persistence_);
   delete_sims_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::DeleteSimVector>(
-      robot_name_ + model_name_ + "/rvo_wrapper/delete_sim_vector", persistence_);
+      robot_name_ + model_name_ +
+      "/rvo_wrapper/delete_sim_vector", persistence_);
   do_sim_step_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::DoStep>(
-      robot_name_ + model_name_ + "/rvo_wrapper/do_step", persistence_);
+      robot_name_ + model_name_ +
+      "/rvo_wrapper/do_step", persistence_);
   get_agent_vel_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::GetAgentVelocity>(
-      robot_name_ + model_name_ + "/rvo_wrapper/get_agent_velocity", persistence_);
+      robot_name_ + model_name_ +
+      "/rvo_wrapper/get_agent_velocity", persistence_);
   set_agent_goals_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::SetAgentGoals>(
-      robot_name_ + model_name_ + "/rvo_wrapper/set_agent_goals", persistence_);
+      robot_name_ + model_name_ +
+      "/rvo_wrapper/set_agent_goals", persistence_);
   set_agent_vel_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::SetAgentVelocity>(
-      robot_name_ + model_name_ + "/rvo_wrapper/set_agent_velocity", persistence_);
+      robot_name_ + model_name_ +
+      "/rvo_wrapper/set_agent_velocity", persistence_);
   get_agent_position_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::GetAgentPosition>(
-      robot_name_ + model_name_ + "/rvo_wrapper/get_agent_position", persistence_);
+      robot_name_ + model_name_ +
+      "/rvo_wrapper/get_agent_position", persistence_);
   set_agent_max_speed_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::SetAgentMaxSpeed>(
-      robot_name_ + model_name_ + "/rvo_wrapper/set_agent_max_speed", persistence_);
+      robot_name_ + model_name_ +
+      "/rvo_wrapper/set_agent_max_speed", persistence_);
   set_agent_max_accel_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::SetAgentMaxAccel>(
-      robot_name_ + model_name_ + "/rvo_wrapper/set_agent_max_accel", persistence_);
+      robot_name_ + model_name_ +
+      "/rvo_wrapper/set_agent_max_accel", persistence_);
   set_agent_pref_speed_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::SetAgentPrefSpeed>(
-      robot_name_ + model_name_ + "/rvo_wrapper/set_agent_pref_speed", persistence_);
+      robot_name_ + model_name_ +
+      "/rvo_wrapper/set_agent_pref_speed", persistence_);
 }
 
 std::vector<uint32_t> SimWrapper::goalSampling(
@@ -236,8 +247,8 @@ std::vector<uint32_t> SimWrapper::goalSequence(
   return sim_ids;
 }
 
-std::vector<common_msgs::Vector2> SimWrapper::calcSimVels(std::vector<uint32_t>
-                                                          sims, size_t n_goals) {
+std::vector<common_msgs::Vector2> SimWrapper::calcSimVels(
+  std::vector<uint32_t> sims, size_t n_goals) {
   if (debug_) {
     ROS_INFO_STREAM("SimsSize: " << sims.size());
     ROS_INFO_STREAM("SimIDs: " << sims[0] << " - " << sims[1]);
@@ -308,7 +319,7 @@ model_msgs::InteractivePrediction SimWrapper::interactiveSim(
   std::vector<geometry_msgs::Pose2D> goals) {
   model_msgs::InteractivePrediction inter_pred_msg;
   inter_pred_msg.foresight = foresight;
-  inter_pred_msg.agent.resize(agent_no_ - 1); // TODO: Bad Practice
+  inter_pred_msg.agent.resize(agent_no_ - 1);  // TODO(Alex): Bad Practice
   rvo_wrapper_msgs::CreateRVOSim sim_msg;
   sim_msg.request.sim_num = 1;
   sim_msg.request.time_step = time_step;
@@ -405,7 +416,8 @@ model_msgs::InteractivePrediction SimWrapper::interactiveSim(
         if ((agent == 0) && (robot_model_)) {
           inter_pred_msg.planner_pose.push_back(pose);
         } else {
-          inter_pred_msg.agent[agent - 1].pose.push_back(pose); // TODO: Bad practice
+          inter_pred_msg.agent[agent - 1].pose.push_back(pose);
+          // TODO(Alex): Bad practice
         }
       }
     }

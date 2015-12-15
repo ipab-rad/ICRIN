@@ -10,8 +10,6 @@
 #define ENVIRONMENT_HPP
 
 #include <ros/ros.h>
-#include <csignal>
-
 #include <std_msgs/Bool.h>
 #include <std_msgs/Int32MultiArray.h>
 #include <nav_msgs/Odometry.h>
@@ -27,9 +25,11 @@
 #include <experiment_msgs/Plans.h>
 #include <experiment_msgs/Plan.h>
 
+#include <csignal>
+
 class Environment {
  public:
-  Environment(ros::NodeHandle* nh);
+  explicit Environment(ros::NodeHandle* nh);
   ~Environment();
 
   void init();

@@ -11,7 +11,7 @@
 RVOPlanner::RVOPlanner(ros::NodeHandle* nh) {
   nh_ = nh;
   robot_name_ = ros::this_node::getNamespace();
-  robot_name_.erase (0, 1); // Remove 1 forward slash from robot_name
+  robot_name_.erase(0, 1);  // Remove 1 forward slash from robot_name
   this->loadParams();
   this->init();
   this->rosSetup();
@@ -30,7 +30,8 @@ void RVOPlanner::loadParams() {
   ros::param::param(robot_name_ + "/planner/max_neighbors", max_neighbors, 20);
   planner_settings_.request.defaults.max_neighbors = uint(max_neighbors);
   ros::param::param(robot_name_ + "/planner/time_horizon_agent",
-                    planner_settings_.request.defaults.time_horizon_agent, 5.0f);
+                    planner_settings_.request.defaults.time_horizon_agent,
+                    5.0f);
   ros::param::param(robot_name_ + "/planner/time_horizon_obst",
                     planner_settings_.request.defaults.time_horizon_obst, 5.0f);
   ros::param::param(robot_name_ + "/planner/radius",
@@ -53,16 +54,26 @@ void RVOPlanner::init() {
 }
 
 void RVOPlanner::rosSetup() {
-  ros::service::waitForService(robot_name_ + "/rvo_wrapper/add_agent");
-  ros::service::waitForService(robot_name_ + "/rvo_wrapper/calc_pref_velocities");
-  ros::service::waitForService(robot_name_ + "/rvo_wrapper/check_reached_goal");
-  ros::service::waitForService(robot_name_ + "/rvo_wrapper/create_rvosim");
-  ros::service::waitForService(robot_name_ + "/rvo_wrapper/delete_sim_vector");
-  ros::service::waitForService(robot_name_ + "/rvo_wrapper/do_step");
-  ros::service::waitForService(robot_name_ + "/rvo_wrapper/get_agent_velocity");
-  ros::service::waitForService(robot_name_ + "/rvo_wrapper/set_agent_goals");
-  ros::service::waitForService(robot_name_ + "/rvo_wrapper/set_agent_position");
-  ros::service::waitForService(robot_name_ + "/rvo_wrapper/set_agent_velocity");
+  ros::service::waitForService(robot_name_ +
+                               "/rvo_wrapper/add_agent");
+  ros::service::waitForService(robot_name_ +
+                               "/rvo_wrapper/calc_pref_velocities");
+  ros::service::waitForService(robot_name_ +
+                               "/rvo_wrapper/check_reached_goal");
+  ros::service::waitForService(robot_name_ +
+                               "/rvo_wrapper/create_rvosim");
+  ros::service::waitForService(robot_name_ +
+                               "/rvo_wrapper/delete_sim_vector");
+  ros::service::waitForService(robot_name_ +
+                               "/rvo_wrapper/do_step");
+  ros::service::waitForService(robot_name_ +
+                               "/rvo_wrapper/get_agent_velocity");
+  ros::service::waitForService(robot_name_ +
+                               "/rvo_wrapper/set_agent_goals");
+  ros::service::waitForService(robot_name_ +
+                               "/rvo_wrapper/set_agent_position");
+  ros::service::waitForService(robot_name_ +
+                               "/rvo_wrapper/set_agent_velocity");
   add_planner_agent_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::AddAgent>(
       robot_name_ + "/rvo_wrapper/add_agent", persistence_);

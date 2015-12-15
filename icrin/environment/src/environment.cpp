@@ -11,7 +11,7 @@
 Environment::Environment(ros::NodeHandle* nh) {
   nh_ = nh;
   robot_name_ = ros::this_node::getNamespace();
-  robot_name_.erase (0, 1); // Remove 1 forward slash from robot_name
+  robot_name_.erase(0, 1);  // Remove 1 forward slash from robot_name
   this->loadParams();
   this->init();
   this->rosSetup();
@@ -193,7 +193,7 @@ void Environment::pubModelHypotheses() {
   // for (size_t i = 1; i < agent_no_; ++i) { // i = 0 includes Robot Agent
   //   model_hypotheses.agents.push_back(i);
   // }
-  if (agent_no_ > 1) {model_hypotheses.agents.push_back(1);} // Temp fix
+  if (agent_no_ > 1) {model_hypotheses.agents.push_back(1);}  // Temp fix
   model_hypotheses.goals = true;
   model_hypotheses.awareness = false;
   model_hypotheses.goal_hypothesis.sampling = false;

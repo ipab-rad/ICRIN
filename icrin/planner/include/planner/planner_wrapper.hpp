@@ -27,7 +27,7 @@
 
 class PlannerWrapper {
  public:
-  PlannerWrapper(ros::NodeHandle* nh);
+  explicit PlannerWrapper(ros::NodeHandle* nh);
   ~PlannerWrapper();
 
   void init();
@@ -48,7 +48,8 @@ class PlannerWrapper {
   void currPoseCB(const geometry_msgs::Pose2D::ConstPtr& msg);
   void targetGoalCB(const geometry_msgs::Pose2D::ConstPtr& msg);
   void planningCB(const std_msgs::Bool::ConstPtr& msg);
-  void environmentDataCB(const environment_msgs::EnvironmentData::ConstPtr& msg);
+  void environmentDataCB(
+    const environment_msgs::EnvironmentData::ConstPtr& msg);
 
  private:
   // Flags

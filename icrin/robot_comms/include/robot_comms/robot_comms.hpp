@@ -11,18 +11,17 @@
 
 #include <ros/ros.h>
 #include <ros/message_event.h>
-#include <sstream>
-// #include <boost/bind.hpp>
 
 #include <std_msgs/String.h>
 #include <geometry_msgs/Pose2D.h>
 #include <geometry_msgs/Twist.h>
 
 #include <robot_comms_msgs/CommsData.h>
+#include <sstream>
 
 class RobotComms {
  public:
-  RobotComms(ros::NodeHandle* nh);
+  explicit RobotComms(ros::NodeHandle* nh);
   ~RobotComms();
 
   void init();

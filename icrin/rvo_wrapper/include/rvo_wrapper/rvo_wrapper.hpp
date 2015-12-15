@@ -59,7 +59,7 @@
 
 class RVOWrapper {
  public:
-  RVOWrapper(ros::NodeHandle* nh);
+  explicit RVOWrapper(ros::NodeHandle* nh);
   ~RVOWrapper();
 
   void init();
@@ -271,7 +271,6 @@ class RVOWrapper {
   // Class pointers
   RVO::RVOSimulator* planner_;
   std::vector<RVO::RVOSimulator*> sim_vect_;
-
 };
 
 #endif /* RVO_WRAPPER_HPP */
