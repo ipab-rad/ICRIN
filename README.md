@@ -9,7 +9,10 @@ Upgraded repo of https://github.com/ipab-rad/Youbot-RVO
 
 By Alejandro Bordallo Mico
 
+Developped, tested and working in ROS Indigo
+
 Depends on:
  
-* ROS Move Base msgs
 * CLang (3.4)
+* ROS Move Base msgs
+* ROS People msgs
