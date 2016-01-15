@@ -11,4 +11,5 @@ By Alejandro Bordallo Mico
 
 Depends on:
  
-* PTrackingBridge (Clone inside ICRIN)
+* ROS Move Base msgs
+* CLang (3.4)
