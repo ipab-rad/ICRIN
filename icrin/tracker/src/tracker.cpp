@@ -1,6 +1,6 @@
 /**
  * @file      tracker.cpp
- * @brief     Tracker wrapper, subs to PTrackingBridge and pubs to Environment
+ * @brief     Tracker wrapper, subs to PTracking and pubs to Environment
  * @author    Alejandro Bordallo <alex.bordallo@ed.ac.uk>
  * @date      2015-08-04
  * @copyright (MIT) 2015 RAD-UoE Informatics
@@ -33,14 +33,16 @@ void Tracker::init() {
 void Tracker::rosSetup() {
   tracker_pub_ = nh_->advertise<tracker_msgs::TrackerData>("data", 1, true);
   people_pub_ = nh_->advertise<people_msgs::People>("/people", 1, true);
-  ptracker_sub_ = nh_->subscribe("/agent_1/PTrackingBridge/targetEstimations",
-                                 1, &Tracker::receivePTrackerData, this);
+  ptracker_sub_ = nh_->subscribe("/ptracking_" + camera_agent_ +
+                                 "/targetEstimations", 1,
+                                 &Tracker::receivePTrackerData, this);
 }
 
 void Tracker::loadParams() {
+  ros::param::get("/experiment/camera_agent", camera_agent_);
 }
 
-void Tracker::receivePTrackerData(const PTrackingBridge::
+void Tracker::receivePTrackerData(const tracker_msgs::
                                   TargetEstimations::ConstPtr& msg) {
   ptracker_msg_ = *msg;
   ptracker_rec_ = true;

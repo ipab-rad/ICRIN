@@ -1,6 +1,6 @@
 /**
  * @file      tracker.hpp
- * @brief     Tracker wrapper, subs to PTrackingBridge and pubs to Environment
+ * @brief     Tracker wrapper, subs to PTracking and pubs to Environment
  * @author    Alejandro Bordallo <alex.bordallo@ed.ac.uk>
  * @date      2015-08-04
  * @copyright (MIT) 2015 RAD-UoE Informatics
@@ -13,8 +13,8 @@
 #include <geometry_msgs/Pose2D.h>
 #include <geometry_msgs/Twist.h>
 
-#include <PTrackingBridge/TargetEstimations.h>
 #include <tracker_msgs/TrackerData.h>
+#include <tracker_msgs/TargetEstimations.h>
 #include <people_msgs/People.h>
 #include <people_msgs/Person.h>
 
@@ -29,7 +29,7 @@ class Tracker {
   void rosSetup();
   void loadParams();
 
-  void receivePTrackerData(const PTrackingBridge::
+  void receivePTrackerData(const tracker_msgs::
                            TargetEstimations::ConstPtr& msg);
   void pubTrackerData();
 
@@ -37,11 +37,14 @@ class Tracker {
   // Flags
   bool ptracker_rec_;
   bool ptracker_sent_;
+
+  // Constants
   int8_t invert_x_;
   float vel_reduct_fact_;
+  std::string camera_agent_;
 
   // Variables
-  PTrackingBridge::TargetEstimations ptracker_msg_;
+  tracker_msgs::TargetEstimations ptracker_msg_;
 
   // ROS
   ros::NodeHandle* nh_;

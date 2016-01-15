@@ -21,7 +21,7 @@ find_package(catkin REQUIRED
   roscpp
   tracker_msgs
   people_msgs
-  PTrackingBridge)
+  )
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -119,8 +119,7 @@ add_executable(tracker src/tracker.cpp)
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 add_dependencies(tracker
-  tracker_msgs_gencpp
-  PTrackingBridge_gencpp)
+  tracker_msgs_gencpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(tracker

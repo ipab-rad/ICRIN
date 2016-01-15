@@ -46,8 +46,6 @@
   <run_depend>tracker_msgs</run_depend>
   <build_depend>people_msgs</build_depend>
   <run_depend>people_msgs</run_depend>
-  <build_depend>PTrackingBridge</build_depend>
-  <run_depend>PTrackingBridge</run_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
