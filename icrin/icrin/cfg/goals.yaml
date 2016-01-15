@@ -1,12 +1,12 @@
 goals: {
 number: 3,
-g_0: {x: -6.3, y: 1.5, theta: 0.0},
-g_1: {x: -3.07, y: 1.5  , theta: 0.0},
-g_2: {x: -4.45, y: 3.0, theta: 0.0} }
+g_0: {x: 1.5, y: 1.5, theta: 0.0},
+g_1: {x: 4.5, y: 1.5  , theta: 0.0},
+g_2: {x: 3.3, y: 3.3, theta: 0.0} }
 plans: {
 megatron: {repeat: true, sequence: [0,1,2]},
 soundwave: {repeat: true, sequence: [0,1]},
 starscream: {repeat: false, sequence: [0]},
 blackout: {repeat: true, sequence: [0,1,2]},
-thundercracker: {repeat: false, sequence: [0]}
+thundercracker: {repeat: true, sequence: [0,1,2]}
 }

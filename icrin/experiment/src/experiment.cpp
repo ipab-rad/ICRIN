@@ -64,6 +64,8 @@ int main(int argc, char* argv[]) {
     INFO("All robots are setup for experiment. Press enter to proceed."
          << std::endl);
     experiment.waitReturn();
+    INFO("Experiment running!"
+         << std::endl);
   }
   experiment.pubPlans(false);
   for (size_t robot_no = 0; robot_no < robots.size(); ++robot_no) {

@@ -34,7 +34,7 @@ void Tracker::rosSetup() {
   tracker_pub_ = nh_->advertise<tracker_msgs::TrackerData>("data", 1, true);
   people_pub_ = nh_->advertise<people_msgs::People>("/people", 1, true);
   ptracker_sub_ = nh_->subscribe("/ptracking_" + camera_agent_ +
-                                 "/targetEstimations", 1,
+                                 "/agent_tracking", 1,
                                  &Tracker::receivePTrackerData, this);
 }
 
