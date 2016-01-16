@@ -5,3 +5,7 @@ goal_history_discount: 0.5
 goal_inference_history: 10
 velocity_average_window: 10
 prior_lambda: 0.5
+
+# For planner costmap
+foresight_steps: 10
+foresight_time_step: 0.5

@@ -919,6 +919,11 @@ bool RVOWrapper::setAgentGoals(
   } else if (req.sim_ids.size() > 0) {  // If Sim Vector
     if ((req.sim_ids.back() >= req.sim_ids.front()) &&
         (req.sim_ids.back() < sim_vect_.size())) {  // If good sim id range
+      if (debug_) {
+        ROS_WARN_STREAM("RVOW- simVectSize: " << sim_vect_.size());
+        ROS_WARN_STREAM("RVOW- F: " << req.sim_ids.front() <<
+                        " B: " << req.sim_ids.back());
+      }
       for (uint32_t j = req.sim_ids.front(); j <= req.sim_ids.back(); ++j) {
         uint32_t num_agents = sim_vect_[j]->getNumAgents();
         if (debug_) {ROS_WARN_STREAM("RVOW- nA: " << num_agents);}

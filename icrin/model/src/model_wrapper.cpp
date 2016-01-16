@@ -47,6 +47,10 @@ void ModelWrapper::loadParams() {
   ros::param::param(robot_name_ + model_name_ + "/prior_lambda",
                     prior_lambda_, 0.5f);
   ros::param::param(robot_name_ + model_name_ + "/max_accel", max_accel_, 1.2f);
+  ros::param::param(robot_name_ + model_name_ + "/foresight_steps",
+                    foresight_steps_, 10);
+  ros::param::param(robot_name_ + model_name_ + "/foresight_time_step",
+                    foresight_time_step_, 0.1f);
 }
 
 void ModelWrapper::init() {
@@ -307,14 +311,11 @@ void ModelWrapper::interactivePrediction() {
     }
   }
 
-  size_t foresight = 20;
-  float time_step = 0.5;
-
 // Run simulation for all agents given goals and foresight
   // if (n_agents > 0) {
   model_msgs::InteractivePrediction inter_pred_msg;
   inter_pred_msg = sim_wrapper_->interactiveSim
-                   (a_goals, foresight, time_step,
+                   (a_goals, foresight_steps_, foresight_time_step_,
                     hypotheses_.goal_hypothesis.goal_sequence);
   inter_pred_pub_.publish(inter_pred_msg);
   // }

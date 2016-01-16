@@ -163,7 +163,6 @@ std::vector<uint32_t> SimWrapper::goalSequence(
   if (debug_) {
     ROS_INFO_STREAM("ModelANo: " << model_agent_no_ <<
                     " SimNum: " << sim_msg.request.sim_num);
-    ROS_INFO_STREAM("ID Size: " << sim_ids.size());
     ROS_INFO_STREAM("IDs:" << sim_ids.front() << " - " << sim_ids.back());
   }
 

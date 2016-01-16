@@ -59,6 +59,8 @@ class ModelWrapper {
   int velocity_average_window_;
   float prior_lambda_;
   float max_accel_;
+  int foresight_steps_;
+  float foresight_time_step_;
 
   // Variables
   std::string robot_name_;
