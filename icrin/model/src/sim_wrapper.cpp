@@ -56,7 +56,7 @@ void SimWrapper::loadParams() {
 
 void SimWrapper::init() {
   use_rvo_lib_ = true;
-  debug_ = false;
+  debug_ = true;
   persistence_ = true;
   null_vect_.x = 0.0f;
   null_vect_.y = 0.0f;

@@ -27,7 +27,7 @@ RVOWrapper::~RVOWrapper() {
 
 void RVOWrapper::init() {
   planner_init_ = false;
-  debug_ = false;
+  debug_ = true;
 }
 
 void RVOWrapper::rosSetup() {

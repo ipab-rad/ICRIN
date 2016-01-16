@@ -56,7 +56,7 @@ void ModelWrapper::loadParams() {
 void ModelWrapper::init() {
   use_rvo_lib_ = true;
   interactive_costmap_ = true;
-  debug_ = false;
+  debug_ = true;
   initialised_ = false;
   // inferred_goals_history_.resize(3);
   // init_liks_.resize(3, false);
