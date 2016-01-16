@@ -26,8 +26,8 @@ Tracker::~Tracker() {
 void Tracker::init() {
   ptracker_rec_ = false;
   ptracker_sent_ = true;
-  invert_x_ = -1;  // Set to -1 to invert x axis relative to robot frame
-  vel_reduct_fact_ = 3.0;  // Reduce recorded velocities by a factor
+  invert_x_ = 1;  // Set to -1 to invert x axis relative to robot frame
+  vel_reduct_fact_ = 1.0;  // Reduce recorded velocities by a factor
 }
 
 void Tracker::rosSetup() {

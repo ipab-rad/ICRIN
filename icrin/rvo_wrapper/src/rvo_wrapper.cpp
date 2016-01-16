@@ -920,8 +920,10 @@ bool RVOWrapper::setAgentGoals(
     if ((req.sim_ids.back() >= req.sim_ids.front()) &&
         (req.sim_ids.back() < sim_vect_.size())) {  // If good sim id range
       for (uint32_t j = req.sim_ids.front(); j <= req.sim_ids.back(); ++j) {
-        uint32_t num_agents = sim_vect_[req.sim_ids[j]]->getNumAgents();
-        size_t sim_no = j - req.sim_ids.front();
+        uint32_t num_agents = sim_vect_[j]->getNumAgents();
+        if (debug_) {ROS_WARN_STREAM("RVOW- nA: " << num_agents);}
+        // size_t sim_no = j - req.sim_ids.front();
+        size_t sim_no = j;
         for (uint32_t i = 0; i < num_agents; ++i) {  // Cycle through sim agents
           sim_vect_goals_[j][i] = RVO::Vector2(req.sim[sim_no].agent[i].x,
                                                req.sim[sim_no].agent[i].y);
