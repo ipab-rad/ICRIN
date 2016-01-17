@@ -49,6 +49,7 @@ class Experiment {
   bool checkReadyRobots();
   void stopExperiment();
   void waitReturn();
+  void progSpin();
   bool robotsReady() {return robots_ready_;}
   static bool isInterrupted() {return interrupted_;}
   std::vector<std::string> getRobots() {return robots_;}
@@ -61,6 +62,7 @@ class Experiment {
   // Variables
   std::vector<std::string> robots_;
   size_t goal_no_;
+  int prog_;
   experiment_msgs::Goals goals_;
   experiment_msgs::Plans plans_;
   experiment_msgs::Plans setup_plans_;

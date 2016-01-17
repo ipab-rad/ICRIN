@@ -247,7 +247,7 @@ void Environment::commsDataCB(const robot_comms_msgs::CommsData::ConstPtr&
 
 void Environment::plannerCmdVelCB(const geometry_msgs::Twist::ConstPtr& msg) {
   planner_cmd_velocity_ = *msg;
-  this->pubRobotVelocity();
+  // this->pubRobotVelocity(); // TODO: Figure out why I was publishing this twice
 }
 
 void Environment::checkGoalPlan() {

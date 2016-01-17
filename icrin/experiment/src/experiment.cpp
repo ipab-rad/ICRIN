@@ -64,8 +64,6 @@ int main(int argc, char* argv[]) {
     INFO("All robots are setup for experiment. Press enter to proceed."
          << std::endl);
     experiment.waitReturn();
-    INFO("Experiment running!"
-         << std::endl);
   }
   experiment.pubPlans(false);
   for (size_t robot_no = 0; robot_no < robots.size(); ++robot_no) {
@@ -73,6 +71,7 @@ int main(int argc, char* argv[]) {
   }
   experiment.pubPlanning();
   while (ros::ok() && !Experiment::isInterrupted()) {
+    experiment.progSpin();
     ros::spinOnce();
     // Publish goals or plans if they have changed
     r.sleep();
@@ -99,6 +98,7 @@ void Experiment::init() {
   Experiment::interrupted_ = false;
   robots_planning_.resize(robots_.size(), false);
   robots_ready_ = false;
+  prog_ = 0;
 }
 
 void Experiment::rosSetup() {
@@ -267,4 +267,12 @@ void Experiment::waitReturn() {
       break;
     }
   }
+}
+
+void Experiment::progSpin() {
+  if (prog_ == 0) {INFO("\r|"); prog_++;}
+  else if (prog_ == 1) {INFO("\r/"); prog_++;}
+  else if (prog_ == 2) {INFO("\r-"); prog_++;}
+  else if (prog_ == 3) {INFO("\r\\"); prog_ = 0;}
+  INFO(" Running")
 }
