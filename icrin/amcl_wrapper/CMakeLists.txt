@@ -88,8 +88,8 @@ catkin_package(
 ###########
 ## Build ##
 ###########
-set(CMAKE_CXX_COMPILER "clang++")
-set(CMAKE_C_COMPILER "clang")
+set(CMAKE_CXX_COMPILER "/usr/bin/clang++-3.6")
+set(CMAKE_C_COMPILER "/usr/bin/clang-3.6")
 set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall -O2")
 
 ## Specify additional locations of header files
