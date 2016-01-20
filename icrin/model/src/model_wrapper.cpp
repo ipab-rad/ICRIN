@@ -314,6 +314,7 @@ void ModelWrapper::interactivePrediction() {
   common_msgs::Vector2 goal;
   size_t n_agents = hypotheses_.agents.size();
   size_t n_goals;
+  model_msgs::InteractivePrediction inter_pred_msg;
   if (hypotheses_.goal_hypothesis.sampling) {
     n_goals = n_sampling_goals;
   } else {n_goals = n_sequence_goals;}
@@ -341,6 +342,10 @@ void ModelWrapper::interactivePrediction() {
       goal.y = hypotheses_.goal_hypothesis.goal_sequence[max_goal].y;
     }
     a_goals.push_back(goal);
+    geometry_msgs::Pose2D goal_pose;
+    goal_pose.x = goal.x;
+    goal_pose.y = goal.y;
+    inter_pred_msg.agent_goal.push_back(goal_pose);
     if (debug_) {
       ROS_INFO_STREAM("A_Goal: " << " x: " << a_goals.back().x
                       << " y: " << a_goals.back().y);
@@ -349,7 +354,6 @@ void ModelWrapper::interactivePrediction() {
 
 // Run simulation for all agents given goals and foresight
   // if (n_agents > 0) {
-  model_msgs::InteractivePrediction inter_pred_msg;
   inter_pred_msg = sim_wrapper_->interactiveSim
                    (a_goals, foresight_steps_, foresight_time_step_
                     // , hypotheses_.goal_hypothesis.goal_sequence
