@@ -56,8 +56,12 @@ class SimWrapper {
                       std::vector<geometry_msgs::Twist> agent_vels);
   model_msgs::InteractivePrediction
   interactiveSim(std::vector<common_msgs::Vector2> a_goals,
-                 size_t foresight,
-                 float time_step, std::vector<geometry_msgs::Pose2D> goals);
+                 size_t foresight, float time_step
+                 // , std::vector<geometry_msgs::Pose2D> goals
+                );
+
+  std::vector<geometry_msgs::Pose2D> getSamplingGoals()
+  { return sampling_goal_sequence_; }
 
  private:
   // Flags
@@ -92,6 +96,7 @@ class SimWrapper {
   size_t model_agent_no_;
   std::vector<common_msgs::Vector2> agent_poses_;
   std::vector<common_msgs::Vector2> agent_vels_;
+  std::vector<geometry_msgs::Pose2D> sampling_goal_sequence_;
 
   // ROS
   ros::NodeHandle* nh_;

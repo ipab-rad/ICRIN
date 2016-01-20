@@ -107,6 +107,18 @@ void Environment::loadParams() {
   ros::param::param("environment/amcl", amcl_, true);
   ros::param::param("environment/bumper", bumper_, false);
   ros::param::param("environment/rvo_planner", rvo_planner_, true);
+  // Modelling
+  float min_x, max_x, min_y, max_y;
+  ros::param::param("/experiment/sampling", sampling_, false);
+  ros::param::param("/experiment/sample_min/x", min_x, 0.0f);
+  ros::param::param("/experiment/sample_max/x", max_x, 1.0f);
+  ros::param::param("/experiment/sample_min/y", min_y, 0.0f);
+  ros::param::param("/experiment/sample_max/y", max_y, 1.0f);
+  ros::param::param("/experiment/sample_res", sample_res_, 0.1f);
+  sample_min_.x = min_x;
+  sample_min_.y = min_y;
+  sample_max_.x = max_x;
+  sample_max_.y = max_y;
 }
 
 bool Environment::interrupted_;
@@ -196,8 +208,14 @@ void Environment::pubModelHypotheses() {
   if (agent_no_ > 1) {model_hypotheses.agents.push_back(1);}  // Temp fix
   model_hypotheses.goals = true;
   model_hypotheses.awareness = false;
-  model_hypotheses.goal_hypothesis.sampling = false;
-  model_hypotheses.goal_hypothesis.goal_sequence = goals_;
+  // FOR GOAL SEQUENCE
+  // model_hypotheses.goal_hypothesis.sampling = false;
+  // model_hypotheses.goal_hypothesis.goal_sequence = goals_;
+  // FOR GOAL SAMPLING
+  model_hypotheses.goal_hypothesis.sampling = sampling_;
+  model_hypotheses.goal_hypothesis.sample_space.push_back(sample_min_);
+  model_hypotheses.goal_hypothesis.sample_space.push_back(sample_max_);
+  model_hypotheses.goal_hypothesis.sample_resolution = sample_res_;
   model_pub_.publish(model_hypotheses);
 }
 

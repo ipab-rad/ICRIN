@@ -72,8 +72,10 @@ class ModelWrapper {
   model_msgs::ModelHypotheses hypotheses_;
   std::vector<uint32_t> sampling_sims_;
   std::vector<common_msgs::Vector2> sampling_sim_vels;
+  size_t n_sampling_goals;
   std::vector<uint32_t> sequence_sims_;
   std::vector<common_msgs::Vector2> sequence_sim_vels;
+  size_t n_sequence_goals;
   std::vector<uint32_t> awareness_sims_;
   // std::vector<std::vector<float> > inferred_goals_history_;
   // std::vector<bool> init_liks_;

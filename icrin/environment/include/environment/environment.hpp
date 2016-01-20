@@ -73,6 +73,7 @@ class Environment {
   bool bumper_;
   bool rvo_planner_;
   bool collision_;
+  bool sampling_;
 
   // Variables
   std::vector<std::string> robots_;
@@ -91,6 +92,8 @@ class Environment {
   experiment_msgs::Plan curr_plan_;
   geometry_msgs::Twist robot_cmd_velocity_;
   geometry_msgs::Twist planner_cmd_velocity_;
+  geometry_msgs::Pose2D sample_min_, sample_max_;
+  float sample_res_;
 
   // ROS
   ros::NodeHandle* nh_;

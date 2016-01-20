@@ -56,7 +56,7 @@ void SimWrapper::loadParams() {
 
 void SimWrapper::init() {
   use_rvo_lib_ = true;
-  debug_ = true;
+  debug_ = false;
   persistence_ = true;
   null_vect_.x = 0.0f;
   null_vect_.y = 0.0f;
@@ -139,7 +139,45 @@ void SimWrapper::rosSetup() {
 std::vector<uint32_t> SimWrapper::goalSampling(
   std::vector<geometry_msgs::Pose2D> sample_space, float sample_resolution) {
   std::vector<uint32_t> sim_ids;
-  ROS_INFO("ModelS- Sampling!");
+  if (debug_) {ROS_INFO("ModelS- Sampling!");}
+  float min_x = sample_space[0].x;
+  float min_y = sample_space[0].y;
+  float max_x = sample_space[1].x;
+  float max_y = sample_space[1].y;
+  float sample_res = sample_resolution;
+  if (!(min_x <= max_x) || !(min_y <= max_y)) {
+    ROS_ERROR("ModelWrapper: Sampling x,y values are incorrect!");
+  } else {
+    size_t size_x = max_x - min_x;
+    size_t size_y = max_y - min_y;
+    size_t n_goals = ((size_x / sample_res) + 1) * ((size_y / sample_res) + 1);
+    std::vector<geometry_msgs::Pose2D> goal_sequence;
+    geometry_msgs::Pose2D goal;
+    goal.theta = 0.0;
+    for (int i = 0; (min_x + (sample_res * i)) <= max_x; ++i) {
+      for (int j = 0; (min_y + (sample_res * j)) <= max_y; ++j) {
+        goal.x = min_x + (sample_res * i);
+        goal.y = min_y + (sample_res * j);
+        goal_sequence.push_back(goal);
+        if (debug_) {
+          ROS_INFO_STREAM("i: " << i << " min_x: " << min_x <<
+                          " max_x: " << max_x << " Gx: " << goal.x <<
+                          " j: " << j << " min_y: " << min_y <<
+                          " max_y: " << max_y << " Gy: " << goal.y);
+        }
+      }
+    }
+    if (debug_) {
+      ROS_INFO_STREAM("SimWrapper- min_x: " << min_x << " min_y: " << min_y <<
+                      " max_x: " << max_x << " max_y: " << max_y <<
+                      " GSeqSize: " << goal_sequence.size() <<
+                      " nGoals: " << n_goals);
+    }
+    if (goal_sequence.size() == n_goals) {
+      sim_ids = goalSequence(goal_sequence);
+      sampling_goal_sequence_ = goal_sequence;
+    } else {ROS_ERROR("SimWrapper: Sampling goal number does not match!");}
+  }
   return sim_ids;
 }
 
@@ -314,8 +352,9 @@ void SimWrapper::setEnvironment(std::vector<geometry_msgs::Pose2D> agent_poses,
 }
 
 model_msgs::InteractivePrediction SimWrapper::interactiveSim(
-  std::vector<common_msgs::Vector2> a_goals, size_t foresight, float time_step,
-  std::vector<geometry_msgs::Pose2D> goals) {
+  std::vector<common_msgs::Vector2> a_goals, size_t foresight, float time_step
+  // , std::vector<geometry_msgs::Pose2D> goals
+) {
   model_msgs::InteractivePrediction inter_pred_msg;
   inter_pred_msg.foresight = foresight;
   inter_pred_msg.agent.resize(agent_no_ - 1);  // TODO(Alex): Bad Practice

@@ -56,8 +56,10 @@ void ModelWrapper::loadParams() {
 void ModelWrapper::init() {
   use_rvo_lib_ = true;
   interactive_costmap_ = true;
-  debug_ = true;
+  debug_ = false;
   initialised_ = false;
+  n_sampling_goals = 0;
+  n_sequence_goals = 0;
   // inferred_goals_history_.resize(3);
   // init_liks_.resize(3, false);
   // prev_prior_.resize(3);
@@ -118,7 +120,12 @@ void ModelWrapper::inferGoals() {
   bool reset_priors = false;
   // size_t inf_hist = 10;
   common_msgs::Vector2 curr_vel;
-  size_t n_goals = hypotheses_.goal_hypothesis.goal_sequence.size();
+  size_t n_goals;
+  if (hypotheses_.goal_hypothesis.sampling) {
+    n_goals = n_sampling_goals;
+  } else {
+    n_goals = n_sequence_goals;
+  }
   size_t n_agents = hypotheses_.agents.size();
   std::vector<float> goals;
   goals.resize(n_goals);
@@ -131,9 +138,15 @@ void ModelWrapper::inferGoals() {
     std::vector<common_msgs::Vector2> agent_sim_vels;
     size_t begin = (agent * n_goals);
     size_t end = begin + (n_goals);
-    agent_sim_vels.insert(agent_sim_vels.begin(),
-                          sequence_sim_vels.begin() + begin,
-                          sequence_sim_vels.begin() + end);
+    if (hypotheses_.goal_hypothesis.sampling) {
+      agent_sim_vels.insert(agent_sim_vels.begin(),
+                            sampling_sim_vels.begin() + begin,
+                            sampling_sim_vels.begin() + end);
+    } else {
+      agent_sim_vels.insert(agent_sim_vels.begin(),
+                            sequence_sim_vels.begin() + begin,
+                            sequence_sim_vels.begin() + end);
+    }
     if (debug_) {ROS_WARN_STREAM("SimVelSize: " << agent_sim_vels.size());}
     for (size_t goal = 0; goal < n_goals; ++goal) {
       // if (DISPLAY_INFERENCE_VALUES) {
@@ -205,10 +218,10 @@ void ModelWrapper::inferGoals() {
       agent_goal_inference_[agent][goal] = prev_prior_[agent][goal];
     }
     if (debug_) {
-      ROS_INFO_STREAM("InferAgent: " << (int)hypotheses_.agents[agent] <<
-                      " G0: " << norm_posteriors[0] <<
-                      " G1: " << norm_posteriors[1] <<
-                      " G2: " << norm_posteriors[2]);
+      ROS_INFO_STREAM("InferAgent: " << (int)hypotheses_.agents[agent]);
+      for (int i = 0; i < n_goals; ++i) {
+        ROS_INFO_STREAM("G" << i << ": " << norm_posteriors[i]);
+      }
     }
   }
 }
@@ -218,16 +231,28 @@ void ModelWrapper::setupModel() {
   //   prev_prior_.resize(3);
   //   initialised_ = true;
   // }
+  size_t n_goals;
+  if (hypotheses_.goal_hypothesis.sampling) {
+    float min_x = hypotheses_.goal_hypothesis.sample_space[0].x;
+    float min_y = hypotheses_.goal_hypothesis.sample_space[0].y;
+    float max_x = hypotheses_.goal_hypothesis.sample_space[1].x;
+    float max_y = hypotheses_.goal_hypothesis.sample_space[1].y;
+    float sample_res = hypotheses_.goal_hypothesis.sample_resolution;
+    size_t size_x = max_x - min_x;
+    size_t size_y = max_y - min_y;
+    n_sampling_goals = ((size_x / sample_res) + 1) * ((size_y / sample_res) + 1);
+    n_goals = n_sampling_goals;
+  } else {
+    n_sequence_goals = hypotheses_.goal_hypothesis.goal_sequence.size();
+    n_goals = n_sequence_goals;
+  }
   init_liks_.resize(hypotheses_.agents.size());
   for (size_t i = 0; i < hypotheses_.agents.size(); ++i) {
-    init_liks_[i].resize(hypotheses_.goal_hypothesis.goal_sequence.size(),
-                         false);
+    init_liks_[i].resize(n_goals, false);
   }
   prev_prior_.resize(hypotheses_.agents.size());
   for (size_t i = 0; i < hypotheses_.agents.size(); ++i) {
-    prev_prior_[i].resize(hypotheses_.goal_hypothesis.goal_sequence.size(),
-                          1.0f /
-                          hypotheses_.goal_hypothesis.goal_sequence.size());
+    prev_prior_[i].resize(n_goals, 1.0f / n_goals);
   }
 
   std::vector<geometry_msgs::Pose2D> agent_poses_;
@@ -263,14 +288,15 @@ void ModelWrapper::setupModel() {
 }
 
 void ModelWrapper::runSims() {
+  sampling_sim_vels.clear();
   sequence_sim_vels.clear();
   if (hypotheses_.goals) {
     if (hypotheses_.goal_hypothesis.sampling) {
-      ROS_WARN("ModelW- Run Goal Sampling Sims!");
+      if (debug_) {ROS_WARN("ModelW- Run Goal Sampling Sims!");}
+      sampling_sim_vels = sim_wrapper_->calcSimVels(sampling_sims_, n_sampling_goals);
     } else {
       if (debug_) {ROS_WARN("ModelW- Run Goal Sequence Sims!");}
-      size_t n_goals = hypotheses_.goal_hypothesis.goal_sequence.size();
-      sequence_sim_vels = sim_wrapper_->calcSimVels(sequence_sims_, n_goals);
+      sequence_sim_vels = sim_wrapper_->calcSimVels(sequence_sims_, n_sequence_goals);
     }
   }
   if (hypotheses_.awareness) {
@@ -287,7 +313,10 @@ void ModelWrapper::interactivePrediction() {
   std::vector<common_msgs::Vector2> a_goals;
   common_msgs::Vector2 goal;
   size_t n_agents = hypotheses_.agents.size();
-  size_t n_goals = hypotheses_.goal_hypothesis.goal_sequence.size();
+  size_t n_goals;
+  if (hypotheses_.goal_hypothesis.sampling) {
+    n_goals = n_sampling_goals;
+  } else {n_goals = n_sequence_goals;}
   if (robot_model_) {  // TODO(Alex): Add proper check for non-modelled agents
     goal.x = robot_goal_.x;
     goal.y = robot_goal_.y;
@@ -302,8 +331,15 @@ void ModelWrapper::interactivePrediction() {
         max_goal = g;
       }
     }
-    goal.x = hypotheses_.goal_hypothesis.goal_sequence[max_goal].x;
-    goal.y = hypotheses_.goal_hypothesis.goal_sequence[max_goal].y;
+    if (hypotheses_.goal_hypothesis.sampling) {
+      std::vector<geometry_msgs::Pose2D> sampling_goal_sequence_ =
+        sim_wrapper_->getSamplingGoals();
+      goal.x = sampling_goal_sequence_[max_goal].x;
+      goal.y = sampling_goal_sequence_[max_goal].y;
+    } else {
+      goal.x = hypotheses_.goal_hypothesis.goal_sequence[max_goal].x;
+      goal.y = hypotheses_.goal_hypothesis.goal_sequence[max_goal].y;
+    }
     a_goals.push_back(goal);
     if (debug_) {
       ROS_INFO_STREAM("A_Goal: " << " x: " << a_goals.back().x
@@ -315,8 +351,9 @@ void ModelWrapper::interactivePrediction() {
   // if (n_agents > 0) {
   model_msgs::InteractivePrediction inter_pred_msg;
   inter_pred_msg = sim_wrapper_->interactiveSim
-                   (a_goals, foresight_steps_, foresight_time_step_,
-                    hypotheses_.goal_hypothesis.goal_sequence);
+                   (a_goals, foresight_steps_, foresight_time_step_
+                    // , hypotheses_.goal_hypothesis.goal_sequence
+                   );
   inter_pred_pub_.publish(inter_pred_msg);
   // }
 }
