@@ -209,8 +209,7 @@ void Environment::pubModelHypotheses() {
   model_hypotheses.goals = true;
   model_hypotheses.awareness = false;
   // FOR GOAL SEQUENCE
-  // model_hypotheses.goal_hypothesis.sampling = false;
-  // model_hypotheses.goal_hypothesis.goal_sequence = goals_;
+  model_hypotheses.goal_hypothesis.goal_sequence = goals_;
   // FOR GOAL SAMPLING
   model_hypotheses.goal_hypothesis.sampling = sampling_;
   model_hypotheses.goal_hypothesis.sample_space.push_back(sample_min_);
