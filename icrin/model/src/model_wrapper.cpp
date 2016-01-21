@@ -345,7 +345,7 @@ void ModelWrapper::interactivePrediction() {
     geometry_msgs::Pose2D goal_pose;
     goal_pose.x = goal.x;
     goal_pose.y = goal.y;
-    inter_pred_msg.agent_goal.push_back(goal_pose);
+    // inter_pred_msg.agent_goal.push_back(goal_pose);
     if (debug_) {
       ROS_INFO_STREAM("A_Goal: " << " x: " << a_goals.back().x
                       << " y: " << a_goals.back().y);
