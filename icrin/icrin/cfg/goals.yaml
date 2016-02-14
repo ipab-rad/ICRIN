@@ -1,16 +1,22 @@
 sampling: true
-sample_max: {x: 1.0, y: 1.0, theta: 0.0}
+# sample_max: {x: 4.0, y: 4.0, theta: 0.0}
+# sample_min: {x: 0.0, y: 0.0, theta: 0.0}
+# sample_res: 4.0
+sample_max: {x: 7.0, y: 5.0, theta: 0.0}
 sample_min: {x: 0.0, y: 0.0, theta: 0.0}
 sample_res: 0.1
+# sample_max: {x: 10.0, y: 10.0, theta: 0.0}
+# sample_min: {x: 0.0, y: 0.0, theta: 0.0}
+# sample_res: 0.1
 goals: {
   number: 3,
-  g_0: {x: 1.5, y: 1.5, theta: 0.0},
-  g_1: {x: 4.5, y: 1.5, theta: 0.0},
+  g_0: {x: 1.8, y: 1.5, theta: 0.0},
+  g_1: {x: 4.8, y: 1.5, theta: 1.6},
   g_2: {x: 3.3, y: 3.3, theta: 0.0}
 }
 plans: {
-  megatron: {repeat: true, sequence: [0,1,2]},
-  soundwave: {repeat: true, sequence: [0,1]},
+  megatron: {repeat: true, sequence: [0,1]},
+  soundwave: {repeat: true, sequence: [2,0,1]},
   starscream: {repeat: false, sequence: [0]},
   blackout: {repeat: true, sequence: [0,1,2]},
   thundercracker: {repeat: true, sequence: [0,1,2]}

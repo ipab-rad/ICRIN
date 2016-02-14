@@ -1,4 +1,5 @@
 track_robots: false,
 camera_agent: "105"
 # robots: ['megatron', 'soundwave', 'starscream', 'blackout', 'thundercracker']
-robots: ['thundercracker']
+# robots: ['thundercracker']
+robots: ['soundwave', 'thundercracker']

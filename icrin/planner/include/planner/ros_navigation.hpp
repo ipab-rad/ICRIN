@@ -9,11 +9,14 @@
 #ifndef ROS_NAVIGATION_HPP
 #define ROS_NAVIGATION_HPP
 
+// ROS
 #include <ros/ros.h>
-
 #include <actionlib/client/simple_action_client.h>
-#include <move_base_msgs/MoveBaseAction.h>
+
+// Messages
 #include <geometry_msgs/Twist.h>
+#include <move_base_msgs/MoveBaseAction.h>
+#include <std_srvs/Empty.h>
 
 class ROSNavigation {
  public:
@@ -52,6 +55,7 @@ class ROSNavigation {
   ros::NodeHandle* nh_;
   ros::Publisher cmd_vel_pub_;
   actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> move_ac;
+  ros::ServiceClient clear_costmaps_client_;
 };
 
 #endif /* ROS_NAVIGATION_HPP */

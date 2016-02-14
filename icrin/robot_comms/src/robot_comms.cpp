@@ -41,7 +41,6 @@ void RobotComms::rosSetup() {
 void RobotComms::loadParams() {
   std::vector<std::string> robot_names;
   ros::param::get("/experiment/robots", robot_names);
-  // TODO(Alex): Read active robots from experiment parameters
   for (uint8_t i = 0; i < robot_names.size(); ++i) {
     if (
       (("/" + robot_names[i]).compare(robot_name_) != 0)

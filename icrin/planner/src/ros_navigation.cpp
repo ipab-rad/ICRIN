@@ -42,6 +42,11 @@ void ROSNavigation::rosSetup() {
   ROS_INFO("Waiting for Move Base Action Server...");
   move_ac.waitForServer();
   ROS_INFO("Move Base Action Server ready!");
+  ROS_INFO("Waiting for Clear Costmaps service");
+  ros::service::waitForService(robot_name_ + "/move_base_node/clear_costmaps");
+  clear_costmaps_client_ = nh_->serviceClient<std_srvs::Empty>
+                           (robot_name_ + "/move_base_node/clear_costmaps");
+  ROS_INFO("Clear Costmaps service ready!");
 }
 
 void ROSNavigation::stopRobot() {
@@ -88,6 +93,8 @@ void ROSNavigation::monitorNavigation() {
     moving_ = false;
     ROS_INFO("ROS_NAV:Stopped!");
   } else if (move_ac.getState() == actionlib::SimpleClientGoalState::ABORTED) {
+    std_srvs::Empty empty;
+    clear_costmaps_client_.call(empty);
     this->stopRobot();
     arrived_ = false;
     moving_ = false;
