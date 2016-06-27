@@ -72,6 +72,7 @@ int main(int argc, char* argv[]) {
   experiment.pubPlanning();
   while (ros::ok() && !Experiment::isInterrupted()) {
     experiment.progSpin();
+    INFO(" Running");
     ros::spinOnce();
     // Publish goals or plans if they have changed
     r.sleep();
@@ -119,7 +120,11 @@ void Experiment::rosSetup() {
 void Experiment::loadParams() {
   // Store active robot names
   ros::param::get("/experiment/robots", robots_);
-
+  INFO("Robots: ")
+  for (int i = 0; i < robots_.size(); ++i) {
+    INFO(robots_[i] << " ");
+  }
+  INFO("\n");
   // Store navigation goals
   int goal_n;
   ros::param::param("/experiment/goals/number", goal_n, 0);
@@ -241,6 +246,7 @@ bool Experiment::setPlan(experiment_msgs::SetPlan::Request& req,
 
 bool Experiment::checkReadyRobots() {
   robots_ready_ = true;
+  progSpin();
   for (size_t i = 0; i < robots_.size(); ++i) {
     if (!ros::param::has("/" + robots_[i] + "/environment/ready"))
     {robots_ready_ = false;} else {
@@ -274,5 +280,4 @@ void Experiment::progSpin() {
   else if (prog_ == 1) {INFO("\r/"); prog_++;}
   else if (prog_ == 2) {INFO("\r-"); prog_++;}
   else if (prog_ == 3) {INFO("\r\\"); prog_ = 0;}
-  INFO(" Running")
 }

@@ -21,7 +21,7 @@ ModelWrapper::ModelWrapper(ros::NodeHandle* nh) {
 }
 
 ModelWrapper::~ModelWrapper() {
-  ros::param::del(model_name_);
+  ros::param::del(robot_name_ + model_name_);
   if (use_rvo_lib_) {
     delete sim_wrapper_;
     sim_wrapper_ = NULL;
