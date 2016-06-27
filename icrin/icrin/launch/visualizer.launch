@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+
+<launch>
+<!--         <group ns="experiment">
+          <rosparam file="$(find icrin)/cfg/experiment.yaml" command="load" />
+          <rosparam file="$(find icrin)/cfg/goals.yaml" command="load" />
+        </group> -->
+<!--         <node name="tracker" pkg="tracker" type="tracker" output="screen" clear_params="true">
+        </node> -->
+        <node name="visualizer" pkg="visualizer" type="visualizer" output="screen" clear_params="true">
+        </node>
+</launch>

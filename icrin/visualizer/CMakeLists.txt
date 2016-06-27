@@ -1,10 +1,26 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(visualizer)
 
+set(CMAKE_CXX_COMPILER "/usr/bin/clang++-3.6")
+set(CMAKE_C_COMPILER "/usr/bin/clang-3.6")
+include(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+if(COMPILER_SUPPORTS_CXX11)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
+elseif(COMPILER_SUPPORTS_CXX0X)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -Wall")
+else()
+        message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
+endif()
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED)
+find_package(catkin REQUIRED
+  roscpp
+  geometry_msgs
+  )
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -76,7 +92,7 @@ find_package(catkin REQUIRED)
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
+ INCLUDE_DIRS include
 #  LIBRARIES visualizer
 #  CATKIN_DEPENDS other_catkin_pkg
 #  DEPENDS system_lib
@@ -85,10 +101,11 @@ catkin_package(
 ###########
 ## Build ##
 ###########
+set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall -O2")
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-# include_directories(include)
+include_directories(include)
 
 ## Declare a cpp library
 # add_library(visualizer
@@ -96,16 +113,17 @@ catkin_package(
 # )
 
 ## Declare a cpp executable
-# add_executable(visualizer_node src/visualizer_node.cpp)
+add_executable(visualizer src/visualizer.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-# add_dependencies(visualizer_node visualizer_generate_messages_cpp)
+# add_dependencies(visualizer
+#   visualizer_msgs_gencpp)
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(visualizer_node
-#   ${catkin_LIBRARIES}
-# )
+target_link_libraries(visualizer
+  ${catkin_LIBRARIES}
+)
 
 #############
 ## Install ##
