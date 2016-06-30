@@ -61,28 +61,28 @@ void Visualizer::pubVizData() {
       data.id = car_frame.car_id;
       data.type = visualization_msgs::Marker::ARROW;
       data.action = visualization_msgs::Marker::ADD;
-      data.scale.x = 25.0;
-      data.scale.y = 10.0;
-      data.scale.z = 10.0;
+      data.scale.x = 10.0;
+      data.scale.y = 4.0;
+      data.scale.z = 2.5;
       data.color.a = 1.0;
       data.color.r = car_color_[car_frame.car_id].r;
       data.color.g = car_color_[car_frame.car_id].g;
       data.color.b = car_color_[car_frame.car_id].b;
       data.pose.position.x = car_frame.x_pos;
       data.pose.position.y = car_frame.y_pos;
+
+      double orientation = 0.0;
       if (car_frame.direction == 1) { // East
-        data.pose.orientation.z = 0.0;
-        data.pose.orientation.w = 1.0;
+        orientation = 0.0;
       } else if (car_frame.direction == 2) { // North
-        data.pose.orientation.z = 0.7071;
-        data.pose.orientation.w = 0.7071;
+        orientation = M_PI / 2;
       } else if (car_frame.direction == 3) { // West
-        data.pose.orientation.z = 1.0;
-        data.pose.orientation.w = 0.0;
+        orientation = M_PI;
       } else if (car_frame.direction == 4) { // South
-        data.pose.orientation.z = 0.7071;
-        data.pose.orientation.w = -0.7071;
+        orientation = -M_PI / 2;
       }
+      data.pose.orientation = euler2quat(0.0, 0.0, orientation);
+
       msg.markers.push_back(data);
     }
     visualizer_pub_.publish(msg);
@@ -129,6 +129,17 @@ void Visualizer::process_file() {
   } else {
     ROS_ERROR("VIS: Error, file is not open!");
   }
+}
+
+geometry_msgs::Quaternion Visualizer::euler2quat(
+  double roll, double pitch, double yaw) {
+  Eigen::AngleAxisd rollAngle(roll, Eigen::Vector3d::UnitY());
+  Eigen::AngleAxisd pitchAngle(pitch, Eigen::Vector3d::UnitX());
+  Eigen::AngleAxisd yawAngle(yaw, Eigen::Vector3d::UnitZ());
+  Eigen::Quaterniond q = rollAngle * yawAngle * pitchAngle;
+  geometry_msgs::Quaternion ori;
+  ori.x = q.x(); ori.y = q.y(); ori.z = q.z(); ori.w = q.w();
+  return ori;
 }
 
 std::vector<std::string>& Visualizer::split2(const std::string& s, char delim,

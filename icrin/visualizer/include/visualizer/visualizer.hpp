@@ -11,7 +11,8 @@
 #define VISUALIZER_HPP
 
 #include <ros/ros.h>
-// #include <geometry_msgs/Pose2D.h>
+#include <Eigen/Geometry>
+#include <geometry_msgs/Quaternion.h>
 // #include <geometry_msgs/PoseStamped.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <visualization_msgs/Marker.h>
@@ -52,6 +53,8 @@ class Visualizer {
   void pubVizData();
 
   void process_file();
+
+  geometry_msgs::Quaternion euler2quat(double roll, double pitch, double yaw);
 
   std::vector<std::string>& split2(const std::string& s, char delim,
                                    std::vector<std::string>& elems);
