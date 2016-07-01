@@ -16,6 +16,8 @@
 // #include <geometry_msgs/PoseStamped.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <visualization_msgs/Marker.h>
+#include <driver_env_msgs/Car.h>
+#include <driver_env_msgs/Cars.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -33,6 +35,8 @@ struct car_struct {
   int lane;
   int destination;
   int destLane;
+  float destX;
+  float destY;
   int direction;
   float length;
   float width;
@@ -55,7 +59,9 @@ class Visualizer {
   void rosSetup();
   void loadParams();
 
+  void pubCarData();
   void pubVizData();
+  
 
   void process_file();
 
@@ -82,6 +88,7 @@ class Visualizer {
   // ROS
   ros::NodeHandle* nh_;
   ros::Publisher visualizer_pub_;
+  ros::Publisher driver_env_data_pub;
 };
 
 #endif /* VISUALIZER_HPP */
