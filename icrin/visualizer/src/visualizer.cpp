@@ -61,8 +61,8 @@ void Visualizer::pubVizData() {
       data.id = car_frame.car_id;
       data.type = visualization_msgs::Marker::ARROW;
       data.action = visualization_msgs::Marker::ADD;
-      data.scale.x = 10.0;
-      data.scale.y = 4.0;
+      data.scale.x = car_frame.length;
+      data.scale.y = car_frame.width;
       data.scale.z = 2.5;
       data.color.a = 1.0;
       data.color.r = car_color_[car_frame.car_id].r;
@@ -71,7 +71,8 @@ void Visualizer::pubVizData() {
       data.pose.position.x = car_frame.x_pos;
       data.pose.position.y = car_frame.y_pos;
 
-      double orientation = 0.0;
+      double orientation = car_frame.orientation;
+        /**
       if (car_frame.direction == 1) { // East
         orientation = 0.0;
       } else if (car_frame.direction == 2) { // North
@@ -80,7 +81,7 @@ void Visualizer::pubVizData() {
         orientation = M_PI;
       } else if (car_frame.direction == 4) { // South
         orientation = -M_PI / 2;
-      }
+      }**/
       data.pose.orientation = euler2quat(0.0, 0.0, orientation);
 
       msg.markers.push_back(data);
@@ -101,19 +102,28 @@ void Visualizer::process_file() {
       }
       std::vector<std::string> values = this->split(std::string(output), ' ');
       car_struct frame;
+      /**self.preceding = augArray[9]
+      self.following = augArray[10]
+      self.spaceHeadway = augArray[11]
+      **/
       frame.car_id = std::stoi(values[0]);
       frame.frame_id = std::stoi(values[1]);
-      frame.max_frames = std::stoi(values[2]);
-      frame.x_pos = std::stof(values[3]);
-      frame.y_pos = std::stof(values[4]);
-      frame.y_vel = std::stof(values[5]);
-      frame.y_acc = std::stof(values[6]);
-      frame.x_vel = std::stof(values[7]);
-      frame.x_acc = std::stof(values[8]);
-      frame.lane = std::stof(values[9]);
-      frame.destination = std::stof(values[10]);
-      frame.direction = std::stof(values[11]);
-      // car_data_[frame.car_id].push_back(frame);
+      //frame.max_frames = std::stoi(values[2]);
+      frame.x_pos = std::stof(values[2]);
+      frame.y_pos = std::stof(values[3]);
+      frame.y_vel = std::stof(values[4]);
+      frame.y_acc = std::stof(values[5]);
+      frame.x_vel = std::stof(values[6]);
+      frame.x_acc = std::stof(values[7]);
+      frame.lane = std::stof(values[8]);
+      frame.destination = std::stof(values[12]);
+      frame.destLane = std::stof(values[13]);
+      frame.direction = std::stof(values[14]);
+      frame.type = std::stof(values[15]);
+      frame.length = std::stof(values[16]);
+      frame.width = std::stof(values[17]);
+      frame.orientation = std::stof(values[18]);
+        // car_data_[frame.car_id].push_back(frame);
       car_data_[frame.car_id][frame.frame_id] = frame;
 
       if (std::find(existing_cars_.begin(), existing_cars_.end(),

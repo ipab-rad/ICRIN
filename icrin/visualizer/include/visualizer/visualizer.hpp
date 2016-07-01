@@ -32,7 +32,12 @@ struct car_struct {
   float x_acc;
   int lane;
   int destination;
+  int destLane;
   int direction;
+  float length;
+  float width;
+  float orientation;
+  int type;
 } ;
 
 struct color {
