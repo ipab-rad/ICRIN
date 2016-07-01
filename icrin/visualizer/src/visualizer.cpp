@@ -8,7 +8,7 @@
 
 
 #include "visualizer/visualizer.hpp"
-
+#include <math.h>
 Visualizer::Visualizer(ros::NodeHandle* nh) {
   nh_ = nh;
   this->loadParams();
@@ -22,7 +22,7 @@ Visualizer::~Visualizer() {
 
 void Visualizer::loadParams() {
   nh_->param<std::string>("datafile", datafile_,
-                          "/home/alex/Documents/NextGenSIM/Data/testfull.txt");
+                          "/home/testdjp/Documents/NGSIM/driver_comp.txt");
 }
 
 void Visualizer::init() {
@@ -72,7 +72,9 @@ void Visualizer::pubVizData() {
       data.pose.position.y = car_frame.y_pos;
 
       double orientation = car_frame.orientation;
-        /**
+      //data.pose.position.x = data.pose.position.x - car_frame.length*sin(orientation);
+      //data.pose.position.y = data.pose.position.y - car_frame.length*cos(orientation);
+      /**
       if (car_frame.direction == 1) { // East
         orientation = 0.0;
       } else if (car_frame.direction == 2) { // North
