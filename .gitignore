@@ -52,3 +52,4 @@ CATKIN_IGNORE
 
 # For mac users
 .DS_Store
+.swp
