@@ -14,15 +14,16 @@ Visualizer::Visualizer(ros::NodeHandle* nh) {
   this->loadParams();
   this->init();
   this->rosSetup();
-  ROS_INFO("Visualizer started");
+  ROS_INFO("VIS: Visualizer started");
 }
 
 Visualizer::~Visualizer() {
+  ros::param::del(nh_->getNamespace());
 }
 
 void Visualizer::loadParams() {
-  nh_->param<std::string>("datafile", datafile_,
-                          "/home/testdjp/Documents/NGSIM/driver_comp.txt");
+  nh_->getParam("data_file", datafile_);
+  nh_->param("use_cardinal", use_cardinal, false);
 }
 
 void Visualizer::init() {
@@ -37,37 +38,36 @@ void Visualizer::init() {
 }
 
 void Visualizer::rosSetup() {
-  visualizer_pub_ =
-    nh_->advertise<visualization_msgs::MarkerArray>("visualization_marker_array", 1,
-                                                    true);
-    driver_env_data_pub = nh_->advertise<driver_env_msgs::Cars>("/driver_env/data",1,true);
-
+  visualizer_pub_ = nh_->advertise<visualization_msgs::MarkerArray>
+                    ("visualization_marker_array", 1, true);
+  driver_env_data_pub = nh_->advertise<driver_env_msgs::Cars>
+                        ("/driver_env/data", 1, true);
 }
 
 void Visualizer::pubCarData() {
-    driver_env_msgs::Cars cars_msg;
-    for (std::vector<int>::iterator i = existing_cars_.begin();
-         i != existing_cars_.end(); ++i) {
-        if (car_data_[*i].find(frame_) != car_data_[*i].end()) {
-            driver_env_msgs::Car car_msg;
-            car_struct car_frame(car_data_[*i][frame_]);
-            car_msg.card_id = car_frame.car_id;
-            car_msg.pose.position.x = car_frame.x_pos;
-            car_msg.pose.position.y = car_frame.y_pos;
-            double orientation = car_frame.orientation;
-            car_msg.pose.orientation = euler2quat(0.0, 0.0, orientation);
-            car_msg.vel.linear.x = car_frame.x_vel;
-            car_msg.vel.linear.y = car_frame.y_vel;
-            car_msg.vel.linear.z = 0;
-            car_msg.acc.linear.x = car_frame.x_acc;
-            car_msg.acc.linear.y = car_frame.y_acc;
-            car_msg.acc.linear.z = 0;
-            car_msg.goal.position.x = car_frame.destX;
-            car_msg.goal.position.y = car_frame.destY;
-            cars_msg.cars.push_back(car_msg);
-         }
+  driver_env_msgs::Cars cars_msg;
+  for (std::vector<int>::iterator i = existing_cars_.begin();
+       i != existing_cars_.end(); ++i) {
+    if (car_data_[*i].find(frame_) != car_data_[*i].end()) {
+      driver_env_msgs::Car car_msg;
+      car_struct car_frame(car_data_[*i][frame_]);
+      car_msg.card_id = car_frame.car_id;
+      car_msg.pose.position.x = car_frame.x_pos;
+      car_msg.pose.position.y = car_frame.y_pos;
+      double orientation = car_frame.orientation;
+      car_msg.pose.orientation = euler2quat(0.0, 0.0, orientation);
+      car_msg.vel.linear.x = car_frame.x_vel;
+      car_msg.vel.linear.y = car_frame.y_vel;
+      car_msg.vel.linear.z = 0;
+      car_msg.acc.linear.x = car_frame.x_acc;
+      car_msg.acc.linear.y = car_frame.y_acc;
+      car_msg.acc.linear.z = 0;
+      car_msg.goal.position.x = car_frame.destX;
+      car_msg.goal.position.y = car_frame.destY;
+      cars_msg.cars.push_back(car_msg);
     }
-    driver_env_data_pub.publish(cars_msg);
+  }
+  driver_env_data_pub.publish(cars_msg);
 }
 
 void Visualizer::pubVizData() {
@@ -100,18 +100,19 @@ void Visualizer::pubVizData() {
       data.pose.position.y = car_frame.y_pos;
 
       double orientation = car_frame.orientation;
+      if (use_cardinal) {
+        if (car_frame.direction == 1) { // East
+          orientation = 0.0;
+        } else if (car_frame.direction == 2) { // North
+          orientation = M_PI / 2;
+        } else if (car_frame.direction == 3) { // West
+          orientation = M_PI;
+        } else if (car_frame.direction == 4) { // South
+          orientation = -M_PI / 2;
+        }
+      }
       //data.pose.position.x = data.pose.position.x - car_frame.length*sin(orientation);
       //data.pose.position.y = data.pose.position.y - car_frame.length*cos(orientation);
-      /**
-      if (car_frame.direction == 1) { // East
-        orientation = 0.0;
-      } else if (car_frame.direction == 2) { // North
-        orientation = M_PI / 2;
-      } else if (car_frame.direction == 3) { // West
-        orientation = M_PI;
-      } else if (car_frame.direction == 4) { // South
-        orientation = -M_PI / 2;
-      }**/
       data.pose.orientation = euler2quat(0.0, 0.0, orientation);
 
       msg.markers.push_back(data);
@@ -122,7 +123,7 @@ void Visualizer::pubVizData() {
 }
 
 void Visualizer::process_file() {
-  ROS_INFO("Begin");
+  ROS_INFO("VIS: Processing dataset, please stand by...");
   char output[256];
   if (myFile_.is_open()) {
     while (!myFile_.eof()) {
@@ -155,7 +156,7 @@ void Visualizer::process_file() {
       frame.length = std::stof(values[16]);
       frame.width = std::stof(values[17]);
       frame.orientation = std::stof(values[18]);
-        // car_data_[frame.car_id].push_back(frame);
+      // car_data_[frame.car_id].push_back(frame);
       car_data_[frame.car_id][frame.frame_id] = frame;
 
       if (std::find(existing_cars_.begin(), existing_cars_.end(),
@@ -211,6 +212,7 @@ int main(int argc, char** argv) {
   while (ros::ok()) {
     ros::spinOnce();
     visualizer.pubVizData();
+    visualizer.pubCarData();
     r.sleep();
   }
 

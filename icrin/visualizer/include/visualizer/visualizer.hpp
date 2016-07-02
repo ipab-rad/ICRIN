@@ -13,7 +13,6 @@
 #include <ros/ros.h>
 #include <Eigen/Geometry>
 #include <geometry_msgs/Quaternion.h>
-// #include <geometry_msgs/PoseStamped.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <visualization_msgs/Marker.h>
 #include <driver_env_msgs/Car.h>
@@ -61,7 +60,6 @@ class Visualizer {
 
   void pubCarData();
   void pubVizData();
-  
 
   void process_file();
 
@@ -73,6 +71,7 @@ class Visualizer {
 
  private:
   // Flags
+  bool use_cardinal;  // Use cardinal orientaitons instead of estimated
 
   // Constants
 
