@@ -1,4 +1,4 @@
-robot_model: true
+robot_model: false
 
 goal_sum_prior: 0.001
 goal_history_discount: 0.5

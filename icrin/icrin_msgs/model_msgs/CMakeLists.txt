@@ -46,6 +46,8 @@ add_message_files(
   FILES
   AwareHypothesis.msg
   GoalHypothesis.msg
+  GoalInference.msg
+  GoalEstimate.msg
   ModelHypotheses.msg
   AgentPrediction.msg
   InteractivePrediction.msg

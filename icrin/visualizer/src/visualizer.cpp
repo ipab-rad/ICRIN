@@ -41,7 +41,7 @@ void Visualizer::rosSetup() {
   visualizer_pub_ = nh_->advertise<visualization_msgs::MarkerArray>
                     ("visualization_marker_array", 1, true);
   driver_env_data_pub = nh_->advertise<driver_env_msgs::Cars>
-                        ("/driver_env/data", 1, true);
+                        ("car_data", 1, true);
 }
 
 void Visualizer::pubCarData() {

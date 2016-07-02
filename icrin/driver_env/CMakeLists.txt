@@ -5,6 +5,9 @@ project(driver_env)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED
+  driver_env_msgs
+  environment_msgs
+  model_msgs
   roscpp)
 
 ## System dependencies are found with CMake's conventions
@@ -107,7 +110,9 @@ add_executable(driver_env src/driver_env.cpp)
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 add_dependencies(driver_env
-                 driver_env_msgs)
+                 driver_env_msgs_gencpp
+                 environment_msgs_gencpp
+                 model_msgs_gencpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(driver_env

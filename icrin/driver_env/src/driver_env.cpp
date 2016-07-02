@@ -19,19 +19,39 @@ DriverEnv::~DriverEnv() {
   ros::param::del("driver_env");
 }
 
-void DriverEnv::init() {
-
-}
-
-void DriverEnv::rosSetup() {
-  car_data_sub_ = nh_->subscribe("/driver_env/data", 1000,
-                                 &DriverEnv::carDataCB, this);
-}
-
 void DriverEnv::loadParams() {
 }
 
+void DriverEnv::init() {
+}
+
+void DriverEnv::rosSetup() {
+  environment_data_pub_ = nh_->advertise<environment_msgs::EnvironmentData>
+                          ("/environment/data", 1, true);
+  model_pub_ = nh_->advertise<model_msgs::ModelHypotheses>
+               ("/model/hypotheses", 1);
+
+  car_data_sub_ = nh_->subscribe("/visualizer/car_data", 1000,
+                                 &DriverEnv::carDataCB, this);
+  model_sub_ = nh_->subscribe("/model/inference", 1000,
+                              &DriverEnv::carDataCB, this);
+}
+
 void DriverEnv::carDataCB(const driver_env_msgs::Cars::ConstPtr& msg) {
+  car_data_ = *msg;
+  this->runModel();
+}
+
+void DriverEnv::runModel() {
+  this->pubEnvData();
+  this->pubHypotheses();
+}
+
+void DriverEnv::pubEnvData() {
+
+}
+
+void DriverEnv::pubHypotheses() {
 
 }
 

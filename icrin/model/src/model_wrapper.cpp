@@ -55,7 +55,7 @@ void ModelWrapper::loadParams() {
 
 void ModelWrapper::init() {
   use_rvo_lib_ = true;
-  interactive_costmap_ = true;
+  interactive_costmap_ = false;
   debug_ = false;
   initialised_ = false;
   n_sampling_goals = 0;
