@@ -89,16 +89,11 @@ void Visualizer::pubVizData() {
       data.id = car_frame.car_id;
       data.type = visualization_msgs::Marker::ARROW;
       data.action = visualization_msgs::Marker::ADD;
-      data.scale.x = car_frame.length;
-      data.scale.y = car_frame.width;
-      data.scale.z = 2.5;
       data.color.a = 1.0;
       data.color.r = car_color_[car_frame.car_id].r;
       data.color.g = car_color_[car_frame.car_id].g;
       data.color.b = car_color_[car_frame.car_id].b;
-      data.pose.position.x = car_frame.x_pos;
-      data.pose.position.y = car_frame.y_pos;
-
+      
       double orientation = car_frame.orientation;
       if (use_cardinal) {
         if (car_frame.direction == 1) { // East
@@ -110,10 +105,39 @@ void Visualizer::pubVizData() {
         } else if (car_frame.direction == 4) { // South
           orientation = -M_PI / 2;
         }
-      }
-      //data.pose.position.x = data.pose.position.x - car_frame.length*sin(orientation);
-      //data.pose.position.y = data.pose.position.y - car_frame.length*cos(orientation);
+      } 
       data.pose.orientation = euler2quat(0.0, 0.0, orientation);
+
+      /* first option is to set the scale*/ 
+      data.scale.x = car_frame.length;
+      data.scale.y = car_frame.width;
+      data.scale.z = 2.5;
+      data.pose.position.x = car_frame.x_pos;
+      data.pose.position.y = car_frame.y_pos;
+      /**other option is to define start/end point specifically**/
+      /*
+      data.points.resize(2);
+      geometry_msgs::Point start;
+      start.x = car_frame.x_pos;
+      start.y = car_frame.y_pos;
+      float dx = car_frame.length * cos(orientation);
+      float dy = car_frame.length * sin(orientation);
+      geometry_msgs::Point end;
+      end.x = car_frame.x_pos - dx;
+      end.y = car_frame.y_pos - dy;
+      data.points[0].x = start.x;
+      data.points[0].y = start.y;
+      data.pose.position.x = end.x;
+      data.pose.position.y = end.y;
+    
+      data.points[1].x = end.x;
+      data.points[1].y = end.y;
+      
+      data.scale.x = car_frame.width;
+      data.scale.y = car_frame.width * 1.5;
+      */
+/**End of point method**/
+      
 
       msg.markers.push_back(data);
     }
