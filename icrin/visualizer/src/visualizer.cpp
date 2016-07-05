@@ -117,6 +117,10 @@ void Visualizer::pubVizData() {
       /**other option is to define start/end point specifically**/
       /*
       data.points.resize(2);
+      data.pose.position.x = car_frame.x_pos;
+      data.pose.position.y = car_frame.y_pos;
+      data.scale.x = car_frame.width;
+      data.scale.y = car_frame.width * 1.5;
       geometry_msgs::Point start;
       start.x = car_frame.x_pos;
       start.y = car_frame.y_pos;
@@ -127,18 +131,10 @@ void Visualizer::pubVizData() {
       end.y = car_frame.y_pos - dy;
       data.points[0].x = start.x;
       data.points[0].y = start.y;
-      data.pose.position.x = end.x;
-      data.pose.position.y = end.y;
-    
       data.points[1].x = end.x;
       data.points[1].y = end.y;
-      
-      data.scale.x = car_frame.width;
-      data.scale.y = car_frame.width * 1.5;
       */
 /**End of point method**/
-      
-
       msg.markers.push_back(data);
     }
     visualizer_pub_.publish(msg);
@@ -182,7 +178,11 @@ void Visualizer::process_file() {
       frame.orientation = std::stof(values[18]);
       // car_data_[frame.car_id].push_back(frame);
       car_data_[frame.car_id][frame.frame_id] = frame;
-
+      
+      float dx = frame.length * cos(frame.orientation);
+      float dy = frame.length * sin(frame.orientation);
+      frame.x_pos = frame.x_pos - dx;
+      frame.y_pos = frame.y_pos - dy;
       if (std::find(existing_cars_.begin(), existing_cars_.end(),
                     frame.car_id) == existing_cars_.end()) {
         existing_cars_.push_back(frame.car_id); // Add car_id if not seen before
