@@ -38,7 +38,7 @@ class DriverEnv {
   // Variables
   driver_env_msgs::Cars car_data_;
   std::vector<geometry_msgs::Pose2D> goals_;
-  std::vector<uint8> agent_ids_;
+  std::vector<uint> agent_ids_;
 
 
   // ROS

@@ -46,7 +46,7 @@ void DriverEnv::init() {
   goal7.x = 60.66331034482761;
   goal7.y = 710.1502758620687;
   geometry_msgs::Pose2D goal8;
-  goal8.x = 57.33545
+  goal8.x = 57.33545;
   goal8.y = 1075.7973500000003;
   geometry_msgs::Pose2D goal9;
   goal9.x = 60.9972;
@@ -65,12 +65,12 @@ void DriverEnv::init() {
   goal13.y = 1613.079240740741;
   geometry_msgs::Pose2D goal14;
   goal14.x = 12.041342105263158;
-  goal14.y = 1622.2986052631584
+  goal14.y = 1622.2986052631584;
   geometry_msgs::Pose2D goal15;
   goal15.x = 21.460899999999988;
   goal15.y = 1616.7741833333332;
   geometry_msgs::Pose2D goal16;
-  goal16.x  33.54720202020202;
+  goal16.x = 33.54720202020202;
   goal16.y = 1616.1990303030302;
   geometry_msgs::Pose2D goal17;
   goal17.x = -75.90733333333333;
@@ -138,11 +138,15 @@ void DriverEnv::runModel() {
 
 void DriverEnv::pubEnvData() {
   environment_msgs::EnvironmentData env_data;
-  uint64_t nrobots = car_data_.size();
-  for (uint64_t i = 0; i < nrobots; ++i) {
-    env_data.tracker_ids.push_back(car_data_[i].card_id);
-    env_data.agent_poses.push_back(car_data_[i].pose);
-    env_data.agent_vels.push_back(car_data_[i].vel);
+  uint64_t ncars = car_data_.cars.size();
+  for (uint64_t i = 0; i < ncars; ++i) {
+    env_data.tracker_ids.push_back(car_data_.cars[i].card_id);
+    geometry_msgs::Pose2D pose;
+    pose.x = car_data_.cars[i].pose.position.x; 
+    pose.y = car_data_.cars[i].pose.position.y;
+    pose.theta = car_data_.cars[i].yaw; 
+    env_data.agent_poses.push_back(pose);
+    env_data.agent_vels.push_back(car_data_.cars[i].vel);
   }
   environment_data_pub_.publish(env_data);
   agent_ids_ = env_data.tracker_ids;
@@ -153,8 +157,10 @@ void DriverEnv::pubHypotheses() {
     //if (agent_no_ > 1) {model_hypotheses.agents.push_back(1);}  // Temp fix
   model_hypotheses.goals = true;
   model_hypotheses.awareness = false;
-  model_hypotheses.agents = agent_ids_;
-    // FOR GOAL SEQUENCE
+  uint64_t ncars = car_data_.cars.size();
+  for (uint64_t i = 0; i < ncars; ++i) {
+    model_hypotheses.agents.push_back(agent_ids_[i]);
+  }
   model_hypotheses.goal_hypothesis.goal_sequence = goals_;
   model_pub_.publish(model_hypotheses);
 }

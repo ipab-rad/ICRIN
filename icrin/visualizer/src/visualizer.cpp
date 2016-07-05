@@ -55,6 +55,7 @@ void Visualizer::pubCarData() {
       car_msg.pose.position.x = car_frame.x_pos;
       car_msg.pose.position.y = car_frame.y_pos;
       double orientation = car_frame.orientation;
+      car_msg.yaw = orientation;
       car_msg.pose.orientation = euler2quat(0.0, 0.0, orientation);
       car_msg.vel.linear.x = car_frame.x_vel;
       car_msg.vel.linear.y = car_frame.y_vel;
