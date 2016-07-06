@@ -3,8 +3,8 @@
   max_neighbors: 20
   time_horizon_agent: 10.0
   time_horizon_obst: 10.0
-  radius: 0.7
-  max_speed: 0.6
-  max_accel: 1.2
-  pref_speed: 0.3
+  radius: 14.5
+  max_speed: 100
+  max_accel: 10
+  pref_speed: 50
 

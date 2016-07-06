@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+
+<launch>
+        <!--
+	<arg name="driver" default="soundwave" />
+        <group ns="$(arg driver)">
+        -->
+	<node name="rvo_wrapper" pkg="rvo_wrapper" type="rvo_wrapper" output="screen" clear_params="true">
+        </node>
+        <!--
+        <node name="amcl_wrapper" pkg="amcl_wrapper" type="amcl_wrapper" output="screen" clear_params="true">
+        </node>
+        -->
+        <node name="planner" pkg="planner" type="planner" output="screen" clear_params="true">
+        <rosparam file="$(find icrin)/cfg/rvo_params.yaml" command="load" />
+        </node>
+        <node name="driver_env" pkg="driver_env" type="driver_env" output="screen" clear_params="true">
+        <!--
+        <rosparam file="$(find icrin)/cfg/$(arg driver).yaml" command="load" />
+        -->
+        </node>
+        <!--
+        <node name="robot_comms" pkg="robot_comms" type="robot_comms" output="screen" clear_params="true">
+        </node>
+        </group>
+        -->
+</launch>

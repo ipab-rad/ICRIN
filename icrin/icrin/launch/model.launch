@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 
 <launch>
-        <arg name="robot" default="soundwave" />
+        <arg name="driver" default="soundwave" />
         <arg name="model" default="model" />
-        <group ns="$(arg robot)">
+        <group ns="$(arg driver)">
           <node ns="$(arg model)" name="rvo_wrapper" pkg="rvo_wrapper" type="rvo_wrapper" output="screen" respawn="true" clear_params="true">
           </node>
           <node name="$(arg model)" pkg="model" type="model" output="screen" respawn="true" clear_params="true">

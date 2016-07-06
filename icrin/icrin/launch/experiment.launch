@@ -5,8 +5,10 @@
           <rosparam file="$(find icrin)/cfg/experiment.yaml" command="load" />
           <rosparam file="$(find icrin)/cfg/goals.yaml" command="load" />
         </group>
-        <node name="tracker" pkg="tracker" type="tracker" output="screen" clear_params="true">
+        <!--
+	<node name="tracker" pkg="tracker" type="tracker" output="screen" clear_params="true">
         </node>
-        <node name="experiment" pkg="experiment" type="experiment" output="screen" clear_params="true">
+        -->
+	<node name="experiment" pkg="experiment" type="experiment" output="screen" clear_params="true">
         </node>
 </launch>
