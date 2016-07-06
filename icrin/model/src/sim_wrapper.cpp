@@ -12,8 +12,10 @@ SimWrapper::SimWrapper(ros::NodeHandle* nh) {
   nh_ = nh;
   robot_name_ = ros::this_node::getNamespace();
   robot_name_.erase(0, 1);  // Remove 1 forward slash from robot_name
+  robot_name_ = "";
   model_name_ = ros::this_node::getName();
   model_name_.erase(0, robot_name_.length());  // Remove robot name
+  model_name_ = "/model";
   this->loadParams();
   this->init();
   this->rosSetup();
@@ -63,77 +65,54 @@ void SimWrapper::init() {
 }
 
 void SimWrapper::rosSetup() {
-  ros::service::waitForService(robot_name_ + model_name_ +
-                               "/rvo_wrapper/add_agent");
-  ros::service::waitForService(robot_name_ + model_name_ +
-                               "/rvo_wrapper/calc_pref_velocities");
-  ros::service::waitForService(robot_name_ + model_name_ +
-                               "/rvo_wrapper/create_rvosim");
-  ros::service::waitForService(robot_name_ + model_name_ +
-                               "/rvo_wrapper/delete_sim_vector");
-  ros::service::waitForService(robot_name_ + model_name_ +
-                               "/rvo_wrapper/do_step");
-  ros::service::waitForService(robot_name_ + model_name_ +
-                               "/rvo_wrapper/get_agent_velocity");
-  ros::service::waitForService(robot_name_ + model_name_ +
-                               "/rvo_wrapper/set_agent_goals");
-  ros::service::waitForService(robot_name_ + model_name_ +
-                               "/rvo_wrapper/set_agent_velocity");
-  ros::service::waitForService(robot_name_ + model_name_ +
-                               "/rvo_wrapper/get_agent_position");
-  ros::service::waitForService(robot_name_ + model_name_ +
-                               "/rvo_wrapper/set_agent_max_speed");
-  ros::service::waitForService(robot_name_ + model_name_ +
-                               "/rvo_wrapper/set_agent_max_accel");
-  ros::service::waitForService(robot_name_ + model_name_ +
-                               "/rvo_wrapper/set_agent_pref_speed");
+  ros::service::waitForService(robot_name_ + "/rvo_wrapper/add_agent");
+  ros::service::waitForService(robot_name_ + "/rvo_wrapper/calc_pref_velocities");
+  ros::service::waitForService(robot_name_ + "/rvo_wrapper/create_rvosim");
+  ros::service::waitForService(robot_name_ + "/rvo_wrapper/delete_sim_vector");
+  ros::service::waitForService(robot_name_ + "/rvo_wrapper/do_step");
+  ros::service::waitForService(robot_name_ + "/rvo_wrapper/get_agent_velocity");
+  ros::service::waitForService(robot_name_ + "/rvo_wrapper/set_agent_goals");
+  ros::service::waitForService(robot_name_ + "/rvo_wrapper/set_agent_velocity");
+  ros::service::waitForService(robot_name_ + "/rvo_wrapper/get_agent_position");
+  ros::service::waitForService(robot_name_ + "/rvo_wrapper/set_agent_max_speed");
+  ros::service::waitForService(robot_name_ + "/rvo_wrapper/set_agent_max_accel");
+  ros::service::waitForService(robot_name_ + "/rvo_wrapper/set_agent_pref_speed");
   add_sim_agent_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::AddAgent>(
-      robot_name_ + model_name_ + "/rvo_wrapper/add_agent", persistence_);
+      robot_name_ + "/rvo_wrapper/add_agent", persistence_);
   calc_pref_velocities_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::CalcPrefVelocities>(
-      robot_name_ + model_name_ +
-      "/rvo_wrapper/calc_pref_velocities", persistence_);
+      robot_name_ + "/rvo_wrapper/calc_pref_velocities", persistence_);
   create_sims_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::CreateRVOSim>(
-      robot_name_ + model_name_ +
-      "/rvo_wrapper/create_rvosim", persistence_);
+      robot_name_ + "/rvo_wrapper/create_rvosim", persistence_);
   delete_sims_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::DeleteSimVector>(
-      robot_name_ + model_name_ +
-      "/rvo_wrapper/delete_sim_vector", persistence_);
+      robot_name_ + "/rvo_wrapper/delete_sim_vector", persistence_);
   do_sim_step_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::DoStep>(
-      robot_name_ + model_name_ +
-      "/rvo_wrapper/do_step", persistence_);
+      robot_name_ + "/rvo_wrapper/do_step", persistence_);
   get_agent_vel_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::GetAgentVelocity>(
-      robot_name_ + model_name_ +
-      "/rvo_wrapper/get_agent_velocity", persistence_);
+      robot_name_ + "/rvo_wrapper/get_agent_velocity", persistence_);
   set_agent_goals_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::SetAgentGoals>(
-      robot_name_ + model_name_ +
-      "/rvo_wrapper/set_agent_goals", persistence_);
+      robot_name_ + "/rvo_wrapper/set_agent_goals", persistence_);
   set_agent_vel_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::SetAgentVelocity>(
-      robot_name_ + model_name_ +
-      "/rvo_wrapper/set_agent_velocity", persistence_);
+      robot_name_ + "/rvo_wrapper/set_agent_velocity", persistence_);
   get_agent_position_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::GetAgentPosition>(
-      robot_name_ + model_name_ +
-      "/rvo_wrapper/get_agent_position", persistence_);
+      robot_name_ + "/rvo_wrapper/get_agent_position", persistence_);
   set_agent_max_speed_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::SetAgentMaxSpeed>(
-      robot_name_ + model_name_ +
-      "/rvo_wrapper/set_agent_max_speed", persistence_);
+      robot_name_ + "/rvo_wrapper/set_agent_max_speed", persistence_);
   set_agent_max_accel_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::SetAgentMaxAccel>(
-      robot_name_ + model_name_ +
-      "/rvo_wrapper/set_agent_max_accel", persistence_);
+      robot_name_ + "/rvo_wrapper/set_agent_max_accel", persistence_);
   set_agent_pref_speed_client_ =
     nh_->serviceClient<rvo_wrapper_msgs::SetAgentPrefSpeed>(
-      robot_name_ + model_name_ +
-      "/rvo_wrapper/set_agent_pref_speed", persistence_);
+      robot_name_ + "/rvo_wrapper/set_agent_pref_speed", persistence_);
 }
 
 std::vector<uint32_t> SimWrapper::goalSampling(
@@ -200,6 +179,7 @@ std::vector<uint32_t> SimWrapper::goalSequence(
   std::vector<uint32_t> sim_ids = sim_msg.response.sim_ids;
   if (debug_) {
     ROS_INFO_STREAM("ModelANo: " << model_agent_no_ <<
+                    " GoalNo: " << goal_no <<
                     " SimNum: " << sim_msg.request.sim_num);
     ROS_INFO_STREAM("IDs:" << sim_ids.front() << " - " << sim_ids.back());
   }
@@ -234,10 +214,13 @@ std::vector<uint32_t> SimWrapper::goalSequence(
 
   // Transform Pose2D goals into Vector2 goals
   std::vector<common_msgs::Vector2> goals;
+  // ROS_ERROR_STREAM("GOAL_NO: " << goal_no);
+  // ROS_ERROR_STREAM("GOAL_SEQ_SIZE: " << goal_sequence.size());
   goals.resize(goal_no);
   for (size_t i = 0; i < goal_no; ++i) {
     goals[i].x = goal_sequence[i].x;
     goals[i].y = goal_sequence[i].y;
+    // ROS_ERROR_STREAM("GOAL_X: " << goal_sequence[i].x);
   }
 
   // Set Agent Goals
@@ -257,19 +240,21 @@ std::vector<uint32_t> SimWrapper::goalSequence(
                             ", Gy: " << robot_goal_.y);
           }
         } else {
-          if (agent == model_agents_[model_agent]) {
-            goal_msg.request.sim[sim_id].agent.push_back(goals[goal]);
-            if (debug_) {
-              ROS_INFO_STREAM("SIMW- A:" << agent << " Gx: " << goals[goal].x
-                              << ", Gy: " << goals[goal].y);
-            }
-          } else {
-            goal_msg.request.sim[sim_id].agent.push_back(null_vect_);
-            if (debug_) {
-              ROS_INFO_STREAM("SIMW- A:" << agent << " Gx: " << "null"
-                              << ", Gy: " << "null");
-            }
+          // if (agent == model_agents_[model_agent]) {
+          goal_msg.request.sim[sim_id].agent.push_back(goals[goal]);
+          if (debug_) {
+          // ROS_ERROR("MODELLING!");
+          ROS_INFO_STREAM("SIMW- A:" << agent << " Gx: " << goals[goal].x
+                          << ", Gy: " << goals[goal].y);
           }
+          // } else {
+          //   goal_msg.request.sim[sim_id].agent.push_back(null_vect_);
+          //   if (debug_) {
+          //     // ROS_ERROR("NOT MODELLING!");
+          //     ROS_INFO_STREAM("SIMW- A:" << agent << " Gx: " << "null"
+          //                     << ", Gy: " << "null");
+          //   }
+          // }
         }
       }
       sim_id++;

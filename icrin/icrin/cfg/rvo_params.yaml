@@ -5,6 +5,6 @@
   time_horizon_obst: 10.0
   radius: 14.5
   max_speed: 100
-  max_accel: 10
+  max_accel: 1000
   pref_speed: 50
 

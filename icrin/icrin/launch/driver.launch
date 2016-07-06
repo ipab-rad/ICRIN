@@ -1,15 +1,19 @@
 <?xml version="1.0"?>
 
 <launch>
-	<arg name="driver" default="soundwave" />
-        <group ns="$(arg driver)">
-	<node name="rvo_wrapper" pkg="rvo_wrapper" type="rvo_wrapper" output="screen" clear_params="true">
+	<!-- <arg name="driver" default="soundwave" /> -->
+        <!-- <group ns="$(arg driver)"> -->
+        <node name="visualizer" pkg="visualizer" type="visualizer" output="screen" clear_params="true">
+	<rosparam file="$(find icrin)/cfg/visualizer.yaml" command="load" />
+        </node>
+        <node name="rvo_wrapper" pkg="rvo_wrapper" type="rvo_wrapper" output="screen" clear_params="true">
         <rosparam file="$(find icrin)/cfg/rvo_params.yaml" command="load" />
         </node>
         <node name="driver_env" pkg="driver_env" type="driver_env" output="screen" clear_params="true">
         </node>
-        <node name="visualizer" pkg="visualizer" type="visualizer" output="screen" clear_params="true">
-	<rosparam file="$(find icrin)/cfg/visualizer.yaml" command="load" />
-	</node>
-	</group>
+        <node name="model" pkg="model" type="model" output="screen" respawn="true" clear_params="true">
+            <rosparam file="$(find icrin)/cfg/model.yaml" command="load" />
+            <rosparam file="$(find icrin)/cfg/rvo_params.yaml" command="load" />
+        </node>
+	<!-- </group> -->
 </launch>

@@ -52,6 +52,8 @@ class ModelWrapper {
   bool use_rvo_lib_;
   bool interactive_costmap_;
   bool initialised_;
+  bool got_env_data_;
+  bool got_hypotheses_;
 
   // Constants
   bool robot_model_;

@@ -12,6 +12,7 @@ RVOWrapper::RVOWrapper(ros::NodeHandle* nh) {
   nh_ = nh;
   this->init();
   this->rosSetup();
+  ROS_INFO("RVO_WRAPPER: Initialised!");
 }
 
 RVOWrapper::~RVOWrapper() {
@@ -27,7 +28,7 @@ RVOWrapper::~RVOWrapper() {
 
 void RVOWrapper::init() {
   planner_init_ = false;
-  debug_ = false;
+  debug_ = true;
 }
 
 void RVOWrapper::rosSetup() {

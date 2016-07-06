@@ -13,6 +13,7 @@ DriverEnv::DriverEnv(ros::NodeHandle* nh) {
   this->loadParams();
   this->init();
   this->rosSetup();
+  ROS_INFO("DRIVER_ENV: Initialised");
 }
 
 DriverEnv::~DriverEnv() {
@@ -23,7 +24,7 @@ void DriverEnv::loadParams() {
 }
 
 void DriverEnv::init() {
-    //Set up for lankershim (8:30), yes this is very crude, sorry... (djp)
+  //Set up for lankershim (8:30), yes this is very crude, sorry... (djp)
   geometry_msgs::Pose2D goal1;
   goal1.x = -6.419475524475522;
   goal1.y = 60.04413286713285;
@@ -116,11 +117,11 @@ void DriverEnv::init() {
 
 void DriverEnv::rosSetup() {
   environment_data_pub_ = nh_->advertise<environment_msgs::EnvironmentData>
-                          ("data", 1, true);
+                          ("/driver_env/data", 1, true);
   model_pub_ = nh_->advertise<model_msgs::ModelHypotheses>
                ("/model/hypotheses", 1);
 
-  car_data_sub_ = nh_->subscribe("/driver_env_msgs/car_data", 1000,
+  car_data_sub_ = nh_->subscribe("/driver_env/car_data", 1000,
                                  &DriverEnv::carDataCB, this);
   model_sub_ = nh_->subscribe("/model/inference", 1000,
                               &DriverEnv::carDataCB, this);
@@ -142,9 +143,9 @@ void DriverEnv::pubEnvData() {
   for (uint64_t i = 0; i < ncars; ++i) {
     env_data.tracker_ids.push_back(car_data_.cars[i].card_id);
     geometry_msgs::Pose2D pose;
-    pose.x = car_data_.cars[i].pose.position.x; 
+    pose.x = car_data_.cars[i].pose.position.x;
     pose.y = car_data_.cars[i].pose.position.y;
-    pose.theta = car_data_.cars[i].yaw; 
+    pose.theta = car_data_.cars[i].yaw;
     env_data.agent_poses.push_back(pose);
     env_data.agent_vels.push_back(car_data_.cars[i].vel);
   }
@@ -154,7 +155,7 @@ void DriverEnv::pubEnvData() {
 
 void DriverEnv::pubHypotheses() {
   model_msgs::ModelHypotheses model_hypotheses;
-    //if (agent_no_ > 1) {model_hypotheses.agents.push_back(1);}  // Temp fix
+  //if (agent_no_ > 1) {model_hypotheses.agents.push_back(1);}  // Temp fix
   model_hypotheses.goals = true;
   model_hypotheses.awareness = false;
   uint64_t ncars = car_data_.cars.size();
@@ -169,7 +170,7 @@ int main(int argc, char** argv) {
   ros::init(argc, argv, "driver_env");
   ros::NodeHandle nh("driver_env");
   DriverEnv driver_env(&nh);
-  driver_env.init();
+  // driver_env.init();
   ros::Rate r(10);
 
   while (ros::ok()) {

@@ -41,7 +41,7 @@ void Visualizer::rosSetup() {
   visualizer_pub_ = nh_->advertise<visualization_msgs::MarkerArray>
                     ("visualization_marker_array", 1, true);
   driver_env_data_pub = nh_->advertise<driver_env_msgs::Cars>
-                        ("/driver_env_msgs/car_data", 1, true);
+                        ("/driver_env/car_data", 1, true);
 }
 
 void Visualizer::pubCarData() {
@@ -79,7 +79,7 @@ void Visualizer::pubVizData() {
   visualizer_pub_.publish(deletemsg);
   visualization_msgs::MarkerArray msg;
   for (std::vector<int>::iterator i = existing_cars_.begin();
-      i != existing_cars_.end(); ++i) {
+       i != existing_cars_.end(); ++i) {
     if (car_data_[*i].find(frame_) != car_data_[*i].end()) {
       car_struct car_frame(car_data_[*i][frame_]);
       visualization_msgs::Marker data;
@@ -94,7 +94,7 @@ void Visualizer::pubVizData() {
       data.color.r = car_color_[car_frame.car_id].r;
       data.color.g = car_color_[car_frame.car_id].g;
       data.color.b = car_color_[car_frame.car_id].b;
-      
+
       double orientation = car_frame.orientation;
       if (use_cardinal) {
         if (car_frame.direction == 1) { // East
@@ -106,10 +106,10 @@ void Visualizer::pubVizData() {
         } else if (car_frame.direction == 4) { // South
           orientation = -M_PI / 2;
         }
-      } 
+      }
       data.pose.orientation = euler2quat(0.0, 0.0, orientation);
 
-      /* first option is to set the scale*/ 
+      /* first option is to set the scale*/
       data.scale.x = car_frame.length;
       data.scale.y = car_frame.width;
       data.scale.z = 2.5;
@@ -135,7 +135,7 @@ void Visualizer::pubVizData() {
       data.points[1].x = end.x;
       data.points[1].y = end.y;
       */
-/**End of point method**/
+      /**End of point method**/
       msg.markers.push_back(data);
     }
     visualizer_pub_.publish(msg);
@@ -179,7 +179,7 @@ void Visualizer::process_file() {
       frame.orientation = std::stof(values[18]);
       // car_data_[frame.car_id].push_back(frame);
       car_data_[frame.car_id][frame.frame_id] = frame;
-      
+
       float dx = frame.length * cos(frame.orientation);
       float dy = frame.length * sin(frame.orientation);
       frame.x_pos = frame.x_pos - dx;

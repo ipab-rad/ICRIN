@@ -12,12 +12,15 @@ ModelWrapper::ModelWrapper(ros::NodeHandle* nh) {
   nh_ = nh;
   robot_name_ = ros::this_node::getNamespace();
   robot_name_.erase(0, 1);  // Remove 1 forward slash from robot_name
+  robot_name_ = "";
   model_name_ = ros::this_node::getName();
   model_name_.erase(0, robot_name_.length());  // Remove robot name
+  model_name_ = "/model";
   this->loadParams();
   this->init();
   this->rosSetup();
   sim_wrapper_ = new SimWrapper(nh_);
+  ROS_INFO("MODEL_WRAPPER: Initialised!");
 }
 
 ModelWrapper::~ModelWrapper() {
@@ -54,6 +57,8 @@ void ModelWrapper::loadParams() {
 }
 
 void ModelWrapper::init() {
+  got_env_data_ = false;
+  got_hypotheses_ = false;
   use_rvo_lib_ = true;
   interactive_costmap_ = false;
   debug_ = true;
@@ -72,7 +77,7 @@ void ModelWrapper::rosSetup() {
                                    1000, &ModelWrapper::robotGoalCB, this);
   robot_vel_sub_ = nh_->subscribe("/cmd_vel", 1000,
                                   &ModelWrapper::robotVelCB, this);
-  env_data_sub_ = nh_->subscribe("/environment/data", 1000,
+  env_data_sub_ = nh_->subscribe("/driver_env/data", 1000,
                                  &ModelWrapper::envDataCB, this);
   model_hyp_sub_ = nh_->subscribe("/model/hypotheses", 1000,
                                   &ModelWrapper::modelCB, this);
@@ -94,23 +99,29 @@ void ModelWrapper::robotVelCB(const geometry_msgs::Twist::ConstPtr& msg) {
 
 void ModelWrapper::envDataCB(const environment_msgs::EnvironmentData::ConstPtr&
                              msg) {
+  got_env_data_ = true;
   env_data_ = *msg;
 }
 
 void ModelWrapper::modelCB(const model_msgs::ModelHypotheses::ConstPtr&
                            msg) {
+  got_hypotheses_ = true;
   hypotheses_ = *msg;
 }
 
 void ModelWrapper::runModel() {
-  if (debug_) {ROS_INFO("BeginModel");}
-  this->setupModel();
-  if (hypotheses_.agents.size() > 0) {
-    this->runSims();
-    this->inferGoals();
+  if (!got_env_data_ || !got_hypotheses_) {
+    ROS_WARN("Model has not received all data yet!");
+  } else {
+    if (debug_) {ROS_INFO("BeginModel");}
+    this->setupModel();
+    if (hypotheses_.agents.size() > 0) {
+      this->runSims();
+      this->inferGoals();
+    }
+    if (interactive_costmap_) {this->interactivePrediction();}
+    if (debug_) {ROS_INFO_STREAM("EndModel" << std::endl);}
   }
-  if (interactive_costmap_) {this->interactivePrediction();}
-  if (debug_) {ROS_INFO_STREAM("EndModel" << std::endl);}
 }
 
 void ModelWrapper::inferGoals() {
@@ -193,8 +204,8 @@ void ModelWrapper::inferGoals() {
 
       posterior_norm += g_posteriors[goal];
       if (debug_) {
-        ROS_INFO_STREAM("GoalPosteriors" << goal << "=" <<
-                        g_posteriors[goal] << " " << std::endl);
+        // ROS_INFO_STREAM("GoalPosteriors" << goal << "=" <<
+        //                 g_posteriors[goal] << " " << std::endl);
       }
     }
 
