@@ -56,7 +56,7 @@ void ModelWrapper::loadParams() {
 void ModelWrapper::init() {
   use_rvo_lib_ = true;
   interactive_costmap_ = false;
-  debug_ = false;
+  debug_ = true;
   initialised_ = false;
   n_sampling_goals = 0;
   n_sequence_goals = 0;
@@ -66,18 +66,18 @@ void ModelWrapper::init() {
 }
 
 void ModelWrapper::rosSetup() {
-  robot_pose_sub_ = nh_->subscribe(robot_name_ + "/environment/curr_pose", 1000,
+  robot_pose_sub_ = nh_->subscribe("/environment/curr_pose", 1000,
                                    &ModelWrapper::robotPoseCB, this);
-  robot_goal_sub_ = nh_->subscribe(robot_name_ + "/environment/target_goal",
+  robot_goal_sub_ = nh_->subscribe("/environment/target_goal",
                                    1000, &ModelWrapper::robotGoalCB, this);
-  robot_vel_sub_ = nh_->subscribe(robot_name_ + "/cmd_vel", 1000,
+  robot_vel_sub_ = nh_->subscribe("/cmd_vel", 1000,
                                   &ModelWrapper::robotVelCB, this);
-  env_data_sub_ = nh_->subscribe(robot_name_ + "/environment/data", 1000,
+  env_data_sub_ = nh_->subscribe("/environment/data", 1000,
                                  &ModelWrapper::envDataCB, this);
-  model_hyp_sub_ = nh_->subscribe(robot_name_ + "/model/hypotheses", 1000,
+  model_hyp_sub_ = nh_->subscribe("/model/hypotheses", 1000,
                                   &ModelWrapper::modelCB, this);
   inter_pred_pub_ = nh_->advertise<model_msgs::InteractivePrediction>
-                    (robot_name_ + "/model/interactive_prediction", 1);
+                    ("/model/interactive_prediction", 1);
 }
 
 void ModelWrapper::robotPoseCB(const geometry_msgs::Pose2D::ConstPtr& msg) {

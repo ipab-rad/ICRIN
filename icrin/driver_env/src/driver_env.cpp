@@ -116,11 +116,11 @@ void DriverEnv::init() {
 
 void DriverEnv::rosSetup() {
   environment_data_pub_ = nh_->advertise<environment_msgs::EnvironmentData>
-                          ("/environment/data", 1, true);
+                          ("data", 1, true);
   model_pub_ = nh_->advertise<model_msgs::ModelHypotheses>
                ("/model/hypotheses", 1);
 
-  car_data_sub_ = nh_->subscribe("/visualizer/car_data", 1000,
+  car_data_sub_ = nh_->subscribe("/driver_env_msgs/car_data", 1000,
                                  &DriverEnv::carDataCB, this);
   model_sub_ = nh_->subscribe("/model/inference", 1000,
                               &DriverEnv::carDataCB, this);
@@ -174,6 +174,7 @@ int main(int argc, char** argv) {
 
   while (ros::ok()) {
     ros::spinOnce();
+    driver_env.runModel();
     r.sleep();
   }
 

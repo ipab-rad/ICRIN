@@ -22,6 +22,8 @@
 #include <model_msgs/GoalHypothesis.h>
 #include <model_msgs/AwareHypothesis.h>
 #include <model_msgs/InteractivePrediction.h>
+#include <driver_env_msgs/Cars.h>
+#include <driver_env_msgs/Car.h>
 
 class ModelWrapper {
  public:

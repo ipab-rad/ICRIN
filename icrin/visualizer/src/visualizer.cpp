@@ -41,7 +41,7 @@ void Visualizer::rosSetup() {
   visualizer_pub_ = nh_->advertise<visualization_msgs::MarkerArray>
                     ("visualization_marker_array", 1, true);
   driver_env_data_pub = nh_->advertise<driver_env_msgs::Cars>
-                        ("car_data", 1, true);
+                        ("/driver_env_msgs/car_data", 1, true);
 }
 
 void Visualizer::pubCarData() {
@@ -79,7 +79,7 @@ void Visualizer::pubVizData() {
   visualizer_pub_.publish(deletemsg);
   visualization_msgs::MarkerArray msg;
   for (std::vector<int>::iterator i = existing_cars_.begin();
-       i != existing_cars_.end(); ++i) {
+      i != existing_cars_.end(); ++i) {
     if (car_data_[*i].find(frame_) != car_data_[*i].end()) {
       car_struct car_frame(car_data_[*i][frame_]);
       visualization_msgs::Marker data;
