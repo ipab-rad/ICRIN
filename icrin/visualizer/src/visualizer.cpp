@@ -15,6 +15,7 @@ Visualizer::Visualizer(ros::NodeHandle* nh) {
   this->init();
   this->rosSetup();
   ROS_INFO("VIS: Visualizer started");
+  ready_pub_.publish(true);
 }
 
 Visualizer::~Visualizer() {
@@ -33,6 +34,8 @@ void Visualizer::init() {
     ROS_INFO("VIS: File was opened successfully!");
   } else {
     ROS_ERROR("VIS: Error, file could not be opened!");
+    ros::shutdown();
+    exit(1);
   }
   geometry_msgs::Pose2D goal1;
   goal1.x = -6.419475524475522;
@@ -126,9 +129,10 @@ void Visualizer::init() {
 }
 
 void Visualizer::rosSetup() {
+  ready_pub_ = nh_->advertise<std_msgs::Bool>("ready", 1, true);
   visualizer_pub_ = nh_->advertise<visualization_msgs::MarkerArray>
                     ("visualization_marker_array", 1, true);
-  driver_env_data_pub = nh_->advertise<driver_env_msgs::Cars>
+  driver_env_data_pub_ = nh_->advertise<driver_env_msgs::Cars>
                         ("/driver_env/car_data", 1, true);
 }
 
@@ -156,7 +160,8 @@ void Visualizer::pubCarData() {
       cars_msg.cars.push_back(car_msg);
     }
   }
-  driver_env_data_pub.publish(cars_msg);
+  driver_env_data_pub_.publish(cars_msg);
+  frame_ += 1;
 }
 
 void Visualizer::pubVizData() {
@@ -271,7 +276,6 @@ void Visualizer::pubVizData() {
     }
     visualizer_pub_.publish(msg);
   }
-  frame_ += 1;
 }
 
 void Visualizer::process_file() {
@@ -327,6 +331,8 @@ void Visualizer::process_file() {
     }
   } else {
     ROS_ERROR("VIS: Error, file is not open!");
+    ros::shutdown();
+    exit(1);
   }
 }
 

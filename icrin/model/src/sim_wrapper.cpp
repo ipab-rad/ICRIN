@@ -240,21 +240,21 @@ std::vector<uint32_t> SimWrapper::goalSequence(
                             ", Gy: " << robot_goal_.y);
           }
         } else {
-          // if (agent == model_agents_[model_agent]) {
+          if (agent == model_agents_[model_agent]) {
           goal_msg.request.sim[sim_id].agent.push_back(goals[goal]);
           if (debug_) {
           // ROS_ERROR("MODELLING!");
           ROS_INFO_STREAM("SIMW- A:" << agent << " Gx: " << goals[goal].x
                           << ", Gy: " << goals[goal].y);
           }
-          // } else {
-          //   goal_msg.request.sim[sim_id].agent.push_back(null_vect_);
-          //   if (debug_) {
-          //     // ROS_ERROR("NOT MODELLING!");
-          //     ROS_INFO_STREAM("SIMW- A:" << agent << " Gx: " << "null"
-          //                     << ", Gy: " << "null");
-          //   }
-          // }
+          } else {
+            goal_msg.request.sim[sim_id].agent.push_back(null_vect_);
+            if (debug_) {
+              // ROS_ERROR("NOT MODELLING!");
+              ROS_INFO_STREAM("SIMW- A:" << agent << " Gx: " << "null"
+                              << ", Gy: " << "null");
+            }
+          }
         }
       }
       sim_id++;
