@@ -10,7 +10,9 @@
 #define MODEL_WRAPPER_HPP
 
 #include <ros/ros.h>
-
+#include <iostream>
+#include <fstream>
+#include <sstream>
 #include <std_msgs/Bool.h>
 
 #include <model/sim_wrapper.hpp>
@@ -69,6 +71,8 @@ class ModelWrapper {
   float foresight_time_step_;
 
   // Variables
+  std::string goal_file_;
+  std::ofstream goals_out;
   std::string robot_name_;
   std::string model_name_;
   environment_msgs::EnvironmentData env_data_;

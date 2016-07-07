@@ -69,6 +69,7 @@ void ModelWrapper::init() {
   // inferred_goals_history_.resize(3);
   // init_liks_.resize(3, false);
   // prev_prior_.resize(3);
+  goal_file_ = "/home/testdjp/Documents/NGSIM/Lankershim_845.txt";
 }
 
 void ModelWrapper::rosSetup() {
@@ -135,6 +136,13 @@ void ModelWrapper::runModel() {
 }
 
 void ModelWrapper::inferGoals() {
+  //open the file to write posteriors to
+  goals_out.open(goal_file_.c_str(), std::ios::app);
+  if(!goals_out.is_open()) {
+    ROS_ERROR("VIS: Error, goal file could not be opened!");
+    ros::shutdown();
+    exit(1);
+  }
   if (debug_) {ROS_INFO("Infer");}
   float ros_freq = 0.1f;
   float PI = 3.14159265358979323846f;
@@ -222,6 +230,8 @@ void ModelWrapper::inferGoals() {
     float norm_posterior = 0.0f;
     std::vector<float> norm_posteriors;
     norm_posteriors.resize(n_goals);
+    //write out
+    goals_out << agent << " " << env_data_.framenum;
     for (std::size_t goal = 0; goal < n_goals; ++goal) {
       if (posterior_norm == 0) {
         norm_posterior = uniform_prior;
@@ -237,7 +247,9 @@ void ModelWrapper::inferGoals() {
       }
       norm_posteriors[goal] = prev_prior_[agent][goal];
       agent_goal_inference_[agent][goal] = prev_prior_[agent][goal];
+      goals_out << " " << agent_goal_inference_[agent][goal];
     }
+    goals_out << std::endl;
     if (debug_) {
       ROS_INFO_STREAM("InferAgent: " << (int)hypotheses_.agents[agent]);
       for (int i = 0; i < n_goals; ++i) {
@@ -245,6 +257,7 @@ void ModelWrapper::inferGoals() {
       }
     }
   }
+  goals_out.close();
 }
 
 void ModelWrapper::setupModel() {

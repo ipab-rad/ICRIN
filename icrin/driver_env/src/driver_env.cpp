@@ -139,9 +139,10 @@ void DriverEnv::runModel() {
 
 void DriverEnv::pubEnvData() {
   environment_msgs::EnvironmentData env_data;
+  env_data.framenum = car_data_.frameid;
   uint64_t ncars = car_data_.cars.size();
   // for (uint64_t i = 0; i < ncars; ++i) {
-  uint64_t tncars = 800;
+  uint64_t tncars = 1574;
   for (uint64_t i = 0; i < tncars; ++i) {
     bool real_car = false;
     uint64_t real_id;

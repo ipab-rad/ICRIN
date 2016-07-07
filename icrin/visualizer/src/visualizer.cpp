@@ -160,6 +160,7 @@ void Visualizer::pubCarData() {
       cars_msg.cars.push_back(car_msg);
     }
   }
+  cars_msg.frameid = frame_;
   driver_env_data_pub_.publish(cars_msg);
   frame_ += 1;
 }
