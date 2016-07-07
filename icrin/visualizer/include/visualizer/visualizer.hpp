@@ -13,6 +13,7 @@
 #include <ros/ros.h>
 #include <Eigen/Geometry>
 #include <geometry_msgs/Quaternion.h>
+#include <geometry_msgs/Pose2D.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <visualization_msgs/Marker.h>
 #include <driver_env_msgs/Car.h>
@@ -83,7 +84,7 @@ class Visualizer {
   std::vector<int> existing_cars_;
   std::map<int, std::map<int, car_struct> > car_data_;
   std::map <int, color> car_color_;
-
+  std::vector<geometry_msgs::Pose2D> goals_;
   // ROS
   ros::NodeHandle* nh_;
   ros::Publisher visualizer_pub_;
