@@ -142,7 +142,7 @@ void DriverEnv::pubEnvData() {
   env_data.framenum = car_data_.frameid;
   uint64_t ncars = car_data_.cars.size();
   // for (uint64_t i = 0; i < ncars; ++i) {
-  uint64_t tncars = 1574;
+  uint64_t tncars = 3000;
   for (uint64_t i = 0; i < tncars; ++i) {
     bool real_car = false;
     uint64_t real_id;
@@ -151,7 +151,7 @@ void DriverEnv::pubEnvData() {
         real_car = true;
         real_id = j;
         break;
-        }
+      }
     }
     if (real_car) {
       env_data.tracker_ids.push_back(car_data_.cars[real_id].card_id);
@@ -172,7 +172,7 @@ void DriverEnv::pubEnvData() {
       vel.linear.z = 0.0;
       env_data.agent_poses.push_back(pose);
       env_data.agent_vels.push_back(vel);
-   }
+    }
   }
   environment_data_pub_.publish(env_data);
   agent_ids_ = env_data.tracker_ids;

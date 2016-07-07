@@ -1,3 +1,3 @@
 uint8 agent_id
-geometry_msgs/Pose2D[] goal_hypotheses
+uint8[] goal_id
 float32[] goal_posterior

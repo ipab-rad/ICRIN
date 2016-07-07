@@ -21,7 +21,6 @@ ModelWrapper::ModelWrapper(ros::NodeHandle* nh) {
   this->rosSetup();
   sim_wrapper_ = new SimWrapper(nh_);
   ROS_INFO("MODEL_WRAPPER: Initialised!");
-  model_ready_pub_.publish(true);
 }
 
 ModelWrapper::~ModelWrapper() {
@@ -60,7 +59,6 @@ void ModelWrapper::loadParams() {
 void ModelWrapper::init() {
   got_env_data_ = false;
   got_hypotheses_ = false;
-  viz_ready_ = false;
   use_rvo_lib_ = true;
   interactive_costmap_ = false;
   debug_ = false;
@@ -70,12 +68,9 @@ void ModelWrapper::init() {
   // inferred_goals_history_.resize(3);
   // init_liks_.resize(3, false);
   // prev_prior_.resize(3);
-  goal_file_ = "/home/testdjp/Documents/NGSIM/Lankershim_845.txt";
 }
 
 void ModelWrapper::rosSetup() {
-  viz_ready_sub_ = nh_->subscribe("/visualizer/ready", 1000,
-                                  &ModelWrapper::readyCB, this);
   robot_pose_sub_ = nh_->subscribe("/environment/curr_pose", 1000,
                                    &ModelWrapper::robotPoseCB, this);
   robot_goal_sub_ = nh_->subscribe("/environment/target_goal",
@@ -86,13 +81,10 @@ void ModelWrapper::rosSetup() {
                                  &ModelWrapper::envDataCB, this);
   model_hyp_sub_ = nh_->subscribe("/model/hypotheses", 1000,
                                   &ModelWrapper::modelCB, this);
-  inter_pred_pub_ = nh_->advertise<model_msgs::InteractivePrediction>
-                    ("/model/interactive_prediction", 1);
-  model_ready_pub_ = nh_->advertise<std_msgs::Bool>("ready",1, true);
-}
-
-void ModelWrapper::readyCB(const std_msgs::Bool::ConstPtr& msg) {
-  viz_ready_ = msg->data;
+  inter_pred_pub_ = nh_->advertise<model_msgs::GoalInference>
+                    ("/model/inference", 1);
+  model_inference_pub_ = nh_->advertise<model_msgs::InteractivePrediction>
+                         ("/model/interactive_prediction", 1);
 }
 
 void ModelWrapper::robotPoseCB(const geometry_msgs::Pose2D::ConstPtr& msg) {
@@ -120,19 +112,14 @@ void ModelWrapper::modelCB(const model_msgs::ModelHypotheses::ConstPtr&
 }
 
 void ModelWrapper::runModel() {
-  if (debug_) {ROS_INFO_STREAM("GOTENV: " << got_env_data_ <<
-                  " GOTHYP: " << got_hypotheses_ <<
-                  " VIZRED: " << viz_ready_);}
-  if (!got_env_data_ || !got_hypotheses_ || !viz_ready_) {
+  if (!got_env_data_ || !got_hypotheses_) {
     ROS_WARN("Model has not received all data yet!");
   } else {
     if (debug_) {ROS_INFO("BeginModel");}
     this->setupModel();
     if (hypotheses_.agents.size() > 0) {
-      model_ready_pub_.publish(false);
       this->runSims();
       this->inferGoals();
-      model_ready_pub_.publish(true);
     }
     if (interactive_costmap_) {this->interactivePrediction();}
     if (debug_) {ROS_INFO_STREAM("EndModel" << std::endl);}
@@ -140,14 +127,8 @@ void ModelWrapper::runModel() {
 }
 
 void ModelWrapper::inferGoals() {
-  //open the file to write posteriors to
-  goals_out.open(goal_file_.c_str(), std::ios::out | std::ios::app);
-  if(!goals_out.is_open()) {
-    ROS_ERROR("MODEL: Error, goal file could not be opened!");
-    ros::shutdown();
-    exit(1);
-  }
   if (debug_) {ROS_INFO("Infer");}
+  model_msgs::GoalInference goal_msg;
   float ros_freq = 0.1f;
   float PI = 3.14159265358979323846f;
   bool reset_priors = false;
@@ -184,10 +165,10 @@ void ModelWrapper::inferGoals() {
     for (size_t goal = 0; goal < n_goals; ++goal) {
       // if (DISPLAY_INFERENCE_VALUES) {
       if (debug_) {
-        // ROS_INFO_STREAM("curr_vel=[" << curr_vel.x <<
-        //                 ", " << curr_vel.y << "] " <<
-        //                 "simVel=[" << agent_sim_vels[goal].x <<
-        //                 ", " << agent_sim_vels[goal].y << "]" << std::endl);
+        ROS_INFO_STREAM("curr_vel=[" << curr_vel.x <<
+                        ", " << curr_vel.y << "] " <<
+                        "simVel=[" << agent_sim_vels[goal].x <<
+                        ", " << agent_sim_vels[goal].y << "]" << std::endl);
       }
       // }
       // Bivariate Gaussian
@@ -234,8 +215,6 @@ void ModelWrapper::inferGoals() {
     float norm_posterior = 0.0f;
     std::vector<float> norm_posteriors;
     norm_posteriors.resize(n_goals);
-    //write out
-    goals_out << agent << " " << env_data_.framenum;
     for (std::size_t goal = 0; goal < n_goals; ++goal) {
       if (posterior_norm == 0) {
         norm_posterior = uniform_prior;
@@ -251,18 +230,19 @@ void ModelWrapper::inferGoals() {
       }
       norm_posteriors[goal] = prev_prior_[agent][goal];
       agent_goal_inference_[agent][goal] = prev_prior_[agent][goal];
-      goals_out << " " << agent_goal_inference_[agent][goal];
     }
-    goals_out << std::endl;
-    if (debug_) {
-      ROS_INFO_STREAM("InferAgent: " << (int)hypotheses_.agents[agent]);
-      for (int i = 0; i < n_goals; ++i) {
-        ROS_INFO_STREAM("G" << i << ": " << norm_posteriors[i]);
-      }
+    // if (debug_) {
+    model_msgs::GoalEstimate msg;
+    msg.agent_id = hypotheses_.agents[agent];
+    // ROS_INFO_STREAM("InferAgent: " << (int)hypotheses_.agents[agent]);
+    for (int i = 0; i < n_goals; ++i) {
+      msg.goal_id.push_back(i);
+      msg.goal_posterior.push_back(norm_posteriors[i]);
+      // ROS_INFO_STREAM("G" << i << ": " << norm_posteriors[i]);
     }
+    goal_msg.goal_inference.push_back(msg);
   }
-  goals_out.close();
-  std::cout << "model: goal posts for: " << env_data_.framenum << std::endl;
+  model_inference_pub_.publish(goal_msg);
 }
 
 void ModelWrapper::setupModel() {

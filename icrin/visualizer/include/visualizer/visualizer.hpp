@@ -63,7 +63,7 @@ class Visualizer {
   void pubVizData();
 
   void process_file();
-  void modelReadyCB(const std_msgs::Bool::ConstPtr& msg); 
+  void modelReadyCB(const std_msgs::Bool::ConstPtr& msg);
 
   geometry_msgs::Quaternion euler2quat(double roll, double pitch, double yaw);
 
@@ -75,6 +75,8 @@ class Visualizer {
   // Flags
   bool use_cardinal;  // Use cardinal orientaitons instead of estimated
   bool model_ready_;
+  bool use_goal_labels_;
+  bool use_car_labels_;
   // Constants
 
   // Variables

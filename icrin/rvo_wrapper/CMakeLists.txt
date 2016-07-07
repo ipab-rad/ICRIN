@@ -91,15 +91,15 @@ catkin_package(
 set(CMAKE_CXX_COMPILER "/usr/bin/clang++-3.6")
 set(CMAKE_C_COMPILER "/usr/bin/clang-3.6")
 set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall -O2")
-# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fopenmp")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fopenmp")
 
-# find_package(OpenMP)
-# if(OPENMP_FOUND)
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-# else(OPENMP_FOUND)
-# message (STATUS "OpenMP not found")
-# endif()
+find_package(OpenMP)
+if(OPENMP_FOUND)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+else(OPENMP_FOUND)
+message (STATUS "OpenMP not found")
+endif()
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
