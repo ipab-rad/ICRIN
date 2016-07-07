@@ -2,8 +2,8 @@ robot_model: false
 
 goal_sum_prior: 0.001
 goal_history_discount: 0.5
-goal_inference_history: 10
-velocity_average_window: 10
+goal_inference_history: 4
+velocity_average_window: 5
 prior_lambda: 0.5
 
 

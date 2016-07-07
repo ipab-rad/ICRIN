@@ -16,7 +16,7 @@ Visualizer::Visualizer(ros::NodeHandle* nh) {
   this->rosSetup();
   ROS_INFO("VIS: Visualizer started");
   ready_pub_.publish(true);
-  model_ready_ = true; //assume its true to start
+  model_ready_ = false; 
 }
 
 Visualizer::~Visualizer() {
@@ -385,14 +385,12 @@ int main(int argc, char** argv) {
 
   while (ros::ok()) {
     ros::spinOnce();
+    while (visualizer.isModelReady() == false) {
+      ros::spinOnce();
+    }
     visualizer.pubVizData();
     visualizer.pubCarData();
-    r.sleep();
-    int cycles = 0;
-    while (!visualizer.isModelReady() == false) {
-      if (cycles > 1000000) break;
-      cycles++;
-    }
+    sleep(1);
   }
 
   ros::shutdown();

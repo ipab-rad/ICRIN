@@ -70,7 +70,7 @@ void ModelWrapper::init() {
   // inferred_goals_history_.resize(3);
   // init_liks_.resize(3, false);
   // prev_prior_.resize(3);
-  goal_file_ = "/home/testdjp/Documents/NGSIM/Lankershim_845.txt";
+  goal_file_ = "/home/testdjp42/Documents/NGSIM/Lankershim_845.txt";
 }
 
 void ModelWrapper::rosSetup() {
@@ -132,7 +132,7 @@ void ModelWrapper::runModel() {
       model_ready_pub_.publish(false);
       this->runSims();
       this->inferGoals();
-      model_ready_pub_.publish(true);
+      //publishes true in infer goals
     }
     if (interactive_costmap_) {this->interactivePrediction();}
     if (debug_) {ROS_INFO_STREAM("EndModel" << std::endl);}
@@ -263,6 +263,7 @@ void ModelWrapper::inferGoals() {
   }
   goals_out.close();
   std::cout << "model: goal posts for: " << env_data_.framenum << std::endl;
+  model_ready_pub_.publish(true);
 }
 
 void ModelWrapper::setupModel() {
