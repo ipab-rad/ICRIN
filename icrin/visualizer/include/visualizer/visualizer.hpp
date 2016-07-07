@@ -14,6 +14,7 @@
 #include <Eigen/Geometry>
 #include <geometry_msgs/Quaternion.h>
 #include <geometry_msgs/Pose2D.h>
+#include <std_msgs/Bool.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <visualization_msgs/Marker.h>
 #include <driver_env_msgs/Car.h>
@@ -87,8 +88,9 @@ class Visualizer {
   std::vector<geometry_msgs::Pose2D> goals_;
   // ROS
   ros::NodeHandle* nh_;
+  ros::Publisher ready_pub_;
   ros::Publisher visualizer_pub_;
-  ros::Publisher driver_env_data_pub;
+  ros::Publisher driver_env_data_pub_;
 };
 
 #endif /* VISUALIZER_HPP */

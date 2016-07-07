@@ -34,6 +34,7 @@ class ModelWrapper {
   void init();
   void rosSetup();
 
+  void readyCB(const std_msgs::Bool::ConstPtr& msg);
   void robotPoseCB(const geometry_msgs::Pose2D::ConstPtr& msg);
   void robotGoalCB(const geometry_msgs::Pose2D::ConstPtr& msg);
   void robotVelCB(const geometry_msgs::Twist::ConstPtr& msg);
@@ -54,6 +55,7 @@ class ModelWrapper {
   bool initialised_;
   bool got_env_data_;
   bool got_hypotheses_;
+  bool viz_ready_;
 
   // Constants
   bool robot_model_;
@@ -96,6 +98,7 @@ class ModelWrapper {
   ros::Subscriber robot_vel_sub_;
   ros::Subscriber env_data_sub_;
   ros::Subscriber model_hyp_sub_;
+  ros::Subscriber viz_ready_sub_;
   ros::Publisher inter_pred_pub_;
 
   // Class pointers

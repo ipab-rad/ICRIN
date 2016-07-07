@@ -140,14 +140,38 @@ void DriverEnv::runModel() {
 void DriverEnv::pubEnvData() {
   environment_msgs::EnvironmentData env_data;
   uint64_t ncars = car_data_.cars.size();
-  for (uint64_t i = 0; i < ncars; ++i) {
-    env_data.tracker_ids.push_back(car_data_.cars[i].card_id);
-    geometry_msgs::Pose2D pose;
-    pose.x = car_data_.cars[i].pose.position.x;
-    pose.y = car_data_.cars[i].pose.position.y;
-    pose.theta = car_data_.cars[i].yaw;
-    env_data.agent_poses.push_back(pose);
-    env_data.agent_vels.push_back(car_data_.cars[i].vel);
+  // for (uint64_t i = 0; i < ncars; ++i) {
+  uint64_t tncars = 800;
+  for (uint64_t i = 0; i < tncars; ++i) {
+    bool real_car = false;
+    uint64_t real_id;
+    for (uint64_t j = 0; j < ncars; ++j) {
+      if (i == car_data_.cars[j].card_id) {
+        real_car = true;
+        real_id = j;
+        break;
+        }
+    }
+    if (real_car) {
+      env_data.tracker_ids.push_back(car_data_.cars[real_id].card_id);
+      geometry_msgs::Pose2D pose;
+      pose.x = car_data_.cars[real_id].pose.position.x;
+      pose.y = car_data_.cars[real_id].pose.position.y;
+      pose.theta = car_data_.cars[real_id].yaw;
+      env_data.agent_poses.push_back(pose);
+      env_data.agent_vels.push_back(car_data_.cars[real_id].vel);
+    } else {
+      geometry_msgs::Pose2D pose;
+      pose.x = 0.0;
+      pose.y = 0.0;
+      pose.theta = 0.0;
+      geometry_msgs::Twist vel;
+      vel.linear.x = 0.0;
+      vel.linear.y = 0.0;
+      vel.linear.z = 0.0;
+      env_data.agent_poses.push_back(pose);
+      env_data.agent_vels.push_back(vel);
+   }
   }
   environment_data_pub_.publish(env_data);
   agent_ids_ = env_data.tracker_ids;

@@ -59,9 +59,10 @@ void ModelWrapper::loadParams() {
 void ModelWrapper::init() {
   got_env_data_ = false;
   got_hypotheses_ = false;
+  viz_ready_ = false;
   use_rvo_lib_ = true;
   interactive_costmap_ = false;
-  debug_ = true;
+  debug_ = false;
   initialised_ = false;
   n_sampling_goals = 0;
   n_sequence_goals = 0;
@@ -71,6 +72,8 @@ void ModelWrapper::init() {
 }
 
 void ModelWrapper::rosSetup() {
+  viz_ready_sub_ = nh_->subscribe("/visualizer/ready", 1000,
+                                  &ModelWrapper::readyCB, this);
   robot_pose_sub_ = nh_->subscribe("/environment/curr_pose", 1000,
                                    &ModelWrapper::robotPoseCB, this);
   robot_goal_sub_ = nh_->subscribe("/environment/target_goal",
@@ -83,6 +86,10 @@ void ModelWrapper::rosSetup() {
                                   &ModelWrapper::modelCB, this);
   inter_pred_pub_ = nh_->advertise<model_msgs::InteractivePrediction>
                     ("/model/interactive_prediction", 1);
+}
+
+void ModelWrapper::readyCB(const std_msgs::Bool::ConstPtr& msg) {
+  viz_ready_ = msg->data;
 }
 
 void ModelWrapper::robotPoseCB(const geometry_msgs::Pose2D::ConstPtr& msg) {
@@ -110,7 +117,10 @@ void ModelWrapper::modelCB(const model_msgs::ModelHypotheses::ConstPtr&
 }
 
 void ModelWrapper::runModel() {
-  if (!got_env_data_ || !got_hypotheses_) {
+  if (debug_) {ROS_INFO_STREAM("GOTENV: " << got_env_data_ <<
+                  " GOTHYP: " << got_hypotheses_ <<
+                  " VIZRED: " << viz_ready_);}
+  if (!got_env_data_ || !got_hypotheses_ || !viz_ready_) {
     ROS_WARN("Model has not received all data yet!");
   } else {
     if (debug_) {ROS_INFO("BeginModel");}
@@ -162,10 +172,10 @@ void ModelWrapper::inferGoals() {
     for (size_t goal = 0; goal < n_goals; ++goal) {
       // if (DISPLAY_INFERENCE_VALUES) {
       if (debug_) {
-        ROS_INFO_STREAM("curr_vel=[" << curr_vel.x <<
-                        ", " << curr_vel.y << "] " <<
-                        "simVel=[" << agent_sim_vels[goal].x <<
-                        ", " << agent_sim_vels[goal].y << "]" << std::endl);
+        // ROS_INFO_STREAM("curr_vel=[" << curr_vel.x <<
+        //                 ", " << curr_vel.y << "] " <<
+        //                 "simVel=[" << agent_sim_vels[goal].x <<
+        //                 ", " << agent_sim_vels[goal].y << "]" << std::endl);
       }
       // }
       // Bivariate Gaussian
