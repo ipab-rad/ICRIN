@@ -166,6 +166,29 @@ void Visualizer::pubVizData() {
   deletemsg.markers.push_back(deletemarkers);
   visualizer_pub_.publish(deletemsg);
   visualization_msgs::MarkerArray msg;
+  //pub goal labels - should probably be other function...
+  for (int goal = 0; goal < goals_.size(); goal++) {
+    visualization_msgs::Marker label;
+    label.header.stamp = ros::Time::now();
+    label.header.frame_id = "map";
+    label.ns = "visualizer";
+    label.text = std::to_string(goal);
+    label.id = 0-goal-goals_.size();
+    label.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
+    label.action = visualization_msgs::Marker::ADD;
+    label.pose.position.x = goals_[goal].x;
+    label.pose.position.y = goals_[goal].y;
+    label.pose.position.z = 15;
+    label.scale.x = 25;
+    label.scale.y = 25;
+    label.scale.z = 15;
+    label.color.a = 1.0;
+    label.color.r = 1;
+    label.color.g = 1;
+    label.color.b = 1;
+    msg.markers.push_back(label);
+    visualizer_pub_.publish(msg);
+  }
   //pub goals - should probably be other function...
   for (int goal = 0; goal < goals_.size(); goal++) {
     visualization_msgs::Marker data;
@@ -173,7 +196,7 @@ void Visualizer::pubVizData() {
     data.header.frame_id = "map";
     data.ns = "visualizer";
     data.text = std::to_string(goal);
-    data.id = goal;
+    data.id = 0-goal;
     data.type = visualization_msgs::Marker::SPHERE;
     data.action = visualization_msgs::Marker::ADD;
     data.pose.position.x = goals_[goal].x;
@@ -192,6 +215,25 @@ void Visualizer::pubVizData() {
        i != existing_cars_.end(); ++i) {
     if (car_data_[*i].find(frame_) != car_data_[*i].end()) {
       car_struct car_frame(car_data_[*i][frame_]);
+      visualization_msgs::Marker label;
+      label.header.stamp = ros::Time::now();
+      label.header.frame_id = "map";
+      label.ns = "visualizer";
+      label.text = std::to_string(car_frame.car_id);
+      label.id = 0-(goals_.size()*2)-car_frame.car_id;
+      label.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
+      label.action = visualization_msgs::Marker::ADD;
+      label.pose.position.x = car_frame.x_pos;
+      label.pose.position.y = car_frame.y_pos;
+      label.pose.position.z = 15;
+      label.scale.x = 25;
+      label.scale.y = 25;
+      label.scale.z = 15;
+      label.color.a = 1;
+      label.color.r = 0;
+      label.color.g = 0;
+      label.color.b = 0;
+      msg.markers.push_back(label);
       visualization_msgs::Marker data;
       data.header.stamp = ros::Time::now();
       data.header.frame_id = "map";
