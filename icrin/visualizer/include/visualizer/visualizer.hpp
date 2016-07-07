@@ -55,15 +55,15 @@ class Visualizer {
  public:
   explicit Visualizer(ros::NodeHandle* nh);
   ~Visualizer();
-
+  bool isModelReady();
   void init();
   void rosSetup();
   void loadParams();
-
   void pubCarData();
   void pubVizData();
 
   void process_file();
+  void modelReadyCB(const std_msgs::Bool::ConstPtr& msg); 
 
   geometry_msgs::Quaternion euler2quat(double roll, double pitch, double yaw);
 
@@ -74,7 +74,7 @@ class Visualizer {
  private:
   // Flags
   bool use_cardinal;  // Use cardinal orientaitons instead of estimated
-
+  bool model_ready_;
   // Constants
 
   // Variables
@@ -91,6 +91,7 @@ class Visualizer {
   ros::Publisher ready_pub_;
   ros::Publisher visualizer_pub_;
   ros::Publisher driver_env_data_pub_;
+  ros::Subscriber model_ready_sub_;
 };
 
 #endif /* VISUALIZER_HPP */

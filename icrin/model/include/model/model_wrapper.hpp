@@ -29,6 +29,7 @@
 
 class ModelWrapper {
  public:
+  bool doneInfering;
   explicit ModelWrapper(ros::NodeHandle* nh);
   ~ModelWrapper();
 
@@ -104,7 +105,7 @@ class ModelWrapper {
   ros::Subscriber model_hyp_sub_;
   ros::Subscriber viz_ready_sub_;
   ros::Publisher inter_pred_pub_;
-
+  ros::Publisher model_ready_pub_;
   // Class pointers
   SimWrapper* sim_wrapper_;
 };

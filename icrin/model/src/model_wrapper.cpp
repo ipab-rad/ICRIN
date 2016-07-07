@@ -21,6 +21,7 @@ ModelWrapper::ModelWrapper(ros::NodeHandle* nh) {
   this->rosSetup();
   sim_wrapper_ = new SimWrapper(nh_);
   ROS_INFO("MODEL_WRAPPER: Initialised!");
+  model_ready_pub_.publish(true);
 }
 
 ModelWrapper::~ModelWrapper() {
@@ -87,6 +88,7 @@ void ModelWrapper::rosSetup() {
                                   &ModelWrapper::modelCB, this);
   inter_pred_pub_ = nh_->advertise<model_msgs::InteractivePrediction>
                     ("/model/interactive_prediction", 1);
+  model_ready_pub_ = nh_->advertise<std_msgs::Bool>("ready",1, true);
 }
 
 void ModelWrapper::readyCB(const std_msgs::Bool::ConstPtr& msg) {
@@ -127,8 +129,10 @@ void ModelWrapper::runModel() {
     if (debug_) {ROS_INFO("BeginModel");}
     this->setupModel();
     if (hypotheses_.agents.size() > 0) {
+      model_ready_pub_.publish(false);
       this->runSims();
       this->inferGoals();
+      model_ready_pub_.publish(true);
     }
     if (interactive_costmap_) {this->interactivePrediction();}
     if (debug_) {ROS_INFO_STREAM("EndModel" << std::endl);}
@@ -137,9 +141,9 @@ void ModelWrapper::runModel() {
 
 void ModelWrapper::inferGoals() {
   //open the file to write posteriors to
-  goals_out.open(goal_file_.c_str(), std::ios::app);
+  goals_out.open(goal_file_.c_str(), std::ios::out | std::ios::app);
   if(!goals_out.is_open()) {
-    ROS_ERROR("VIS: Error, goal file could not be opened!");
+    ROS_ERROR("MODEL: Error, goal file could not be opened!");
     ros::shutdown();
     exit(1);
   }
@@ -258,6 +262,7 @@ void ModelWrapper::inferGoals() {
     }
   }
   goals_out.close();
+  std::cout << "model: goal posts for: " << env_data_.framenum << std::endl;
 }
 
 void ModelWrapper::setupModel() {

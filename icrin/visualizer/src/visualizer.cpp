@@ -16,6 +16,7 @@ Visualizer::Visualizer(ros::NodeHandle* nh) {
   this->rosSetup();
   ROS_INFO("VIS: Visualizer started");
   ready_pub_.publish(true);
+  model_ready_ = true; //assume its true to start
 }
 
 Visualizer::~Visualizer() {
@@ -134,6 +135,12 @@ void Visualizer::rosSetup() {
                     ("visualization_marker_array", 1, true);
   driver_env_data_pub_ = nh_->advertise<driver_env_msgs::Cars>
                         ("/driver_env/car_data", 1, true);
+  model_ready_sub_ = nh_->subscribe("/model/ready",1000, &Visualizer::modelReadyCB, this);
+}
+
+void Visualizer::modelReadyCB(const std_msgs::Bool::ConstPtr& msg) {
+  model_ready_ = msg->data;
+  std::cout << "received model ready " << model_ready_ << std::endl;
 }
 
 void Visualizer::pubCarData() {
@@ -158,9 +165,9 @@ void Visualizer::pubCarData() {
       car_msg.goal.position.x = car_frame.destX;
       car_msg.goal.position.y = car_frame.destY;
       cars_msg.cars.push_back(car_msg);
+      cars_msg.frameid = car_frame.frame_id;
     }
   }
-  cars_msg.frameid = frame_;
   driver_env_data_pub_.publish(cars_msg);
   frame_ += 1;
 }
@@ -365,6 +372,10 @@ std::vector<std::string> Visualizer::split(const std::string& s, char delim) {
   return elems;
 }
 
+bool Visualizer::isModelReady() {
+  return model_ready_;
+}
+
 int main(int argc, char** argv) {
   ros::init(argc, argv, "visualizer");
   ros::NodeHandle nh("visualizer");
@@ -377,6 +388,11 @@ int main(int argc, char** argv) {
     visualizer.pubVizData();
     visualizer.pubCarData();
     r.sleep();
+    int cycles = 0;
+    while (!visualizer.isModelReady() == false) {
+      if (cycles > 1000000) break;
+      cycles++;
+    }
   }
 
   ros::shutdown();

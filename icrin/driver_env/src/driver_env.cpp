@@ -195,7 +195,6 @@ int main(int argc, char** argv) {
   ros::init(argc, argv, "driver_env");
   ros::NodeHandle nh("driver_env");
   DriverEnv driver_env(&nh);
-  // driver_env.init();
   ros::Rate r(10);
 
   while (ros::ok()) {
