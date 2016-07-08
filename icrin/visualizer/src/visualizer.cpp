@@ -403,14 +403,12 @@ int main(int argc, char** argv) {
 
   while (ros::ok()) {
     ros::spinOnce();
-    while (!visualizer.isModelReady()) {
+    while (visualizer.isModelReady() == false) {
       ros::spinOnce();
-      r.sleep();
     }
-    
     visualizer.pubVizData();
     visualizer.pubCarData();
-    visualizer.setModelReady(false);
+    sleep(1);
   }
 
   ros::shutdown();

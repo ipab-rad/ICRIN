@@ -244,7 +244,6 @@ void ModelWrapper::inferGoals() {
       }
       norm_posteriors[goal] = prev_prior_[agent][goal];
       agent_goal_inference_[agent][goal] = prev_prior_[agent][goal];
-      goals_out << " " << norm_posteriors[goal];
     }
     goals_out << std::endl;
     // if (debug_) {
@@ -255,6 +254,7 @@ void ModelWrapper::inferGoals() {
       msg.goal_id.push_back(i);
       msg.goal_posterior.push_back(norm_posteriors[i]);
       // ROS_INFO_STREAM("G" << i << ": " << norm_posteriors[i]);
+      goals_out << " " << norm_posteriors[i];
     }
     goal_msg.goal_inference.push_back(msg);
   }
