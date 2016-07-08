@@ -61,7 +61,7 @@ class Visualizer {
   void loadParams();
   void pubCarData();
   void pubVizData();
-
+  void setModelReady(bool isModelReady);
   void process_file();
   void modelReadyCB(const std_msgs::Bool::ConstPtr& msg);
 

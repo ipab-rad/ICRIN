@@ -390,6 +390,10 @@ bool Visualizer::isModelReady() {
   return model_ready_;
 }
 
+void Visualizer::setModelReady(bool isModelReady) {
+  model_ready_ = isModelReady;
+}
+
 int main(int argc, char** argv) {
   ros::init(argc, argv, "visualizer");
   ros::NodeHandle nh("visualizer");
@@ -399,12 +403,14 @@ int main(int argc, char** argv) {
 
   while (ros::ok()) {
     ros::spinOnce();
-    while (visualizer.isModelReady() == false) {
+    while (!visualizer.isModelReady()) {
       ros::spinOnce();
+      r.sleep();
     }
+    
     visualizer.pubVizData();
     visualizer.pubCarData();
-    sleep(1);
+    visualizer.setModelReady(false);
   }
 
   ros::shutdown();

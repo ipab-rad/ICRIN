@@ -1,5 +1,5 @@
-# data_file: '/home/testdjp/Documents/NGSIM/driver_comp_845.txt'
-data_file: '/home/bluestreak/Documents/driver_data/text_aug_red1.txt'
+data_file: '/home/testdjp/Documents/NGSIM/driver_comp_845.txt'
+#data_file: '/home/bluestreak/Documents/driver_data/text_aug_red1.txt'
 #data_file: '/home/testdjp/Documents/NGSIM/small_set.txt'
 
 use_cardinal: false
