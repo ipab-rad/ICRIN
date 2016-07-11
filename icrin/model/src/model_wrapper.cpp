@@ -211,7 +211,6 @@ void ModelWrapper::inferGoals() {
     std::vector<float> g_posteriors;
     g_posteriors.resize(n_goals);
     float uniform_prior = 1.0f / n_goals;
-    goals_out << agent << " " << env_data_.framenum;
     for (std::size_t goal = 0; goal < n_goals; ++goal) {
       if (reset_priors || !init_liks_[agent][goal]) {
         g_posteriors[goal] = uniform_prior;
@@ -245,17 +244,18 @@ void ModelWrapper::inferGoals() {
       norm_posteriors[goal] = prev_prior_[agent][goal];
       agent_goal_inference_[agent][goal] = prev_prior_[agent][goal];
     }
-    goals_out << std::endl;
     // if (debug_) {
     model_msgs::GoalEstimate msg;
     msg.agent_id = hypotheses_.agents[agent];
     // ROS_INFO_STREAM("InferAgent: " << (int)hypotheses_.agents[agent]);
+    goals_out << agent << " " << env_data_.framenum;
     for (int i = 0; i < n_goals; ++i) {
       msg.goal_id.push_back(i);
       msg.goal_posterior.push_back(norm_posteriors[i]);
       // ROS_INFO_STREAM("G" << i << ": " << norm_posteriors[i]);
       goals_out << " " << norm_posteriors[i];
     }
+    goals_out << std::endl;
     goal_msg.goal_inference.push_back(msg);
   }
   model_inference_pub_.publish(goal_msg);
