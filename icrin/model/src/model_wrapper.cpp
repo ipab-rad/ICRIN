@@ -34,6 +34,8 @@ ModelWrapper::~ModelWrapper() {
 void ModelWrapper::loadParams() {
   // Model Params
   nh_->getParam("goal_file", goal_file_);
+  nh_->getParam("vel_file", vel_file_);
+  nh_->getParam("both_file", both_file_);
   if (!ros::param::has(robot_name_ + model_name_ + "/robot_model"))
   {ROS_WARN("ModelW- Robot model by default");}
   ros::param::param(robot_name_ + model_name_ + "/robot_model",
@@ -66,15 +68,30 @@ void ModelWrapper::init() {
   initialised_ = false;
   n_sampling_goals = 0;
   n_sequence_goals = 0;
+  doing_goals_ = true;
+  doing_vels_ = true;
+  doing_both_ = doing_goals_ && doing_vels_;
   // inferred_goals_history_.resize(3);
   // init_liks_.resize(3, false);
-  // prev_prior_.resize(3);
-  goals_out.open(goal_file_.c_str(), std::ios::out); //overwrite file
-  if (goals_out.is_open()) {
-    ROS_INFO("Model: Goal File opened successfully");
+  // prev_prior_.resize(3);i
+  if (!doing_both_) {
+    if (doing_goals_) {
+      file_out.open(goal_file_.c_str(), std::ios::out); //overwrite file
+    } else {
+      file_out.open(vel_file_.c_str(), std::ios::out); //overwrite file
+    }
   } else {
-    ROS_ERROR("Model: Goal file could not be opened!");
-    std::cout << goal_file_ << std::endl;
+    file_out.open(both_file_.c_str(), std::ios::out); //overwrite file
+  }
+  if (file_out.is_open()) {
+    ROS_INFO("Model: out file opened successfully");
+  } else {
+    ROS_ERROR("Model: out file could not be opened!");
+    if (doing_goals_) {
+      std::cout << goal_file_ << std::endl;
+    } else {
+      std::cout << vel_file_ << std::endl;
+    }
     ros::shutdown();
     exit(1);
   }
@@ -128,11 +145,21 @@ void ModelWrapper::runModel() {
   } else {
     model_ready_pub_.publish(false);
     if (debug_) {ROS_INFO("BeginModel");}
+    time_t start, end;
+    start = time(0);
     this->setupModel();
+    end = time(0);
+    double secs1 = difftime(end,start);
     if (hypotheses_.agents.size() > 0) {
+      start = time(0);
       this->runSims();
+      end = time(0);
+      double secs2 = difftime(end,start);
+      start = time(0);
       this->inferGoals();
-      //publishes true in infer goals
+      end = time(0);
+      double secs3 = difftime(end,start);
+      std::cout << "Setup: " << secs1 << " Sims: " << secs2 << " Infer: " << secs3 << std::endl;
     }
     if (interactive_costmap_) {this->interactivePrediction();}
     if (debug_) {ROS_INFO_STREAM("EndModel" << std::endl);}
@@ -248,14 +275,21 @@ void ModelWrapper::inferGoals() {
     model_msgs::GoalEstimate msg;
     msg.agent_id = hypotheses_.agents[agent];
     // ROS_INFO_STREAM("InferAgent: " << (int)hypotheses_.agents[agent]);
-    goals_out << agent << " " << env_data_.framenum;
+    
+    if (doing_goals_) {
+      file_out << agent << " " << env_data_.framenum;
+    }
     for (int i = 0; i < n_goals; ++i) {
       msg.goal_id.push_back(i);
       msg.goal_posterior.push_back(norm_posteriors[i]);
       // ROS_INFO_STREAM("G" << i << ": " << norm_posteriors[i]);
-      goals_out << " " << norm_posteriors[i];
+      if (doing_goals_) {
+        file_out << " " << norm_posteriors[i];
+      }
     }
-    goals_out << std::endl;
+    if (doing_goals_) {
+      file_out << std::endl;
+    }
     goal_msg.goal_inference.push_back(msg);
   }
   model_inference_pub_.publish(goal_msg);
@@ -326,6 +360,12 @@ void ModelWrapper::setupModel() {
 void ModelWrapper::runSims() {
   sampling_sim_vels.clear();
   sequence_sim_vels.clear();
+  size_t n_goals; 
+  if (hypotheses_.goal_hypothesis.sampling) {
+    n_goals = n_sampling_goals;
+  } else {
+    n_goals = n_sequence_goals;
+  }
   if (hypotheses_.goals) {
     if (hypotheses_.goal_hypothesis.sampling) {
       if (debug_) {ROS_WARN("ModelW- Run Goal Sampling Sims!");}
@@ -338,8 +378,19 @@ void ModelWrapper::runSims() {
   if (hypotheses_.awareness) {
     ROS_WARN("ModelW- Awareness modelling not implemented yet!");
   }
-  // for (size_t i = 0; i < sequence_sim_vels.size(); ++i) {
-  // ROS_INFO_STREAM("SimVel" << i << ": " << sequence_sim_vels[i].x <<
+  if (doing_vels_) {
+    for (size_t i = 0; i < sequence_sim_vels.size(); ++i) {
+      size_t agent = i/n_goals;
+      if (i % n_goals == 0) {
+        file_out << agent << " " << env_data_.framenum << " ";
+      }
+      file_out << "(" << sequence_sim_vels[i].x << ", " << sequence_sim_vels[i].y << ") ";
+      if (i % n_goals == n_goals - 1) {
+        file_out << std::endl; 
+      }
+    }
+  }
+// ROS_INFO_STREAM("SimVel" << i << ": " << sequence_sim_vels[i].x <<
   //                 ", " << sequence_sim_vels[i].y);
   // }
 }

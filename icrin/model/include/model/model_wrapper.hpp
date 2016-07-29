@@ -14,7 +14,7 @@
 #include <fstream>
 #include <sstream>
 #include <std_msgs/Bool.h>
-
+#include <ctime>
 #include <model/sim_wrapper.hpp>
 
 #include <geometry_msgs/Pose2D.h>
@@ -61,7 +61,10 @@ class ModelWrapper {
   bool got_env_data_;
   bool got_hypotheses_;
   bool viz_ready_;
-
+  bool doing_goals_; //False -> velocities, True -> goals distrs.
+  bool doing_vels_;
+  bool doing_both_;
+ 
   // Constants
   bool robot_model_;
   float goal_sum_prior_;
@@ -75,7 +78,9 @@ class ModelWrapper {
 
   // Variables
   std::string goal_file_;
-  std::ofstream goals_out;
+  std::string vel_file_;
+  std::string both_file_;
+  std::ofstream file_out;
   std::string robot_name_;
   std::string model_name_;
   environment_msgs::EnvironmentData env_data_;

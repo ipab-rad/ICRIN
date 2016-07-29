@@ -6,7 +6,9 @@ goal_inference_history: 4
 velocity_average_window: 5
 prior_lambda: 0.5
 
-goal_file: "/home/testdjp/Documents/NGSIM/Lankershim_830.txt"
+goal_file: "/home/testdjp42/Documents/NGSIM/Lankershim_830_goals.txt"
+vel_file: "/home/testdjp42/Documents/NGSIM/Lankershim_830_vels.txt"
+both_file: "/home/testdjp42/Documents/NGSIM/Lankershim_845_goals_and_vels.txt"
 
 # For planner costmap
 foresight_steps: 10
